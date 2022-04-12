@@ -28,6 +28,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using OpenTween.Api.DataModel;
+using OpenTween.Controls;
 using OpenTween.Models;
 using OpenTween.OpenTweenCustomControl;
 using OpenTween.Setting;
@@ -166,17 +167,9 @@ namespace OpenTween
                 Assert.Equal(2, tabPage.Controls.Count);
                 Assert.IsType<DetailsListView>(tabPage.Controls[0]);
 
-                var panel = Assert.IsType<Panel>(tabPage.Controls[1]);
-                Assert.Equal(4, panel.Controls.Count);
-
-                var comboSearchWord = Assert.IsType<ComboBox>(panel.Controls[0]);
-                Assert.Equal("#OpenTween", comboSearchWord.Text);
-
-                var comboSearchLang = Assert.IsType<ComboBox>(panel.Controls[1]);
-                Assert.Equal("ja", comboSearchLang.Text);
-
-                Assert.IsType<Button>(panel.Controls[2]);
-                Assert.IsType<Label>(panel.Controls[3]);
+                var header = Assert.IsType<PublicSearchHeaderPanel>(tabPage.Controls[1]);
+                Assert.Equal("#OpenTween", header.Query);
+                Assert.Equal("ja", header.Lang);
             });
         }
 
@@ -198,7 +191,7 @@ namespace OpenTween
 
                 var tabPage = tweenMain.ListTab.TabPages[4];
                 var listView = (DetailsListView)tabPage.Controls[0];
-                var searchPanel = (Panel)tabPage.Controls[1];
+                var header = (PublicSearchHeaderPanel)tabPage.Controls[1];
                 Assert.Equal("hoge", tabPage.Text);
 
                 tweenMain.RemoveSpecifiedTab("hoge", confirm: false);
@@ -207,7 +200,7 @@ namespace OpenTween
                 Assert.False(context.TabInfo.ContainsTab("hoge"));
                 Assert.True(tabPage.IsDisposed);
                 Assert.True(listView.IsDisposed);
-                Assert.True(searchPanel.IsDisposed);
+                Assert.True(header.IsDisposed);
             });
         }
 

@@ -55,6 +55,7 @@ using OpenTween.Api.DataModel;
 using OpenTween.Api.GraphQL;
 using OpenTween.Api.TwitterV2;
 using OpenTween.Connection;
+using OpenTween.Controls;
 using OpenTween.MediaUploadServices;
 using OpenTween.Models;
 using OpenTween.OpenTweenCustomControl;
@@ -2757,13 +2758,11 @@ namespace OpenTween
             // 追加したタブをアクティブに
             this.ListTab.SelectedIndex = this.statuses.Tabs.Count - 1;
             // 検索条件の設定
-            var tabPage = this.CurrentTabPage;
-            var cmb = (ComboBox)tabPage.Controls["panelSearch"].Controls["comboSearch"];
-            cmb.Items.Add(searchWord);
-            cmb.Text = searchWord;
+            var panel = this.CurrentTabPage.Controls.OfType<PublicSearchHeaderPanel>().First();
+            panel.Query = searchWord;
             this.SaveConfigsTabs();
             // 検索実行
-            this.SearchButton_Click(tabPage.Controls["panelSearch"].Controls["comboSearch"], EventArgs.Empty);
+            this.PublicSearchTabPanel_Search(panel, EventArgs.Empty);
         }
 
         private async Task ShowUserTimeline()
@@ -2780,14 +2779,10 @@ namespace OpenTween
             await this.AddNewTabForUserTimeline(retweetedBy);
         }
 
-        private void SearchComboBox_KeyDown(object sender, KeyEventArgs e)
+        private void PublicSearchTabPanel_EscKeyDown(object sender, EventArgs e)
         {
-            if (e.KeyCode == Keys.Escape)
-            {
-                this.RemoveSpecifiedTab(this.CurrentTabName, false);
-                this.SaveConfigsTabs();
-                e.SuppressKeyPress = true;
-            }
+            this.RemoveSpecifiedTab(this.CurrentTabName, false);
+            this.SaveConfigsTabs();
         }
 
         public async Task AddNewTabForUserTimeline(string user)
@@ -2845,10 +2840,11 @@ namespace OpenTween
             {
                 tabPage.Controls.Add(listCustom);
 
+                Control? headerPanel = null;
+
                 // UserTimeline関連
                 var userTab = tab as UserTimelineTabModel;
                 var listTab = tab as ListTimelineTabModel;
-                var searchTab = tab as PublicSearchTabModel;
 
                 if (userTab != null || listTab != null)
                 {
@@ -2875,94 +2871,24 @@ namespace OpenTween
                     tabPage.Controls.Add(label);
                 }
                 // 検索関連の準備
-                else if (searchTab != null)
+                else if (tab is PublicSearchTabModel searchTab)
                 {
-                    var pnl = new Panel();
-
-                    var lbl = new Label();
-                    var cmb = new ComboBox();
-                    var btn = new Button();
-                    var cmbLang = new ComboBox();
-
-                    using (ControlTransaction.Layout(pnl, false))
+                    var panel = new PublicSearchHeaderPanel
                     {
-                        pnl.Controls.Add(cmb);
-                        pnl.Controls.Add(cmbLang);
-                        pnl.Controls.Add(btn);
-                        pnl.Controls.Add(lbl);
-                        pnl.Name = "panelSearch";
-                        pnl.TabIndex = 0;
-                        pnl.Dock = DockStyle.Top;
-                        pnl.Height = cmb.Height;
-                        pnl.Enter += this.SearchControls_Enter;
-                        pnl.Leave += this.SearchControls_Leave;
+                        Dock = DockStyle.Top,
+                        Query = searchTab.SearchWords,
+                        Lang = searchTab.SearchLang,
+                    };
 
-                        cmb.Text = "";
-                        cmb.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-                        cmb.Dock = DockStyle.Fill;
-                        cmb.Name = "comboSearch";
-                        cmb.DropDownStyle = ComboBoxStyle.DropDown;
-                        cmb.ImeMode = ImeMode.NoControl;
-                        cmb.TabStop = false;
-                        cmb.TabIndex = 1;
-                        cmb.AutoCompleteMode = AutoCompleteMode.None;
-                        cmb.KeyDown += this.SearchComboBox_KeyDown;
+                    panel.EscKeyDown += this.PublicSearchTabPanel_EscKeyDown;
+                    panel.Search += this.PublicSearchTabPanel_Search;
 
-                        cmbLang.Text = "";
-                        cmbLang.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-                        cmbLang.Dock = DockStyle.Right;
-                        cmbLang.Width = 50;
-                        cmbLang.Name = "comboLang";
-                        cmbLang.DropDownStyle = ComboBoxStyle.DropDownList;
-                        cmbLang.TabStop = false;
-                        cmbLang.TabIndex = 2;
-                        cmbLang.Items.Add("");
-                        cmbLang.Items.Add("ja");
-                        cmbLang.Items.Add("en");
-                        cmbLang.Items.Add("ar");
-                        cmbLang.Items.Add("da");
-                        cmbLang.Items.Add("nl");
-                        cmbLang.Items.Add("fa");
-                        cmbLang.Items.Add("fi");
-                        cmbLang.Items.Add("fr");
-                        cmbLang.Items.Add("de");
-                        cmbLang.Items.Add("hu");
-                        cmbLang.Items.Add("is");
-                        cmbLang.Items.Add("it");
-                        cmbLang.Items.Add("no");
-                        cmbLang.Items.Add("pl");
-                        cmbLang.Items.Add("pt");
-                        cmbLang.Items.Add("ru");
-                        cmbLang.Items.Add("es");
-                        cmbLang.Items.Add("sv");
-                        cmbLang.Items.Add("th");
+                    headerPanel = panel;
+                }
 
-                        lbl.Text = "Search(C-S-f)";
-                        lbl.Name = "label1";
-                        lbl.Dock = DockStyle.Left;
-                        lbl.Width = 90;
-                        lbl.Height = cmb.Height;
-                        lbl.TextAlign = ContentAlignment.MiddleLeft;
-                        lbl.TabIndex = 0;
-
-                        btn.Text = "Search";
-                        btn.Name = "buttonSearch";
-                        btn.UseVisualStyleBackColor = true;
-                        btn.Dock = DockStyle.Right;
-                        btn.TabStop = false;
-                        btn.TabIndex = 3;
-                        btn.Click += this.SearchButton_Click;
-
-                        if (!MyCommon.IsNullOrEmpty(searchTab.SearchWords))
-                        {
-                            cmb.Items.Add(searchTab.SearchWords);
-                            cmb.Text = searchTab.SearchWords;
-                        }
-
-                        cmbLang.Text = searchTab.SearchLang;
-
-                        tabPage.Controls.Add(pnl);
-                    }
+                if (headerPanel != null)
+                {
+                    tabPage.Controls.Add(headerPanel);
                 }
 
                 tabPage.Tag = listCustom;
@@ -3072,28 +2998,14 @@ namespace OpenTween
                 {
                     using var label = tabPage.Controls["labelUser"];
                     tabPage.Controls.Remove(label);
+                    listCustom = (DetailsListView)tabPage.Tag;
                 }
                 else if (tabInfo.TabType == MyCommon.TabUsageType.PublicSearch)
                 {
-                    using var pnl = tabPage.Controls["panelSearch"];
-
-                    pnl.Enter -= this.SearchControls_Enter;
-                    pnl.Leave -= this.SearchControls_Leave;
-                    tabPage.Controls.Remove(pnl);
-
-                    foreach (Control ctrl in pnl.Controls)
-                    {
-                        if (ctrl.Name == "buttonSearch")
-                        {
-                            ctrl.Click -= this.SearchButton_Click;
-                        }
-                        else if (ctrl.Name == "comboSearch")
-                        {
-                            ctrl.KeyDown -= this.SearchComboBox_KeyDown;
-                        }
-                        pnl.Controls.Remove(ctrl);
-                        ctrl.Dispose();
-                    }
+                    using var panel = tabPage.Controls.OfType<PublicSearchHeaderPanel>().First();
+                    panel.EscKeyDown -= this.PublicSearchTabPanel_EscKeyDown;
+                    panel.Search -= this.PublicSearchTabPanel_Search;
+                    tabPage.Controls.Remove(panel);
                 }
 
                 tabPage.Controls.Remove(listCustom);
@@ -4165,10 +4077,9 @@ namespace OpenTween
             var tab = this.CurrentTab;
             if (tab.TabType == MyCommon.TabUsageType.PublicSearch)
             {
-                var pnl = this.CurrentTabPage.Controls["panelSearch"];
-                if (pnl.Controls["comboSearch"].Focused ||
-                    pnl.Controls["comboLang"].Focused ||
-                    pnl.Controls["buttonSearch"].Focused) return;
+                var panel = this.CurrentTabPage.Controls.OfType<PublicSearchHeaderPanel>().First();
+                if (panel.ContainsFocus)
+                    return;
             }
 
             if (e.Control || e.Shift || e.Alt)
@@ -4602,7 +4513,11 @@ namespace OpenTween
 
                 ShortcutCommand.Create(Keys.Control | Keys.Shift | Keys.F)
                     .OnlyWhen(() => this.CurrentTab.TabType == MyCommon.TabUsageType.PublicSearch)
-                    .Do(() => this.CurrentTabPage.Controls["panelSearch"].Controls["comboSearch"].Focus()),
+                    .Do(() =>
+                    {
+                        var panel = this.CurrentTabPage.Controls.OfType<PublicSearchHeaderPanel>().First();
+                        panel.FocusToQuery();
+                    }),
 
                 ShortcutCommand.Create(Keys.Control | Keys.Shift | Keys.L)
                     .Do(() => this.DoQuoteOfficial()),
@@ -6368,7 +6283,8 @@ namespace OpenTween
                     if (tabUsage == MyCommon.TabUsageType.PublicSearch)
                     {
                         this.ListTab.SelectedIndex = tabIndex;
-                        this.CurrentTabPage.Controls["panelSearch"].Controls["comboSearch"].Focus();
+                        var panel = this.CurrentTabPage.Controls.OfType<PublicSearchHeaderPanel>().First();
+                        panel.FocusToQuery();
                     }
                     if (tabUsage == MyCommon.TabUsageType.Lists)
                     {
@@ -6479,20 +6395,6 @@ namespace OpenTween
                     {
                         this.PostButton_Click(this.PostButton, EventArgs.Empty);
                         return true;
-                    }
-                }
-                else
-                {
-                    var tab = this.CurrentTab;
-                    if (tab.TabType == MyCommon.TabUsageType.PublicSearch)
-                    {
-                        var tabPage = this.CurrentTabPage;
-                        if (tabPage.Controls["panelSearch"].Controls["comboSearch"].Focused ||
-                            tabPage.Controls["panelSearch"].Controls["comboLang"].Focused)
-                        {
-                            this.SearchButton_Click(tabPage.Controls["panelSearch"].Controls["comboSearch"], EventArgs.Empty);
-                            return true;
-                        }
                     }
                 }
             }
@@ -8518,25 +8420,23 @@ namespace OpenTween
         private void QuoteStripMenuItem_Click(object sender, EventArgs e)
             => this.DoQuoteOfficial();
 
-        private async void SearchButton_Click(object sender, EventArgs e)
+        private async void PublicSearchTabPanel_Search(object sender, EventArgs e)
         {
             // 公式検索
-            var pnl = ((Control)sender).Parent;
-            if (pnl == null) return;
-            var tbName = pnl.Parent.Text;
-            var tb = (PublicSearchTabModel)this.statuses.Tabs[tbName];
-            var cmb = (ComboBox)pnl.Controls["comboSearch"];
-            var cmbLang = (ComboBox)pnl.Controls["comboLang"];
-            cmb.Text = cmb.Text.Trim();
+            var tb = (PublicSearchTabModel)this.CurrentTab;
+            var panel = this.CurrentTabPage.Controls.OfType<PublicSearchHeaderPanel>().First();
+            var query = panel.Query;
+            var lang = panel.Lang;
+
             // 検索式演算子 OR についてのみ大文字しか認識しないので強制的に大文字とする
             var quote = false;
             var buf = new StringBuilder();
-            var c = cmb.Text.ToCharArray();
-            for (var cnt = 0; cnt < cmb.Text.Length; cnt++)
+            var c = query.ToCharArray();
+            for (var cnt = 0; cnt < c.Length; cnt++)
             {
-                if (cnt > cmb.Text.Length - 4)
+                if (cnt > c.Length - 4)
                 {
-                    buf.Append(cmb.Text.Substring(cnt));
+                    buf.Append(query.Substring(cnt));
                     break;
                 }
                 if (c[cnt] == '"')
@@ -8545,7 +8445,7 @@ namespace OpenTween
                 }
                 else
                 {
-                    if (!quote && cmb.Text.Substring(cnt, 4).Equals(" or ", StringComparison.OrdinalIgnoreCase))
+                    if (!quote && query.Substring(cnt, 4).Equals(" or ", StringComparison.OrdinalIgnoreCase))
                     {
                         buf.Append(" OR ");
                         cnt += 3;
@@ -8554,15 +8454,14 @@ namespace OpenTween
                 }
                 buf.Append(c[cnt]);
             }
-            cmb.Text = buf.ToString();
+            query = buf.ToString();
 
-            var listView = (DetailsListView)pnl.Parent.Tag;
+            var listView = this.CurrentListView;
+            var queryChanged = tb.SearchWords != query || tb.SearchLang != lang;
 
-            var queryChanged = tb.SearchWords != cmb.Text || tb.SearchLang != cmbLang.Text;
-
-            tb.SearchWords = cmb.Text;
-            tb.SearchLang = cmbLang.Text;
-            if (MyCommon.IsNullOrEmpty(cmb.Text))
+            tb.SearchWords = query;
+            tb.SearchLang = lang;
+            if (MyCommon.IsNullOrEmpty(query))
             {
                 listView.Focus();
                 this.SaveConfigsTabs();
@@ -8570,12 +8469,7 @@ namespace OpenTween
             }
             if (queryChanged)
             {
-                var idx = cmb.Items.IndexOf(tb.SearchWords);
-                if (idx > -1) cmb.Items.RemoveAt(idx);
-                cmb.Items.Insert(0, tb.SearchWords);
-                cmb.Text = tb.SearchWords;
-                cmb.SelectAll();
-                this.statuses.ClearTabIds(tbName);
+                this.statuses.ClearTabIds(tb.TabName);
                 this.listCache?.PurgeCache();
                 this.listCache?.UpdateListSize();
                 this.SaveConfigsTabs();   // 検索条件の保存
@@ -8645,29 +8539,13 @@ namespace OpenTween
             listSelectForm.ShowDialog(this);
         }
 
-        private void SearchControls_Enter(object sender, EventArgs e)
-        {
-            var pnl = (Control)sender;
-            foreach (Control ctl in pnl.Controls)
-            {
-                ctl.TabStop = true;
-            }
-        }
-
-        private void SearchControls_Leave(object sender, EventArgs e)
-        {
-            var pnl = (Control)sender;
-            foreach (Control ctl in pnl.Controls)
-            {
-                ctl.TabStop = false;
-            }
-        }
-
         private void PublicSearchQueryMenuItem_Click(object sender, EventArgs e)
         {
             var tab = this.CurrentTab;
             if (tab.TabType != MyCommon.TabUsageType.PublicSearch) return;
-            this.CurrentTabPage.Controls["panelSearch"].Controls["comboSearch"].Focus();
+
+            var panel = this.CurrentTabPage.Controls.OfType<PublicSearchHeaderPanel>().First();
+            panel.FocusToQuery();
         }
 
         private void StatusLabel_DoubleClick(object sender, EventArgs e)

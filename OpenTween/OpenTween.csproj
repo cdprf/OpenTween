@@ -65,6 +65,12 @@
     <Compile Update="AtIdSupplement.Designer.cs">
       <DependentUpon>AtIdSupplement.cs</DependentUpon>
     </Compile>
+    <Compile Update="Controls\PublicSearchHeaderPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\PublicSearchHeaderPanel.Designer.cs">
+      <DependentUpon>PublicSearchHeaderPanel.cs</DependentUpon>
+    </Compile>
     <Compile Update="AppendSettingDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -333,6 +339,9 @@
     </EmbeddedResource>
     <EmbeddedResource Update="AuthDialog.resx">
       <DependentUpon>AuthDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Controls\PublicSearchHeaderPanel.resx">
+      <DependentUpon>PublicSearchHeaderPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="EncryptApiKeyDialog.resx">
       <DependentUpon>EncryptApiKeyDialog.cs</DependentUpon>
