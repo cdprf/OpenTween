@@ -71,6 +71,12 @@
     <Compile Update="Controls\PublicSearchHeaderPanel.Designer.cs">
       <DependentUpon>PublicSearchHeaderPanel.cs</DependentUpon>
     </Compile>
+    <Compile Update="Controls\GeneralTimelineHeaderPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\GeneralTimelineHeaderPanel.Designer.cs">
+      <DependentUpon>GeneralTimelineHeaderPanel.cs</DependentUpon>
+    </Compile>
     <Compile Update="AppendSettingDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -342,6 +348,9 @@
     </EmbeddedResource>
     <EmbeddedResource Update="Controls\PublicSearchHeaderPanel.resx">
       <DependentUpon>PublicSearchHeaderPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Controls\GeneralTimelineHeaderPanel.resx">
+      <DependentUpon>GeneralTimelineHeaderPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="EncryptApiKeyDialog.resx">
       <DependentUpon>EncryptApiKeyDialog.cs</DependentUpon>

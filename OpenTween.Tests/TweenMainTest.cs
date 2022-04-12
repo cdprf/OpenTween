@@ -110,8 +110,8 @@ namespace OpenTween
                 Assert.Equal(2, tabPage.Controls.Count);
                 Assert.IsType<DetailsListView>(tabPage.Controls[0]);
 
-                var label = Assert.IsType<Label>(tabPage.Controls[1]);
-                Assert.Equal("twitterapi's Timeline", label.Text);
+                var header = Assert.IsType<GeneralTimelineHeaderPanel>(tabPage.Controls[1]);
+                Assert.Equal("twitterapi's Timeline", header.HeaderText);
             });
         }
 
@@ -140,8 +140,8 @@ namespace OpenTween
                 Assert.Equal(2, tabPage.Controls.Count);
                 Assert.IsType<DetailsListView>(tabPage.Controls[0]);
 
-                var label = Assert.IsType<Label>(tabPage.Controls[1]);
-                Assert.Equal("@opentween/tetete [Protected]", label.Text);
+                var header = Assert.IsType<GeneralTimelineHeaderPanel>(tabPage.Controls[1]);
+                Assert.Equal("@opentween/tetete [Protected]", header.HeaderText);
             });
         }
 

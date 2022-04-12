@@ -2842,33 +2842,21 @@ namespace OpenTween
 
                 Control? headerPanel = null;
 
-                // UserTimeline関連
-                var userTab = tab as UserTimelineTabModel;
-                var listTab = tab as ListTimelineTabModel;
-
-                if (userTab != null || listTab != null)
+                if (tab is UserTimelineTabModel userTab)
                 {
-                    var label = new Label
+                    headerPanel = new GeneralTimelineHeaderPanel
                     {
                         Dock = DockStyle.Top,
-                        Name = "labelUser",
-                        TabIndex = 0,
+                        HeaderText = $"{userTab.ScreenName}'s Timeline",
                     };
-
-                    if (listTab != null)
+                }
+                else if (tab is ListTimelineTabModel listTab)
+                {
+                    headerPanel = new GeneralTimelineHeaderPanel
                     {
-                        label.Text = listTab.ListInfo.ToString();
-                    }
-                    else if (userTab != null)
-                    {
-                        label.Text = userTab.ScreenName + "'s Timeline";
-                    }
-                    label.TextAlign = ContentAlignment.MiddleLeft;
-                    using (var tmpComboBox = new ComboBox())
-                    {
-                        label.Height = tmpComboBox.Height;
-                    }
-                    tabPage.Controls.Add(label);
+                        Dock = DockStyle.Top,
+                        HeaderText = listTab.ListInfo.ToString(),
+                    };
                 }
                 // 検索関連の準備
                 else if (tab is PublicSearchTabModel searchTab)
@@ -2994,11 +2982,11 @@ namespace OpenTween
                 this.ListTab.Controls.Remove(tabPage);
 
                 // 後付けのコントロールを破棄
-                if (tabInfo.TabType == MyCommon.TabUsageType.UserTimeline || tabInfo.TabType == MyCommon.TabUsageType.Lists)
+                if (tabInfo.TabType == MyCommon.TabUsageType.UserTimeline ||
+                    tabInfo.TabType == MyCommon.TabUsageType.Lists)
                 {
-                    using var label = tabPage.Controls["labelUser"];
-                    tabPage.Controls.Remove(label);
-                    listCustom = (DetailsListView)tabPage.Tag;
+                    using var panel = tabPage.Controls.OfType<GeneralTimelineHeaderPanel>().First();
+                    tabPage.Controls.Remove(panel);
                 }
                 else if (tabInfo.TabType == MyCommon.TabUsageType.PublicSearch)
                 {
