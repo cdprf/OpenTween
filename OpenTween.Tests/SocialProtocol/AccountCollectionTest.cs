@@ -142,6 +142,25 @@ namespace OpenTween.SocialProtocol
         }
 
         [Fact]
+        public void SecondaryAccounts_Test()
+        {
+            using var accounts = new AccountCollection();
+            accounts.LoadFromSettings(new()
+            {
+                UserAccounts = new()
+                {
+                    this.CreateAccountSetting("00000000-0000-4000-8000-000000000000"),
+                    this.CreateAccountSetting("00000000-0000-4000-8000-111111111111"),
+                },
+                SelectedAccountKey = new("00000000-0000-4000-8000-000000000000"),
+            });
+
+            var secondaryAccounts = accounts.SecondaryAccounts;
+            Assert.Single(secondaryAccounts);
+            Assert.Equal(new("00000000-0000-4000-8000-111111111111"), secondaryAccounts[0].UniqueKey);
+        }
+
+        [Fact]
         public void GetAccountForTab_DefaultTest()
         {
             using var accounts = new AccountCollection();
