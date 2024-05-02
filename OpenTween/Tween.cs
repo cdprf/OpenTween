@@ -2286,6 +2286,7 @@ namespace OpenTween
             if (ret != DialogResult.OK)
                 return;
 
+            var currentTab = this.CurrentTab;
             var currentListView = this.CurrentListView;
             var focusedIndex = currentListView.FocusedItem?.Index ?? currentListView.TopItem?.Index ?? 0;
 
@@ -2345,25 +2346,28 @@ namespace OpenTween
                 else
                     this.StatusLabel.Text = Properties.Resources.DeleteStripMenuItem_ClickText3; // 失敗
 
-                using (ControlTransaction.Update(currentListView))
+                // 非同期タスク実行前後で表示中のタブが変わっていなければ発言一覧を更新する
+                if (currentTab == this.CurrentTab)
                 {
-                    this.listCache?.PurgeCache();
-                    this.listCache?.UpdateListSize();
-
-                    currentListView.SelectedIndices.Clear();
-
-                    var currentTab = this.CurrentTab;
-                    if (currentTab.AllCount != 0)
+                    using (ControlTransaction.Update(currentListView))
                     {
-                        int selectedIndex;
-                        if (currentTab.AllCount - 1 > focusedIndex && focusedIndex > -1)
-                            selectedIndex = focusedIndex;
-                        else
-                            selectedIndex = currentTab.AllCount - 1;
+                        this.listCache?.PurgeCache();
+                        this.listCache?.UpdateListSize();
 
-                        currentListView.SelectedIndices.Add(selectedIndex);
-                        currentListView.EnsureVisible(selectedIndex);
-                        currentListView.FocusedItem = currentListView.Items[selectedIndex];
+                        currentListView.SelectedIndices.Clear();
+
+                        if (currentTab.AllCount != 0)
+                        {
+                            int selectedIndex;
+                            if (currentTab.AllCount - 1 > focusedIndex && focusedIndex > -1)
+                                selectedIndex = focusedIndex;
+                            else
+                                selectedIndex = currentTab.AllCount - 1;
+
+                            currentListView.SelectedIndices.Add(selectedIndex);
+                            currentListView.EnsureVisible(selectedIndex);
+                            currentListView.FocusedItem = currentListView.Items[selectedIndex];
+                        }
                     }
                 }
 
