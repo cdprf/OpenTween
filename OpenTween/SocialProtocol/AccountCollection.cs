@@ -88,14 +88,15 @@ namespace OpenTween.SocialProtocol
                 account.Dispose();
         }
 
-        public ISocialAccount? GetAccountForTab(TabModel tab)
+        public ISocialAccount GetAccountForTab(TabModel tab)
         {
             if (tab.SourceAccountId is { } accountId)
             {
                 if (this.accounts.TryGetValue(accountId, out var account))
                     return account;
 
-                return null;
+                // タブ追加後に設定画面からアカウントの情報を削除した場合
+                return new InvalidAccount(accountId);
             }
 
             return this.Primary;

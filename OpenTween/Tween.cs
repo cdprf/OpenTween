@@ -122,7 +122,7 @@ namespace OpenTween
             => this.accounts.Primary;
 
         public ISocialAccount CurrentTabAccount
-            => this.accounts.GetAccountForTab(this.CurrentTab) ?? throw new InvalidOperationException("Account not found");
+            => this.accounts.GetAccountForTab(this.CurrentTab);
 
         // Growl呼び出し部
         private readonly GrowlHelper gh = new(ApplicationSettings.ApplicationName);
@@ -1310,7 +1310,7 @@ namespace OpenTween
             try
             {
                 var accountForTab = this.accounts.GetAccountForTab(tab);
-                if (accountForTab == null)
+                if (accountForTab is InvalidAccount)
                     return;
 
                 this.RefreshTasktrayIcon();
@@ -2902,7 +2902,7 @@ namespace OpenTween
                     headerPanel = new GeneralTimelineHeaderPanel
                     {
                         Dock = DockStyle.Top,
-                        HeaderText = account != null ? $"@{account.UserName}: Home" : "",
+                        HeaderText = $"@{account.UserName}: Home",
                     };
                 }
                 // 検索関連の準備
