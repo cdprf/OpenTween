@@ -2896,6 +2896,15 @@ namespace OpenTween
                         HeaderText = listTab.ListInfo.ToString(),
                     };
                 }
+                else if (tab is HomeSpecifiedAccountTabModel homeSecondaryTab)
+                {
+                    var account = this.accounts.GetAccountForTab(homeSecondaryTab);
+                    headerPanel = new GeneralTimelineHeaderPanel
+                    {
+                        Dock = DockStyle.Top,
+                        HeaderText = account != null ? $"@{account.UserName}: Home" : "",
+                    };
+                }
                 // 検索関連の準備
                 else if (tab is PublicSearchTabModel searchTab)
                 {
@@ -3021,7 +3030,8 @@ namespace OpenTween
 
                 // 後付けのコントロールを破棄
                 if (tabInfo.TabType == MyCommon.TabUsageType.UserTimeline ||
-                    tabInfo.TabType == MyCommon.TabUsageType.Lists)
+                    tabInfo.TabType == MyCommon.TabUsageType.Lists ||
+                    tabInfo is HomeSpecifiedAccountTabModel)
                 {
                     using var panel = tabPage.Controls.OfType<GeneralTimelineHeaderPanel>().First();
                     tabPage.Controls.Remove(panel);
