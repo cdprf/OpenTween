@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenTween.Api.GraphQL;
 using OpenTween.Setting;
 using OpenTween.SocialProtocol;
 using OpenTween.SocialProtocol.Twitter;
@@ -47,9 +48,9 @@ namespace OpenTween.Models
 
         public PostId? SinceId { get; set; }
 
-        public string? CursorTop { get; set; }
+        public TwitterGraphqlCursor? CursorTop { get; set; }
 
-        public string? CursorBottom { get; set; }
+        public TwitterGraphqlCursor? CursorBottom { get; set; }
 
         public string SearchWords
         {

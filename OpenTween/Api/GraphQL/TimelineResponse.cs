@@ -28,8 +28,8 @@ namespace OpenTween.Api.GraphQL
 {
     public record TimelineResponse(
         TimelineTweet[] Tweets,
-        string? CursorTop,
-        string? CursorBottom
+        TwitterGraphqlCursor? CursorTop,
+        TwitterGraphqlCursor? CursorBottom
     )
     {
         public TwitterStatus[] ToTwitterStatuses()

@@ -36,8 +36,15 @@ namespace OpenTween.Api.GraphQL
             if (tweets.Length == 0)
                 ErrorResponse.ThrowIfContainsRateLimitMessage(rootElm);
 
-            var cursorTop = rootElm.XPathSelectElement("//content[__typename[text()='TimelineTimelineCursor']][cursorType[text()='Top']]/value")?.Value;
-            var cursorBottom = rootElm.XPathSelectElement("//content[__typename[text()='TimelineTimelineCursor']][cursorType[text()='Bottom']]/value")?.Value;
+            var cursorTopStr = rootElm.XPathSelectElement("//content[__typename[text()='TimelineTimelineCursor']][cursorType[text()='Top']]/value")?.Value;
+            var cursorTop = cursorTopStr != null
+                ? new TwitterGraphqlCursor(cursorTopStr)
+                : null;
+
+            var cursorBottomStr = rootElm.XPathSelectElement("//content[__typename[text()='TimelineTimelineCursor']][cursorType[text()='Bottom']]/value")?.Value;
+            var cursorBottom = cursorBottomStr != null
+                ? new TwitterGraphqlCursor(cursorBottomStr)
+                : null;
 
             return new(tweets, cursorTop, cursorBottom);
         }

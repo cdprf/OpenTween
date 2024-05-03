@@ -19,23 +19,11 @@
 // the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
 // Boston, MA 02110-1301, USA.
 
-using System.Threading.Tasks;
-using Xunit;
+#nullable enable
 
 namespace OpenTween.Api.GraphQL
 {
-    public class TimelineResponseTest
-    {
-        [Fact]
-        public async Task ToTwitterStatuses_Test()
-        {
-            using var apiResponse = await TestUtils.CreateApiResponse("Resources/Responses/SearchTimeline_SimpleTweet.json");
-            var tweets = TimelineTweet.ExtractTimelineTweets(await apiResponse.ReadAsJsonXml());
-            var timelineResponse = new TimelineResponse(tweets, new(""), new(""));
-
-            var statuses = timelineResponse.ToTwitterStatuses();
-            Assert.Single(statuses);
-            Assert.Equal("1619433164757413894", statuses[0].IdStr);
-        }
-    }
+    public record TwitterGraphqlCursor(
+        string Value
+    );
 }

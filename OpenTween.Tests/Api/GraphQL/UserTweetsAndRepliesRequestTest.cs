@@ -56,8 +56,8 @@ namespace OpenTween.Api.GraphQL
 
             var response = await request.Send(mock.Object);
             Assert.Single(response.Tweets);
-            Assert.Equal("DAABCgABF_tTnZvAJxEKAAIWes8rE1oQAAgAAwAAAAEAAA", response.CursorTop);
-            Assert.Equal("DAABCgABF_tTnZu__-0KAAIWZa6KTRoAAwgAAwAAAAIAAA", response.CursorBottom);
+            Assert.Equal("DAABCgABF_tTnZvAJxEKAAIWes8rE1oQAAgAAwAAAAEAAA", response.CursorTop?.Value);
+            Assert.Equal("DAABCgABF_tTnZu__-0KAAIWZa6KTRoAAwgAAwAAAAIAAA", response.CursorBottom?.Value);
 
             mock.VerifyAll();
         }
@@ -86,7 +86,7 @@ namespace OpenTween.Api.GraphQL
             var request = new UserTweetsAndRepliesRequest(userId: "40480664")
             {
                 Count = 20,
-                Cursor = "aaa",
+                Cursor = new("aaa"),
             };
 
             await request.Send(mock.Object);
