@@ -909,20 +909,22 @@ namespace OpenTween
             return minimumId;
         }
 
-        private long? CreateFavoritePostsFromJson(TwitterStatus[] items, bool firstLoad)
+        private PostId? CreateFavoritePostsFromJson(TwitterStatus[] items, bool firstLoad)
         {
             var favTab = TabInformations.GetInstance().FavoriteTab;
-            long? minimumId = null;
+            PostId? minimumId = null;
 
             foreach (var status in items)
             {
-                if (minimumId == null || minimumId.Value > status.Id)
-                    minimumId = status.Id;
+                var statusId = new TwitterStatusId(status.IdStr);
+
+                if (minimumId == null || minimumId > statusId)
+                    minimumId = statusId;
 
                 // 二重取得回避
                 lock (this.lockObj)
                 {
-                    if (favTab.Contains(new TwitterStatusId(status.IdStr)))
+                    if (favTab.Contains(statusId))
                         continue;
                 }
 
@@ -1329,7 +1331,7 @@ namespace OpenTween
             {
                 if (backward)
                 {
-                    statuses = await this.Api.FavoritesList(count, maxId: tab.OldestId)
+                    statuses = await this.Api.FavoritesList(count, maxId: tab.OldestId as TwitterStatusId)
                         .ConfigureAwait(false);
                 }
                 else
@@ -1342,7 +1344,7 @@ namespace OpenTween
             var minimumId = this.CreateFavoritePostsFromJson(statuses, firstLoad);
 
             if (minimumId != null)
-                tab.OldestId = minimumId.Value;
+                tab.OldestId = minimumId;
         }
 
         /// <summary>

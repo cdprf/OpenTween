@@ -724,7 +724,7 @@ namespace OpenTween.Api
             return response.ReadAsLazyJson<TwitterUser>();
         }
 
-        public async Task<TwitterStatus[]> FavoritesList(int? count = null, long? maxId = null, long? sinceId = null)
+        public async Task<TwitterStatus[]> FavoritesList(int? count = null, TwitterStatusId? maxId = null, TwitterStatusId? sinceId = null)
         {
             var param = new Dictionary<string, string>
             {
@@ -736,9 +736,9 @@ namespace OpenTween.Api
             if (count != null)
                 param["count"] = count.ToString();
             if (maxId != null)
-                param["max_id"] = maxId.ToString();
+                param["max_id"] = maxId.Id;
             if (sinceId != null)
-                param["since_id"] = sinceId.ToString();
+                param["since_id"] = sinceId.Id;
 
             var request = new GetRequest
             {
