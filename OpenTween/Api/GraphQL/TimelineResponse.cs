@@ -23,13 +23,14 @@
 
 using System.Linq;
 using OpenTween.Api.DataModel;
+using OpenTween.Models;
 
 namespace OpenTween.Api.GraphQL
 {
     public record TimelineResponse(
         TimelineTweet[] Tweets,
-        string? CursorTop,
-        string? CursorBottom
+        QueryCursor<TwitterGraphqlCursor>? CursorTop,
+        QueryCursor<TwitterGraphqlCursor>? CursorBottom
     )
     {
         public TwitterStatus[] ToTwitterStatuses()

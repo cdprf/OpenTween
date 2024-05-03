@@ -19,24 +19,21 @@
 // the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
 // Boston, MA 02110-1301, USA.
 
-using System.Threading.Tasks;
-using OpenTween.Models;
-using Xunit;
+#nullable enable
 
-namespace OpenTween.Api.GraphQL
+namespace OpenTween.Models
 {
-    public class TimelineResponseTest
+    public interface IQueryCursor
     {
-        [Fact]
-        public async Task ToTwitterStatuses_Test()
-        {
-            using var apiResponse = await TestUtils.CreateApiResponse("Resources/Responses/SearchTimeline_SimpleTweet.json");
-            var tweets = TimelineTweet.ExtractTimelineTweets(await apiResponse.ReadAsJsonXml());
-            var timelineResponse = new TimelineResponse(tweets, new(CursorType.Top, new("")), new(CursorType.Bottom, new("")));
+        public CursorType Type { get; }
+    }
 
-            var statuses = timelineResponse.ToTwitterStatuses();
-            Assert.Single(statuses);
-            Assert.Equal("1619433164757413894", statuses[0].IdStr);
+    public static class QueryCursorExtensions
+    {
+        public static T? As<T>(this IQueryCursor cursor)
+            where T : class
+        {
+            return cursor is QueryCursor<T> { Value: var value } ? value : null;
         }
     }
 }

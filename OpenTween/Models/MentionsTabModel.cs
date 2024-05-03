@@ -43,12 +43,6 @@ namespace OpenTween.Models
         public override MyCommon.TabUsageType TabType
             => MyCommon.TabUsageType.Mentions;
 
-        public PostId? OldestId { get; set; }
-
-        public string? CursorTop { get; set; }
-
-        public string? CursorBottom { get; set; }
-
         public MentionsTabModel()
             : this(MyCommon.DEFAULTTAB.REPLY)
         {

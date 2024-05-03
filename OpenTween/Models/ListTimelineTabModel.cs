@@ -45,12 +45,6 @@ namespace OpenTween.Models
 
         public ListElement ListInfo { get; set; }
 
-        public PostId? OldestId { get; set; }
-
-        public string? CursorTop { get; set; }
-
-        public string? CursorBottom { get; set; }
-
         public ListTimelineTabModel(string tabName, ListElement list)
             : base(tabName)
         {

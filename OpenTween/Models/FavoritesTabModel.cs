@@ -43,12 +43,6 @@ namespace OpenTween.Models
         public override MyCommon.TabUsageType TabType
             => MyCommon.TabUsageType.Favorites;
 
-        public PostId? OldestId { get; set; }
-
-        public string? CursorTop { get; set; }
-
-        public string? CursorBottom { get; set; }
-
         public FavoritesTabModel()
             : this(MyCommon.DEFAULTTAB.FAV)
         {

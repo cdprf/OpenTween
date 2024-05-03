@@ -38,19 +38,21 @@ namespace OpenTween.Api.GraphQL
 
         public int Count { get; set; } = 20;
 
-        public string? Cursor { get; set; }
+        public TwitterGraphqlCursor? Cursor { get; set; }
 
         public ListLatestTweetsTimelineRequest(string listId)
             => this.ListId = listId;
 
         public Dictionary<string, string> CreateParameters()
         {
+            var cursorStr = this.Cursor?.Value;
+
             return new()
             {
                 ["variables"] = "{" +
                     $@"""listId"":""{JsonUtils.EscapeJsonString(this.ListId)}""," +
                     $@"""count"":{this.Count}" +
-                    (this.Cursor != null ? $@",""cursor"":""{JsonUtils.EscapeJsonString(this.Cursor)}""" : "") +
+                    (cursorStr != null ? $@",""cursor"":""{JsonUtils.EscapeJsonString(cursorStr)}""" : "") +
                     "}",
                 ["features"] = "{" +
                     @"""rweb_lists_timeline_redesign_enabled"":true," +

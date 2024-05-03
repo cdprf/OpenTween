@@ -645,10 +645,11 @@ namespace OpenTween
             TwitterStatus[] statuses;
             if (this.Api.AuthType == APIAuthType.TwitterComCookie)
             {
+                var cursor = more ? tab.CursorBottom : tab.CursorTop;
                 var request = new HomeLatestTimelineRequest
                 {
                     Count = count,
-                    Cursor = more ? tab.CursorBottom : tab.CursorTop,
+                    Cursor = cursor?.As<TwitterGraphqlCursor>(),
                 };
                 var response = await request.Send(this.Api.Connection)
                     .ConfigureAwait(false);
@@ -662,10 +663,11 @@ namespace OpenTween
             }
             else if (SettingManager.Instance.Common.EnableTwitterV2Api)
             {
+                var maxId = more ? tab.CursorBottom?.As<TwitterStatusId>() : null;
                 var request = new GetTimelineRequest(this.UserId)
                 {
                     MaxResults = count,
-                    UntilId = more ? tab.OldestId as TwitterStatusId : null,
+                    UntilId = maxId,
                 };
 
                 var response = await request.Send(this.Api.Connection)
@@ -681,15 +683,15 @@ namespace OpenTween
             }
             else
             {
-                var maxId = more ? tab.OldestId : null;
+                var maxId = more ? tab.CursorBottom?.As<TwitterStatusId>() : null;
 
-                statuses = await this.Api.StatusesHomeTimeline(count, maxId as TwitterStatusId)
+                statuses = await this.Api.StatusesHomeTimeline(count, maxId)
                     .ConfigureAwait(false);
 
                 if (statuses.Length > 0)
                 {
                     var min = statuses.Select(x => new TwitterStatusId(x.IdStr)).Min();
-                    tab.OldestId = min;
+                    tab.CursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
                 }
             }
 
@@ -705,10 +707,11 @@ namespace OpenTween
             TwitterStatus[] statuses;
             if (this.Api.AuthType == APIAuthType.TwitterComCookie)
             {
+                var cursor = more ? tab.CursorBottom : tab.CursorTop;
                 var request = new NotificationsMentionsRequest
                 {
                     Count = Math.Min(count, 50),
-                    Cursor = more ? tab.CursorBottom : tab.CursorTop,
+                    Cursor = cursor?.As<TwitterGraphqlCursor>(),
                 };
                 var response = await request.Send(this.Api.Connection)
                     .ConfigureAwait(false);
@@ -722,7 +725,7 @@ namespace OpenTween
             }
             else
             {
-                var maxId = more ? tab.OldestId as TwitterStatusId : null;
+                var maxId = more ? tab.CursorBottom?.As<TwitterStatusId>() : null;
 
                 statuses = await this.Api.StatusesMentionsTimeline(count, maxId)
                     .ConfigureAwait(false);
@@ -730,7 +733,7 @@ namespace OpenTween
                 if (statuses.Length > 0)
                 {
                     var min = statuses.Select(x => new TwitterStatusId(x.IdStr)).Min();
-                    tab.OldestId = min;
+                    tab.CursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
                 }
             }
 
@@ -756,10 +759,11 @@ namespace OpenTween
                     tab.UserId = user.IdStr;
                 }
 
+                var cursor = more ? tab.CursorBottom : tab.CursorTop;
                 var request = new UserTweetsAndRepliesRequest(userId)
                 {
                     Count = count,
-                    Cursor = more ? tab.CursorBottom : tab.CursorTop,
+                    Cursor = cursor?.As<TwitterGraphqlCursor>(),
                 };
                 var response = await request.Send(this.Api.Connection)
                     .ConfigureAwait(false);
@@ -775,7 +779,7 @@ namespace OpenTween
             }
             else
             {
-                var maxId = more ? tab.OldestId as TwitterStatusId : null;
+                var maxId = more ? tab.CursorBottom?.As<TwitterStatusId>() : null;
 
                 statuses = await this.Api.StatusesUserTimeline(tab.ScreenName, count, maxId)
                     .ConfigureAwait(false);
@@ -783,7 +787,7 @@ namespace OpenTween
                 if (statuses.Length > 0)
                 {
                     var min = statuses.Select(x => new TwitterStatusId(x.IdStr)).Min();
-                    tab.OldestId = min;
+                    tab.CursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
                 }
             }
 
@@ -928,10 +932,11 @@ namespace OpenTween
             TwitterStatus[] statuses;
             if (this.Api.AuthType == APIAuthType.TwitterComCookie)
             {
+                var cursor = more ? tab.CursorBottom : tab.CursorTop;
                 var request = new ListLatestTweetsTimelineRequest(tab.ListInfo.Id.ToString())
                 {
                     Count = count,
-                    Cursor = more ? tab.CursorBottom : tab.CursorTop,
+                    Cursor = cursor?.As<TwitterGraphqlCursor>(),
                 };
                 var response = await request.Send(this.Api.Connection)
                     .ConfigureAwait(false);
@@ -949,7 +954,7 @@ namespace OpenTween
             }
             else
             {
-                var maxId = more ? tab.OldestId as TwitterStatusId : null;
+                var maxId = more ? tab.CursorBottom?.As<TwitterStatusId>() : null;
 
                 statuses = await this.Api.ListsStatuses(tab.ListInfo.Id, count, maxId, includeRTs: SettingManager.Instance.Common.IsListsIncludeRts)
                     .ConfigureAwait(false);
@@ -957,7 +962,7 @@ namespace OpenTween
                 if (statuses.Length > 0)
                 {
                     var min = statuses.Select(x => new TwitterStatusId(x.IdStr)).Min();
-                    tab.OldestId = min;
+                    tab.CursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
                 }
             }
 
@@ -1151,10 +1156,11 @@ namespace OpenTween
                 if (!MyCommon.IsNullOrEmpty(tab.SearchLang))
                     query = $"({query}) lang:{tab.SearchLang}";
 
+                var cursor = more ? tab.CursorBottom : tab.CursorTop;
                 var request = new SearchTimelineRequest(query)
                 {
                     Count = count,
-                    Cursor = more ? tab.CursorBottom : tab.CursorTop,
+                    Cursor = cursor?.As<TwitterGraphqlCursor>(),
                 };
                 var response = await request.Send(this.Api.Connection)
                     .ConfigureAwait(false);
@@ -1172,11 +1178,11 @@ namespace OpenTween
                 TwitterStatusId? sinceId = null;
                 if (more)
                 {
-                    maxId = tab.OldestId as TwitterStatusId;
+                    maxId = tab.CursorBottom?.As<TwitterStatusId>();
                 }
                 else
                 {
-                    sinceId = tab.SinceId as TwitterStatusId;
+                    sinceId = tab.CursorTop?.As<TwitterStatusId>();
                 }
 
                 var searchResult = await this.Api.SearchTweets(tab.SearchWords, tab.SearchLang, count, maxId, sinceId)
@@ -1187,10 +1193,10 @@ namespace OpenTween
                 if (statuses.Length > 0)
                 {
                     var (min, max) = statuses.Select(x => new TwitterStatusId(x.IdStr)).MinMax();
-                    tab.OldestId = min;
+                    tab.CursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
 
                     if (!more)
-                        tab.SinceId = max;
+                        tab.CursorTop = new QueryCursor<TwitterStatusId>(CursorType.Top, max);
                 }
             }
 
@@ -1287,11 +1293,12 @@ namespace OpenTween
             TwitterStatus[] statuses;
             if (this.Api.AuthType == APIAuthType.TwitterComCookie)
             {
+                var cursor = backward ? tab.CursorBottom : tab.CursorTop;
                 var request = new LikesRequest
                 {
                     UserId = this.UserId.ToString(CultureInfo.InvariantCulture),
                     Count = count,
-                    Cursor = backward ? tab.CursorBottom : tab.CursorTop,
+                    Cursor = cursor?.As<TwitterGraphqlCursor>(),
                 };
                 var response = await request.Send(this.Api.Connection)
                     .ConfigureAwait(false);
@@ -1305,15 +1312,15 @@ namespace OpenTween
             }
             else
             {
-                var maxId = backward ? tab.OldestId as TwitterStatusId : null;
+                var maxId = backward ? tab.CursorBottom : null;
 
-                statuses = await this.Api.FavoritesList(count, maxId)
+                statuses = await this.Api.FavoritesList(count, maxId: maxId?.As<TwitterStatusId>())
                     .ConfigureAwait(false);
 
                 if (statuses.Length > 0)
                 {
                     var min = statuses.Select(x => new TwitterStatusId(x.IdStr)).Min();
-                    tab.OldestId = min;
+                    tab.CursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
                 }
             }
 

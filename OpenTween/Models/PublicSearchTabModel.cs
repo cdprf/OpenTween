@@ -43,14 +43,6 @@ namespace OpenTween.Models
         public override MyCommon.TabUsageType TabType
             => MyCommon.TabUsageType.PublicSearch;
 
-        public PostId? OldestId { get; set; }
-
-        public PostId? SinceId { get; set; }
-
-        public string? CursorTop { get; set; }
-
-        public string? CursorBottom { get; set; }
-
         public string SearchWords
         {
             get => this.searchWords;
@@ -107,8 +99,6 @@ namespace OpenTween.Models
         /// </summary>
         public void ResetFetchIds()
         {
-            this.SinceId = null;
-            this.OldestId = null;
             this.CursorTop = null;
             this.CursorBottom = null;
             this.IsFirstLoadCompleted = false;

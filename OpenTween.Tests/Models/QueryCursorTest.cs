@@ -19,24 +19,25 @@
 // the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
 // Boston, MA 02110-1301, USA.
 
-using System.Threading.Tasks;
-using OpenTween.Models;
+using OpenTween.Api.GraphQL;
 using Xunit;
 
-namespace OpenTween.Api.GraphQL
+namespace OpenTween.Models
 {
-    public class TimelineResponseTest
+    public class QueryCursorTest
     {
         [Fact]
-        public async Task ToTwitterStatuses_Test()
+        public void As_TypeMatchTest()
         {
-            using var apiResponse = await TestUtils.CreateApiResponse("Resources/Responses/SearchTimeline_SimpleTweet.json");
-            var tweets = TimelineTweet.ExtractTimelineTweets(await apiResponse.ReadAsJsonXml());
-            var timelineResponse = new TimelineResponse(tweets, new(CursorType.Top, new("")), new(CursorType.Bottom, new("")));
+            IQueryCursor cursor = new QueryCursor<TwitterGraphqlCursor>(CursorType.Top, new("aaa"));
+            Assert.Equal(new("aaa"), cursor.As<TwitterGraphqlCursor>());
+        }
 
-            var statuses = timelineResponse.ToTwitterStatuses();
-            Assert.Single(statuses);
-            Assert.Equal("1619433164757413894", statuses[0].IdStr);
+        [Fact]
+        public void As_TypeMissmatchTest()
+        {
+            IQueryCursor cursor = new QueryCursor<TwitterGraphqlCursor>(CursorType.Top, new("aaa"));
+            Assert.Null(cursor.As<TwitterStatusId>());
         }
     }
 }
