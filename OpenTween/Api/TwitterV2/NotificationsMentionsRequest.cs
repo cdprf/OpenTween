@@ -35,6 +35,7 @@ using System.Xml.XPath;
 using OpenTween.Api.DataModel;
 using OpenTween.Api.GraphQL;
 using OpenTween.Connection;
+using OpenTween.Models;
 
 namespace OpenTween.Api.TwitterV2
 {
@@ -153,12 +154,12 @@ namespace OpenTween.Api.TwitterV2
 
             var cursorTopStr = rootElm.XPathSelectElement("//content/operation/cursor[cursorType[text()='Top']]/value")?.Value;
             var cursorTop = cursorTopStr != null
-                ? new TwitterGraphqlCursor(cursorTopStr)
+                ? new QueryCursor<TwitterGraphqlCursor>(CursorType.Top, new(cursorTopStr))
                 : null;
 
             var cursorBottomStr = rootElm.XPathSelectElement("//content/operation/cursor[cursorType[text()='Bottom']]/value")?.Value;
             var cursorBottom = cursorBottomStr != null
-                ? new TwitterGraphqlCursor(cursorBottomStr)
+                ? new QueryCursor<TwitterGraphqlCursor>(CursorType.Bottom, new(cursorBottomStr))
                 : null;
 
             return new(statuses.ToArray(), cursorTop, cursorBottom);
@@ -187,8 +188,8 @@ namespace OpenTween.Api.TwitterV2
 
         public readonly record struct NotificationsResponse(
             TwitterStatus[] Statuses,
-            TwitterGraphqlCursor? CursorTop,
-            TwitterGraphqlCursor? CursorBottom
+            QueryCursor<TwitterGraphqlCursor>? CursorTop,
+            QueryCursor<TwitterGraphqlCursor>? CursorBottom
         );
     }
 }

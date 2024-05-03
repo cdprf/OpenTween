@@ -23,6 +23,7 @@
 
 using System.Xml.Linq;
 using System.Xml.XPath;
+using OpenTween.Models;
 
 namespace OpenTween.Api.GraphQL
 {
@@ -38,12 +39,12 @@ namespace OpenTween.Api.GraphQL
 
             var cursorTopStr = rootElm.XPathSelectElement("//content[__typename[text()='TimelineTimelineCursor']][cursorType[text()='Top']]/value")?.Value;
             var cursorTop = cursorTopStr != null
-                ? new TwitterGraphqlCursor(cursorTopStr)
+                ? new QueryCursor<TwitterGraphqlCursor>(CursorType.Top, new(cursorTopStr))
                 : null;
 
             var cursorBottomStr = rootElm.XPathSelectElement("//content[__typename[text()='TimelineTimelineCursor']][cursorType[text()='Bottom']]/value")?.Value;
             var cursorBottom = cursorBottomStr != null
-                ? new TwitterGraphqlCursor(cursorBottomStr)
+                ? new QueryCursor<TwitterGraphqlCursor>(CursorType.Bottom, new(cursorBottomStr))
                 : null;
 
             return new(tweets, cursorTop, cursorBottom);

@@ -32,7 +32,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTween.Api.GraphQL;
 using OpenTween.Setting;
 using OpenTween.SocialProtocol;
 using OpenTween.SocialProtocol.Twitter;
@@ -43,12 +42,6 @@ namespace OpenTween.Models
     {
         public override MyCommon.TabUsageType TabType
             => MyCommon.TabUsageType.Favorites;
-
-        public PostId? OldestId { get; set; }
-
-        public TwitterGraphqlCursor? CursorTop { get; set; }
-
-        public TwitterGraphqlCursor? CursorBottom { get; set; }
 
         public FavoritesTabModel()
             : this(MyCommon.DEFAULTTAB.FAV)

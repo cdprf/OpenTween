@@ -32,7 +32,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTween.Api.GraphQL;
 using OpenTween.Setting;
 using OpenTween.SocialProtocol;
 using OpenTween.SocialProtocol.Twitter;
@@ -47,12 +46,6 @@ namespace OpenTween.Models
         public string ScreenName { get; }
 
         public string? UserId { get; set; }
-
-        public PostId? OldestId { get; set; }
-
-        public TwitterGraphqlCursor? CursorTop { get; set; }
-
-        public TwitterGraphqlCursor? CursorBottom { get; set; }
 
         public UserTimelineTabModel(string tabName, string screenName)
             : base(tabName)

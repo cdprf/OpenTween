@@ -52,6 +52,10 @@ namespace OpenTween.Models
 
         public string SoundFile { get; set; } = "";
 
+        public IQueryCursor? CursorTop { get; set; }
+
+        public IQueryCursor? CursorBottom { get; set; }
+
         public ComparerMode SortMode { get; private set; }
 
         public SortOrder SortOrder { get; private set; }

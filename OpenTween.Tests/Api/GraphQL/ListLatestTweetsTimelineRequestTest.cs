@@ -56,8 +56,8 @@ namespace OpenTween.Api.GraphQL
 
             var response = await request.Send(mock.Object);
             Assert.Single(response.Tweets);
-            Assert.Equal("DAABCgABF0HfRMjAJxEKAAIWes8rE1oQAAgAAwAAAAEAAA", response.CursorTop?.Value);
-            Assert.Equal("DAABCgABF0HfRMi__7QKAAIVAxUYmFWQAwgAAwAAAAIAAA", response.CursorBottom?.Value);
+            Assert.Equal("DAABCgABF0HfRMjAJxEKAAIWes8rE1oQAAgAAwAAAAEAAA", response.CursorTop?.Value.Value);
+            Assert.Equal("DAABCgABF0HfRMi__7QKAAIVAxUYmFWQAwgAAwAAAAIAAA", response.CursorBottom?.Value.Value);
 
             mock.VerifyAll();
         }
