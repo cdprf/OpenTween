@@ -884,7 +884,7 @@ namespace OpenTween.Api
             using var twitterApi = new TwitterApi();
             twitterApi.ApiConnection = mock.Object;
 
-            await twitterApi.FavoritesList(200, maxId: 900L, sinceId: 100L);
+            await twitterApi.FavoritesList(200, maxId: new("900"), sinceId: new("100"));
 
             mock.VerifyAll();
         }
