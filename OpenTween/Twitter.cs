@@ -691,7 +691,11 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, tab, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.FilterNoRetweetUserPosts(posts);
+
+            foreach (var post in posts)
+                TabInformations.GetInstance().AddPost(post);
         }
 
         public async Task GetMentionsTimelineApi(MentionsTabModel tab, bool more, bool firstLoad)
@@ -733,7 +737,11 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, tab, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.FilterNoRetweetUserPosts(posts);
+
+            foreach (var post in posts)
+                TabInformations.GetInstance().AddPost(post);
         }
 
         public async Task GetUserTimelineApi(UserTimelineTabModel tab, bool more, bool firstLoad)
@@ -787,7 +795,10 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, tab, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+
+            foreach (var post in posts)
+                tab.AddPostQueue(post);
         }
 
         public async Task<PostClass> GetStatusApi(TwitterStatusId id, bool firstLoad = false)
@@ -828,28 +839,17 @@ namespace OpenTween
             return post;
         }
 
-        private void CreatePostsFromJson(TwitterStatus[] items, TabModel tab, bool firstLoad)
+        private PostClass[] CreatePostsFromJson(TwitterStatus[] statuses, bool firstLoad)
         {
-            var posts = items.Select(x => this.CreatePostsFromStatusData(x, firstLoad)).ToArray();
+            var posts = statuses.Select(x => this.CreatePostsFromStatusData(x, firstLoad)).ToArray();
 
             TwitterPostFactory.AdjustSortKeyForPromotedPost(posts);
 
-            if (tab is not UserTimelineTabModel)
-            {
-                // RT 禁止ユーザーによる RT を除外
-                posts = posts.Where(
-                    x => x.RetweetedByUserId == null || this.noRTId.Contains(x.RetweetedByUserId.Value)
-                ).ToArray();
-            }
-
-            foreach (var post in posts)
-            {
-                if (tab is InternalStorageTabModel)
-                    tab.AddPostQueue(post);
-                else
-                    TabInformations.GetInstance().AddPost(post);
-            }
+            return posts;
         }
+
+        private PostClass[] FilterNoRetweetUserPosts(PostClass[] posts)
+            => posts.Where(x => x.RetweetedByUserId == null || this.noRTId.Contains(x.RetweetedByUserId.Value)).ToArray();
 
         public async Task GetListStatus(ListTimelineTabModel tab, bool more, bool firstLoad)
         {
@@ -892,7 +892,11 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, tab, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.FilterNoRetweetUserPosts(posts);
+
+            foreach (var post in posts)
+                tab.AddPostQueue(post);
         }
 
         /// <summary>
@@ -1129,7 +1133,11 @@ namespace OpenTween
             if (!TabInformations.GetInstance().ContainsTab(tab))
                 return;
 
-            this.CreatePostsFromJson(statuses, tab, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.FilterNoRetweetUserPosts(posts);
+
+            foreach (var post in posts)
+                tab.AddPostQueue(post);
         }
 
         public async Task GetDirectMessageEvents(DirectMessagesTabModel dmTab, bool backward, bool firstLoad)
@@ -1249,7 +1257,11 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, tab, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.FilterNoRetweetUserPosts(posts);
+
+            foreach (var post in posts)
+                TabInformations.GetInstance().AddPost(post);
         }
 
         /// <summary>
