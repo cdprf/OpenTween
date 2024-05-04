@@ -691,7 +691,7 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, MyCommon.WORKERTYPE.Timeline, tab, firstLoad);
+            this.CreatePostsFromJson(statuses, tab, firstLoad);
         }
 
         public async Task GetMentionsTimelineApi(MentionsTabModel tab, bool more, bool firstLoad)
@@ -733,7 +733,7 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, MyCommon.WORKERTYPE.Reply, tab, firstLoad);
+            this.CreatePostsFromJson(statuses, tab, firstLoad);
         }
 
         public async Task GetUserTimelineApi(UserTimelineTabModel tab, bool more, bool firstLoad)
@@ -787,7 +787,7 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, MyCommon.WORKERTYPE.UserTimeline, tab, firstLoad);
+            this.CreatePostsFromJson(statuses, tab, firstLoad);
         }
 
         public async Task<PostClass> GetStatusApi(TwitterStatusId id, bool firstLoad = false)
@@ -828,76 +828,26 @@ namespace OpenTween
             return post;
         }
 
-        private void CreatePostsFromJson(TwitterStatus[] items, MyCommon.WORKERTYPE gType, TabModel? tab, bool firstLoad)
+        private void CreatePostsFromJson(TwitterStatus[] items, TabModel tab, bool firstLoad)
         {
             var posts = items.Select(x => this.CreatePostsFromStatusData(x, firstLoad)).ToArray();
 
             TwitterPostFactory.AdjustSortKeyForPromotedPost(posts);
 
+            if (tab is not UserTimelineTabModel)
+            {
+                // RT 禁止ユーザーによる RT を除外
+                posts = posts.Where(
+                    x => x.RetweetedByUserId == null || this.noRTId.Contains(x.RetweetedByUserId.Value)
+                ).ToArray();
+            }
+
             foreach (var post in posts)
             {
-                // 二重取得回避
-                lock (this.lockObj)
-                {
-                    var id = post.StatusId;
-                    if (tab == null)
-                    {
-                        if (TabInformations.GetInstance().ContainsKey(id)) continue;
-                    }
-                    else
-                    {
-                        if (tab.Contains(id)) continue;
-                    }
-                }
-
-                // RT禁止ユーザーによるもの
-                if (gType != MyCommon.WORKERTYPE.UserTimeline &&
-                    post.RetweetedByUserId != null && this.noRTId.Contains(post.RetweetedByUserId.Value)) continue;
-
-                if (tab != null && tab is InternalStorageTabModel)
+                if (tab is InternalStorageTabModel)
                     tab.AddPostQueue(post);
                 else
                     TabInformations.GetInstance().AddPost(post);
-            }
-        }
-
-        private void CreatePostsFromSearchJson(TwitterStatus[] statuses, PublicSearchTabModel tab, bool firstLoad)
-        {
-            var posts = statuses.Select(x => this.CreatePostsFromStatusData(x, firstLoad)).ToArray();
-
-            TwitterPostFactory.AdjustSortKeyForPromotedPost(posts);
-
-            foreach (var post in posts)
-            {
-                // 二重取得回避
-                lock (this.lockObj)
-                {
-                    if (tab.Contains(post.StatusId))
-                        continue;
-                }
-
-                tab.AddPostQueue(post);
-            }
-        }
-
-        private void CreateFavoritePostsFromJson(TwitterStatus[] items, bool firstLoad)
-        {
-            var favTab = TabInformations.GetInstance().FavoriteTab;
-
-            foreach (var status in items)
-            {
-                var statusId = new TwitterStatusId(status.IdStr);
-
-                // 二重取得回避
-                lock (this.lockObj)
-                {
-                    if (favTab.Contains(statusId))
-                        continue;
-                }
-
-                var post = this.CreatePostsFromStatusData(status, firstLoad, favTweet: true);
-
-                TabInformations.GetInstance().AddPost(post);
             }
         }
 
@@ -942,7 +892,7 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, MyCommon.WORKERTYPE.List, tab, firstLoad);
+            this.CreatePostsFromJson(statuses, tab, firstLoad);
         }
 
         /// <summary>
@@ -1179,7 +1129,7 @@ namespace OpenTween
             if (!TabInformations.GetInstance().ContainsTab(tab))
                 return;
 
-            this.CreatePostsFromSearchJson(statuses, tab, firstLoad);
+            this.CreatePostsFromJson(statuses, tab, firstLoad);
         }
 
         public async Task GetDirectMessageEvents(DirectMessagesTabModel dmTab, bool backward, bool firstLoad)
@@ -1299,7 +1249,7 @@ namespace OpenTween
                 }
             }
 
-            this.CreateFavoritePostsFromJson(statuses, firstLoad);
+            this.CreatePostsFromJson(statuses, tab, firstLoad);
         }
 
         /// <summary>
