@@ -60,7 +60,6 @@ namespace OpenTween.SocialProtocol.Twitter
             var credential = accountSettings.GetTwitterCredential();
             this.twLegacy.Initialize(credential, accountSettings.Username, accountSettings.UserId);
             this.twLegacy.RestrictFavCheck = settingCommon.RestrictFavCheck;
-            this.twLegacy.ReadOwnPost = settingCommon.ReadOwnPost;
         }
 
         public void Dispose()

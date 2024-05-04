@@ -28,6 +28,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using OpenTween.Api.DataModel;
+using OpenTween.Setting;
 
 namespace OpenTween.Models
 {
@@ -36,10 +37,14 @@ namespace OpenTween.Models
         private static readonly Uri SourceUriBase = new("https://twitter.com/");
 
         private readonly TabInformations tabinfo;
+        private readonly SettingCommon settingCommon;
         private readonly HashSet<string> receivedHashTags = new();
 
-        public TwitterPostFactory(TabInformations tabinfo)
-            => this.tabinfo = tabinfo;
+        public TwitterPostFactory(TabInformations tabinfo, SettingCommon settingCommon)
+        {
+            this.tabinfo = tabinfo;
+            this.settingCommon = settingCommon;
+        }
 
         public string[] GetReceivedHashtags()
         {
@@ -55,6 +60,7 @@ namespace OpenTween.Models
             TwitterStatus status,
             long selfUserId,
             ISet<long> followerIds,
+            bool firstLoad,
             bool favTweet = false
         )
         {
@@ -189,6 +195,8 @@ namespace OpenTween.Models
                 // retweeterUser から生成
                 RetweetedBy = retweeterUser != null ? string.Intern(retweeterUser.ScreenName) : null,
                 RetweetedByUserId = retweeterUser?.Id,
+
+                IsRead = this.DetermineUnreadState(isMe, firstLoad),
             };
         }
 
@@ -196,7 +204,8 @@ namespace OpenTween.Models
             TwitterMessageEvent eventItem,
             IReadOnlyDictionary<string, TwitterUser> users,
             IReadOnlyDictionary<string, TwitterMessageEventList.App> apps,
-            long selfUserId
+            long selfUserId,
+            bool firstLoad
         )
         {
             var timestamp = long.Parse(eventItem.CreatedTimestamp);
@@ -291,7 +300,20 @@ namespace OpenTween.Models
                 IsProtect = displayUser.Protected,
                 IsMe = senderIsMe,
                 IsOwl = !senderIsMe,
+
+                IsRead = this.DetermineUnreadState(senderIsMe, firstLoad),
             };
+        }
+
+        private bool DetermineUnreadState(bool isMe, bool firstLoad)
+        {
+            if (isMe && this.settingCommon.ReadOwnPost)
+                return true;
+
+            if (firstLoad && this.settingCommon.Read)
+                return true;
+
+            return false;
         }
 
         private string ReplaceTextFromApi(string text, TwitterEntities? entities, TwitterQuotedStatusPermalink? quotedStatusLink)

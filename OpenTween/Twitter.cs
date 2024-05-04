@@ -180,7 +180,7 @@ namespace OpenTween
 
         public Twitter(TwitterApi api)
         {
-            this.postFactory = new(TabInformations.GetInstance());
+            this.postFactory = new(TabInformations.GetInstance(), SettingManager.Instance.Common);
             this.urlExpander = new(ShortUrl.Instance);
 
             this.Api = api;
@@ -283,8 +283,7 @@ namespace OpenTween
             this.previousStatusId = status.IdStr;
 
             // 投稿したものを返す
-            var post = this.CreatePostsFromStatusData(status);
-            this.SetInitialUnreadState(post, firstLoad: false);
+            var post = this.CreatePostsFromStatusData(status, firstLoad: false);
 
             return post;
         }
@@ -426,8 +425,7 @@ namespace OpenTween
                 throw new WebApiException("Invalid Json!");
 
             // Retweetしたものを返す
-            var retweetPost = this.CreatePostsFromStatusData(status);
-            this.SetInitialUnreadState(retweetPost, firstLoad: false);
+            var retweetPost = this.CreatePostsFromStatusData(status, firstLoad: false);
 
             return retweetPost;
         }
@@ -531,8 +529,6 @@ namespace OpenTween
         public static MyCommon.ACCOUNT_STATE AccountState { get; set; } = MyCommon.ACCOUNT_STATE.Valid;
 
         public bool RestrictFavCheck { get; set; }
-
-        public bool ReadOwnPost { get; set; }
 
         public int FollowersCount { get; private set; }
 
@@ -816,18 +812,17 @@ namespace OpenTween
                     .ConfigureAwait(false);
             }
 
-            var item = this.CreatePostsFromStatusData(status);
-            this.SetInitialUnreadState(item, firstLoad);
+            var item = this.CreatePostsFromStatusData(status, firstLoad);
 
             return item;
         }
 
-        private PostClass CreatePostsFromStatusData(TwitterStatus status)
-            => this.CreatePostsFromStatusData(status, favTweet: false);
+        private PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad)
+            => this.CreatePostsFromStatusData(status, firstLoad, favTweet: false);
 
-        private PostClass CreatePostsFromStatusData(TwitterStatus status, bool favTweet)
+        private PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad, bool favTweet)
         {
-            var post = this.postFactory.CreateFromStatus(status, this.UserId, this.followerId, favTweet);
+            var post = this.postFactory.CreateFromStatus(status, this.UserId, this.followerId, firstLoad, favTweet);
             _ = this.urlExpander.Expand(post);
 
             return post;
@@ -835,7 +830,7 @@ namespace OpenTween
 
         private void CreatePostsFromJson(TwitterStatus[] items, MyCommon.WORKERTYPE gType, TabModel? tab, bool firstLoad)
         {
-            var posts = items.Select(x => this.CreatePostsFromStatusData(x)).ToArray();
+            var posts = items.Select(x => this.CreatePostsFromStatusData(x, firstLoad)).ToArray();
 
             TwitterPostFactory.AdjustSortKeyForPromotedPost(posts);
 
@@ -859,8 +854,6 @@ namespace OpenTween
                 if (gType != MyCommon.WORKERTYPE.UserTimeline &&
                     post.RetweetedByUserId != null && this.noRTId.Contains(post.RetweetedByUserId.Value)) continue;
 
-                this.SetInitialUnreadState(post, firstLoad);
-
                 if (tab != null && tab is InternalStorageTabModel)
                     tab.AddPostQueue(post);
                 else
@@ -870,7 +863,7 @@ namespace OpenTween
 
         private void CreatePostsFromSearchJson(TwitterStatus[] statuses, PublicSearchTabModel tab, bool firstLoad)
         {
-            var posts = statuses.Select(x => this.CreatePostsFromStatusData(x)).ToArray();
+            var posts = statuses.Select(x => this.CreatePostsFromStatusData(x, firstLoad)).ToArray();
 
             TwitterPostFactory.AdjustSortKeyForPromotedPost(posts);
 
@@ -882,8 +875,6 @@ namespace OpenTween
                     if (tab.Contains(post.StatusId))
                         continue;
                 }
-
-                this.SetInitialUnreadState(post, firstLoad);
 
                 tab.AddPostQueue(post);
             }
@@ -904,25 +895,10 @@ namespace OpenTween
                         continue;
                 }
 
-                var post = this.CreatePostsFromStatusData(status, true);
-
-                this.SetInitialUnreadState(post, firstLoad);
+                var post = this.CreatePostsFromStatusData(status, firstLoad, favTweet: true);
 
                 TabInformations.GetInstance().AddPost(post);
             }
-        }
-
-        private void SetInitialUnreadState(PostClass post, bool firstLoad)
-        {
-            bool isRead;
-            if (post.IsMe && this.ReadOwnPost)
-                isRead = true;
-            else if (firstLoad && SettingManager.Instance.Common.Read)
-                isRead = true;
-            else
-                isRead = false;
-
-            post.IsRead = isRead;
         }
 
         public async Task GetListStatus(ListTimelineTabModel tab, bool more, bool firstLoad)
@@ -1141,7 +1117,7 @@ namespace OpenTween
                 statuses = response.Statuses;
             }
 
-            return statuses.Select(x => this.CreatePostsFromStatusData(x)).ToArray();
+            return statuses.Select(x => this.CreatePostsFromStatusData(x, firstLoad: false)).ToArray();
         }
 
         public async Task GetSearch(PublicSearchTabModel tab, bool more, bool firstLoad)
@@ -1275,8 +1251,7 @@ namespace OpenTween
 
             foreach (var eventItem in events)
             {
-                var post = this.postFactory.CreateFromDirectMessageEvent(eventItem, users, apps, this.UserId);
-                this.SetInitialUnreadState(post, firstLoad);
+                var post = this.postFactory.CreateFromDirectMessageEvent(eventItem, users, apps, this.UserId, firstLoad);
 
                 _ = this.urlExpander.Expand(post);
 
