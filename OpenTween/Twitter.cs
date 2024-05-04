@@ -180,7 +180,7 @@ namespace OpenTween
 
         public Twitter(TwitterApi api)
         {
-            this.postFactory = new(TabInformations.GetInstance());
+            this.postFactory = new(TabInformations.GetInstance(), SettingManager.Instance.Common);
             this.urlExpander = new(ShortUrl.Instance);
 
             this.Api = api;
@@ -283,8 +283,7 @@ namespace OpenTween
             this.previousStatusId = status.IdStr;
 
             // 投稿したものを返す
-            var post = this.CreatePostsFromStatusData(status);
-            this.SetInitialUnreadState(post, firstLoad: false);
+            var post = this.CreatePostsFromStatusData(status, firstLoad: false);
 
             return post;
         }
@@ -382,8 +381,11 @@ namespace OpenTween
             var messageEventSingle = await response.LoadJsonAsync()
                 .ConfigureAwait(false);
 
-            await this.CreateDirectMessagesEventFromJson(messageEventSingle, firstLoad: false)
+            var post = await this.CreateDirectMessagesEventFromJson(messageEventSingle, firstLoad: false)
                 .ConfigureAwait(false);
+
+            var dmTab = TabInformations.GetInstance().DirectMessageTab;
+            dmTab.AddPostQueue(post);
         }
 
         public async Task<PostClass?> PostRetweet(PostId id)
@@ -426,8 +428,7 @@ namespace OpenTween
                 throw new WebApiException("Invalid Json!");
 
             // Retweetしたものを返す
-            var retweetPost = this.CreatePostsFromStatusData(status);
-            this.SetInitialUnreadState(retweetPost, firstLoad: false);
+            var retweetPost = this.CreatePostsFromStatusData(status, firstLoad: false);
 
             return retweetPost;
         }
@@ -531,8 +532,6 @@ namespace OpenTween
         public static MyCommon.ACCOUNT_STATE AccountState { get; set; } = MyCommon.ACCOUNT_STATE.Valid;
 
         public bool RestrictFavCheck { get; set; }
-
-        public bool ReadOwnPost { get; set; }
 
         public int FollowersCount { get; private set; }
 
@@ -695,7 +694,11 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, MyCommon.WORKERTYPE.Timeline, tab, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.FilterNoRetweetUserPosts(posts);
+
+            foreach (var post in posts)
+                TabInformations.GetInstance().AddPost(post);
         }
 
         public async Task GetMentionsTimelineApi(MentionsTabModel tab, bool more, bool firstLoad)
@@ -737,7 +740,11 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, MyCommon.WORKERTYPE.Reply, tab, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.FilterNoRetweetUserPosts(posts);
+
+            foreach (var post in posts)
+                TabInformations.GetInstance().AddPost(post);
         }
 
         public async Task GetUserTimelineApi(UserTimelineTabModel tab, bool more, bool firstLoad)
@@ -791,7 +798,10 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, MyCommon.WORKERTYPE.UserTimeline, tab, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+
+            foreach (var post in posts)
+                tab.AddPostQueue(post);
         }
 
         public async Task<PostClass> GetStatusApi(TwitterStatusId id, bool firstLoad = false)
@@ -816,114 +826,33 @@ namespace OpenTween
                     .ConfigureAwait(false);
             }
 
-            var item = this.CreatePostsFromStatusData(status);
-            this.SetInitialUnreadState(item, firstLoad);
+            var item = this.CreatePostsFromStatusData(status, firstLoad);
 
             return item;
         }
 
-        private PostClass CreatePostsFromStatusData(TwitterStatus status)
-            => this.CreatePostsFromStatusData(status, favTweet: false);
+        private PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad)
+            => this.CreatePostsFromStatusData(status, firstLoad, favTweet: false);
 
-        private PostClass CreatePostsFromStatusData(TwitterStatus status, bool favTweet)
+        private PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad, bool favTweet)
         {
-            var post = this.postFactory.CreateFromStatus(status, this.UserId, this.followerId, favTweet);
+            var post = this.postFactory.CreateFromStatus(status, this.UserId, this.followerId, firstLoad, favTweet);
             _ = this.urlExpander.Expand(post);
 
             return post;
         }
 
-        private void CreatePostsFromJson(TwitterStatus[] items, MyCommon.WORKERTYPE gType, TabModel? tab, bool firstLoad)
+        private PostClass[] CreatePostsFromJson(TwitterStatus[] statuses, bool firstLoad)
         {
-            var posts = items.Select(x => this.CreatePostsFromStatusData(x)).ToArray();
+            var posts = statuses.Select(x => this.CreatePostsFromStatusData(x, firstLoad)).ToArray();
 
             TwitterPostFactory.AdjustSortKeyForPromotedPost(posts);
 
-            foreach (var post in posts)
-            {
-                // 二重取得回避
-                lock (this.lockObj)
-                {
-                    var id = post.StatusId;
-                    if (tab == null)
-                    {
-                        if (TabInformations.GetInstance().ContainsKey(id)) continue;
-                    }
-                    else
-                    {
-                        if (tab.Contains(id)) continue;
-                    }
-                }
-
-                // RT禁止ユーザーによるもの
-                if (gType != MyCommon.WORKERTYPE.UserTimeline &&
-                    post.RetweetedByUserId != null && this.noRTId.Contains(post.RetweetedByUserId.Value)) continue;
-
-                this.SetInitialUnreadState(post, firstLoad);
-
-                if (tab != null && tab is InternalStorageTabModel)
-                    tab.AddPostQueue(post);
-                else
-                    TabInformations.GetInstance().AddPost(post);
-            }
+            return posts;
         }
 
-        private void CreatePostsFromSearchJson(TwitterStatus[] statuses, PublicSearchTabModel tab, bool firstLoad)
-        {
-            var posts = statuses.Select(x => this.CreatePostsFromStatusData(x)).ToArray();
-
-            TwitterPostFactory.AdjustSortKeyForPromotedPost(posts);
-
-            foreach (var post in posts)
-            {
-                // 二重取得回避
-                lock (this.lockObj)
-                {
-                    if (tab.Contains(post.StatusId))
-                        continue;
-                }
-
-                this.SetInitialUnreadState(post, firstLoad);
-
-                tab.AddPostQueue(post);
-            }
-        }
-
-        private void CreateFavoritePostsFromJson(TwitterStatus[] items, bool firstLoad)
-        {
-            var favTab = TabInformations.GetInstance().FavoriteTab;
-
-            foreach (var status in items)
-            {
-                var statusId = new TwitterStatusId(status.IdStr);
-
-                // 二重取得回避
-                lock (this.lockObj)
-                {
-                    if (favTab.Contains(statusId))
-                        continue;
-                }
-
-                var post = this.CreatePostsFromStatusData(status, true);
-
-                this.SetInitialUnreadState(post, firstLoad);
-
-                TabInformations.GetInstance().AddPost(post);
-            }
-        }
-
-        private void SetInitialUnreadState(PostClass post, bool firstLoad)
-        {
-            bool isRead;
-            if (post.IsMe && this.ReadOwnPost)
-                isRead = true;
-            else if (firstLoad && SettingManager.Instance.Common.Read)
-                isRead = true;
-            else
-                isRead = false;
-
-            post.IsRead = isRead;
-        }
+        private PostClass[] FilterNoRetweetUserPosts(PostClass[] posts)
+            => posts.Where(x => x.RetweetedByUserId == null || this.noRTId.Contains(x.RetweetedByUserId.Value)).ToArray();
 
         public async Task GetListStatus(ListTimelineTabModel tab, bool more, bool firstLoad)
         {
@@ -966,7 +895,11 @@ namespace OpenTween
                 }
             }
 
-            this.CreatePostsFromJson(statuses, MyCommon.WORKERTYPE.List, tab, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.FilterNoRetweetUserPosts(posts);
+
+            foreach (var post in posts)
+                tab.AddPostQueue(post);
         }
 
         /// <summary>
@@ -1141,7 +1074,7 @@ namespace OpenTween
                 statuses = response.Statuses;
             }
 
-            return statuses.Select(x => this.CreatePostsFromStatusData(x)).ToArray();
+            return statuses.Select(x => this.CreatePostsFromStatusData(x, firstLoad: false)).ToArray();
         }
 
         public async Task GetSearch(PublicSearchTabModel tab, bool more, bool firstLoad)
@@ -1203,7 +1136,11 @@ namespace OpenTween
             if (!TabInformations.GetInstance().ContainsTab(tab))
                 return;
 
-            this.CreatePostsFromSearchJson(statuses, tab, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.FilterNoRetweetUserPosts(posts);
+
+            foreach (var post in posts)
+                tab.AddPostQueue(post);
         }
 
         public async Task GetDirectMessageEvents(DirectMessagesTabModel dmTab, bool backward, bool firstLoad)
@@ -1227,11 +1164,14 @@ namespace OpenTween
 
             dmTab.NextCursor = eventList.NextCursor;
 
-            await this.CreateDirectMessagesEventFromJson(eventList, firstLoad)
+            var posts = await this.CreateDirectMessagesEventFromJson(eventList, firstLoad)
                 .ConfigureAwait(false);
+
+            foreach (var post in posts)
+                dmTab.AddPostQueue(post);
         }
 
-        private async Task CreateDirectMessagesEventFromJson(TwitterMessageEventSingle eventSingle, bool firstLoad)
+        private async Task<PostClass> CreateDirectMessagesEventFromJson(TwitterMessageEventSingle eventSingle, bool firstLoad)
         {
             var eventList = new TwitterMessageEventList
             {
@@ -1239,18 +1179,20 @@ namespace OpenTween
                 Events = new[] { eventSingle.Event },
             };
 
-            await this.CreateDirectMessagesEventFromJson(eventList, firstLoad)
+            var posts = await this.CreateDirectMessagesEventFromJson(eventList, firstLoad)
                 .ConfigureAwait(false);
+
+            return posts.Single();
         }
 
-        private async Task CreateDirectMessagesEventFromJson(TwitterMessageEventList eventList, bool firstLoad)
+        private async Task<PostClass[]> CreateDirectMessagesEventFromJson(TwitterMessageEventList eventList, bool firstLoad)
         {
             var events = eventList.Events
                 .Where(x => x.Type == "message_create")
                 .ToArray();
 
             if (events.Length == 0)
-                return;
+                return Array.Empty<PostClass>();
 
             var userIds = Enumerable.Concat(
                 events.Select(x => x.MessageCreate.SenderId),
@@ -1262,26 +1204,27 @@ namespace OpenTween
 
             var apps = eventList.Apps ?? new Dictionary<string, TwitterMessageEventList.App>();
 
-            this.CreateDirectMessagesEventFromJson(events, users, apps, firstLoad);
+            return this.CreateDirectMessagesEventFromJson(events, users, apps, firstLoad);
         }
 
-        private void CreateDirectMessagesEventFromJson(
-            IEnumerable<TwitterMessageEvent> events,
+        private PostClass[] CreateDirectMessagesEventFromJson(
+            IReadOnlyCollection<TwitterMessageEvent> events,
             IReadOnlyDictionary<string, TwitterUser> users,
             IReadOnlyDictionary<string, TwitterMessageEventList.App> apps,
             bool firstLoad)
         {
-            var dmTab = TabInformations.GetInstance().DirectMessageTab;
+            var posts = new List<PostClass>(capacity: events.Count);
 
             foreach (var eventItem in events)
             {
-                var post = this.postFactory.CreateFromDirectMessageEvent(eventItem, users, apps, this.UserId);
-                this.SetInitialUnreadState(post, firstLoad);
+                var post = this.postFactory.CreateFromDirectMessageEvent(eventItem, users, apps, this.UserId, firstLoad);
 
                 _ = this.urlExpander.Expand(post);
 
-                dmTab.AddPostQueue(post);
+                posts.Add(post);
             }
+
+            return posts.ToArray();
         }
 
         public async Task GetFavoritesApi(FavoritesTabModel tab, bool backward, bool firstLoad)
@@ -1324,7 +1267,11 @@ namespace OpenTween
                 }
             }
 
-            this.CreateFavoritePostsFromJson(statuses, firstLoad);
+            var posts = this.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.FilterNoRetweetUserPosts(posts);
+
+            foreach (var post in posts)
+                TabInformations.GetInstance().AddPost(post);
         }
 
         /// <summary>
