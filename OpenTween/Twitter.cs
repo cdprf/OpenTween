@@ -381,8 +381,11 @@ namespace OpenTween
             var messageEventSingle = await response.LoadJsonAsync()
                 .ConfigureAwait(false);
 
-            await this.CreateDirectMessagesEventFromJson(messageEventSingle, firstLoad: false)
+            var post = await this.CreateDirectMessagesEventFromJson(messageEventSingle, firstLoad: false)
                 .ConfigureAwait(false);
+
+            var dmTab = TabInformations.GetInstance().DirectMessageTab;
+            dmTab.AddPostQueue(post);
         }
 
         public async Task<PostClass?> PostRetweet(PostId id)
@@ -1161,11 +1164,14 @@ namespace OpenTween
 
             dmTab.NextCursor = eventList.NextCursor;
 
-            await this.CreateDirectMessagesEventFromJson(eventList, firstLoad)
+            var posts = await this.CreateDirectMessagesEventFromJson(eventList, firstLoad)
                 .ConfigureAwait(false);
+
+            foreach (var post in posts)
+                dmTab.AddPostQueue(post);
         }
 
-        private async Task CreateDirectMessagesEventFromJson(TwitterMessageEventSingle eventSingle, bool firstLoad)
+        private async Task<PostClass> CreateDirectMessagesEventFromJson(TwitterMessageEventSingle eventSingle, bool firstLoad)
         {
             var eventList = new TwitterMessageEventList
             {
@@ -1173,18 +1179,20 @@ namespace OpenTween
                 Events = new[] { eventSingle.Event },
             };
 
-            await this.CreateDirectMessagesEventFromJson(eventList, firstLoad)
+            var posts = await this.CreateDirectMessagesEventFromJson(eventList, firstLoad)
                 .ConfigureAwait(false);
+
+            return posts.Single();
         }
 
-        private async Task CreateDirectMessagesEventFromJson(TwitterMessageEventList eventList, bool firstLoad)
+        private async Task<PostClass[]> CreateDirectMessagesEventFromJson(TwitterMessageEventList eventList, bool firstLoad)
         {
             var events = eventList.Events
                 .Where(x => x.Type == "message_create")
                 .ToArray();
 
             if (events.Length == 0)
-                return;
+                return Array.Empty<PostClass>();
 
             var userIds = Enumerable.Concat(
                 events.Select(x => x.MessageCreate.SenderId),
@@ -1196,16 +1204,16 @@ namespace OpenTween
 
             var apps = eventList.Apps ?? new Dictionary<string, TwitterMessageEventList.App>();
 
-            this.CreateDirectMessagesEventFromJson(events, users, apps, firstLoad);
+            return this.CreateDirectMessagesEventFromJson(events, users, apps, firstLoad);
         }
 
-        private void CreateDirectMessagesEventFromJson(
-            IEnumerable<TwitterMessageEvent> events,
+        private PostClass[] CreateDirectMessagesEventFromJson(
+            IReadOnlyCollection<TwitterMessageEvent> events,
             IReadOnlyDictionary<string, TwitterUser> users,
             IReadOnlyDictionary<string, TwitterMessageEventList.App> apps,
             bool firstLoad)
         {
-            var dmTab = TabInformations.GetInstance().DirectMessageTab;
+            var posts = new List<PostClass>(capacity: events.Count);
 
             foreach (var eventItem in events)
             {
@@ -1213,8 +1221,10 @@ namespace OpenTween
 
                 _ = this.urlExpander.Expand(post);
 
-                dmTab.AddPostQueue(post);
+                posts.Add(post);
             }
+
+            return posts.ToArray();
         }
 
         public async Task GetFavoritesApi(FavoritesTabModel tab, bool backward, bool firstLoad)
