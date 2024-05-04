@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Moq;
 using OpenTween.Api.DataModel;
 using OpenTween.Connection;
+using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 
 namespace OpenTween.Api
@@ -57,26 +58,24 @@ namespace OpenTween.Api
             Assert.IsType<TwitterCredentialNone>(apiConnection.Credential);
 
             var credential = new TwitterCredentialOAuth1(TwitterAppToken.GetDefault(), "*** AccessToken ***", "*** AccessSecret ***");
-            twitterApi.Initialize(credential, userId: 100L, screenName: "hogehoge");
+            var accountState = new TwitterAccountState(100L, "hogehoge");
+            twitterApi.Initialize(credential, accountState);
 
             apiConnection = Assert.IsType<TwitterApiConnection>(twitterApi.Connection);
             Assert.Same(credential, apiConnection.Credential);
-
-            Assert.Equal(100L, twitterApi.CurrentUserId);
-            Assert.Equal("hogehoge", twitterApi.CurrentScreenName);
+            Assert.Same(accountState, twitterApi.AccountState);
 
             // 複数回 Initialize を実行した場合は新たに TwitterApiConnection が生成される
             var credential2 = new TwitterCredentialOAuth1(TwitterAppToken.GetDefault(), "*** AccessToken2 ***", "*** AccessSecret2 ***");
-            twitterApi.Initialize(credential2, userId: 200L, screenName: "foobar");
+            var accountState2 = new TwitterAccountState(200L, "foobar");
+            twitterApi.Initialize(credential2, accountState2);
 
             var oldApiConnection = apiConnection;
             Assert.True(oldApiConnection.IsDisposed);
 
             apiConnection = Assert.IsType<TwitterApiConnection>(twitterApi.Connection);
             Assert.Same(credential2, apiConnection.Credential);
-
-            Assert.Equal(200L, twitterApi.CurrentUserId);
-            Assert.Equal("foobar", twitterApi.CurrentScreenName);
+            Assert.Same(accountState2, twitterApi.AccountState);
         }
 
         private Mock<IApiConnection> CreateApiConnectionMock<T>(Action<T> verifyRequest)
@@ -1173,10 +1172,7 @@ namespace OpenTween.Api
             using var twitterApi = new TwitterApi();
             twitterApi.ApiConnection = mock.Object;
 
-            await twitterApi.AccountVerifyCredentials();
-
-            Assert.Equal(100L, twitterApi.CurrentUserId);
-            Assert.Equal("opentween", twitterApi.CurrentScreenName);
+            var user = await twitterApi.AccountVerifyCredentials();
 
             mock.VerifyAll();
         }

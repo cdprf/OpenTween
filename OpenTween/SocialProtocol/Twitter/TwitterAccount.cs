@@ -35,14 +35,16 @@ namespace OpenTween.SocialProtocol.Twitter
 
         public bool IsDisposed { get; private set; }
 
+        public TwitterAccountState AccountState { get; private set; } = new();
+
         public OpenTween.Twitter Legacy
             => this.twLegacy;
 
         public long UserId
-            => this.Legacy.UserId;
+            => this.AccountState.UserId;
 
         public string UserName
-            => this.Legacy.Username;
+            => this.AccountState.UserName;
 
         public APIAuthType AuthType
             => this.Legacy.Api.AuthType;
@@ -58,7 +60,8 @@ namespace OpenTween.SocialProtocol.Twitter
             Debug.Assert(accountSettings.UniqueKey == this.UniqueKey, "UniqueKey must be same as current value.");
 
             var credential = accountSettings.GetTwitterCredential();
-            this.twLegacy.Initialize(credential, accountSettings.Username, accountSettings.UserId);
+            this.AccountState = new TwitterAccountState(accountSettings.UserId, accountSettings.Username);
+            this.twLegacy.Initialize(credential, this.AccountState);
             this.twLegacy.RestrictFavCheck = settingCommon.RestrictFavCheck;
         }
 

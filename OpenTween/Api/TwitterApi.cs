@@ -32,14 +32,17 @@ using System.Threading.Tasks;
 using OpenTween.Api.DataModel;
 using OpenTween.Connection;
 using OpenTween.Models;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Api
 {
     public sealed class TwitterApi : IDisposable
     {
-        public long CurrentUserId { get; private set; }
+        public long CurrentUserId
+            => this.AccountState.UserId;
 
-        public string CurrentScreenName { get; private set; } = "";
+        public string CurrentScreenName
+            => this.AccountState.UserName;
 
         public IApiConnection Connection => this.ApiConnection;
 
@@ -47,10 +50,12 @@ namespace OpenTween.Api
 
         public APIAuthType AuthType { get; private set; } = APIAuthType.None;
 
+        public TwitterAccountState AccountState { get; private set; } = new();
+
         public TwitterApi()
             => this.ApiConnection = new TwitterApiConnection(new TwitterCredentialNone());
 
-        public void Initialize(ITwitterCredential credential, long userId, string screenName)
+        public void Initialize(ITwitterCredential credential, TwitterAccountState accountState)
         {
             this.AuthType = credential.AuthType;
 
@@ -58,8 +63,7 @@ namespace OpenTween.Api
             var oldInstance = Interlocked.Exchange(ref this.ApiConnection, newInstance);
             oldInstance?.Dispose();
 
-            this.CurrentUserId = userId;
-            this.CurrentScreenName = screenName;
+            this.AccountState = accountState;
         }
 
         public async Task<TwitterStatus[]> StatusesHomeTimeline(int? count = null, TwitterStatusId? maxId = null, TwitterStatusId? sinceId = null)
@@ -977,9 +981,6 @@ namespace OpenTween.Api
 
             var user = await response.ReadAsJson<TwitterUser>()
                 .ConfigureAwait(false);
-
-            this.CurrentUserId = user.Id;
-            this.CurrentScreenName = user.ScreenName;
 
             return user;
         }
