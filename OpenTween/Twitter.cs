@@ -49,6 +49,7 @@ using OpenTween.Api.TwitterV2;
 using OpenTween.Connection;
 using OpenTween.Models;
 using OpenTween.Setting;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {
@@ -170,8 +171,6 @@ namespace OpenTween
         private delegate void GetIconImageDelegate(PostClass post);
 
         private readonly object lockObj = new();
-        private ISet<long> followerId = new HashSet<long>();
-        private long[] noRTId = Array.Empty<long>();
 
         private readonly TwitterPostFactory postFactory;
         private readonly PostUrlExpander urlExpander;
@@ -217,17 +216,17 @@ namespace OpenTween
             var user = await this.Api.AccountVerifyCredentials()
                 .ConfigureAwait(false);
 
-            this.UpdateUserStats(user);
+            this.Api.AccountState.UpdateFromUser(user);
         }
 
-        public void Initialize(ITwitterCredential credential, string username, long userId)
+        public void Initialize(ITwitterCredential credential, TwitterAccountState accountState)
         {
             // OAuth認証
             if (credential is TwitterCredentialNone)
                 Twitter.AccountState = MyCommon.ACCOUNT_STATE.Invalid;
 
             this.ResetApiStatus();
-            this.Api.Initialize(credential, userId, username);
+            this.Api.Initialize(credential, accountState);
         }
 
         public async Task<PostClass?> PostStatus(PostStatusParams param)
@@ -275,7 +274,7 @@ namespace OpenTween
                     .ConfigureAwait(false);
             }
 
-            this.UpdateUserStats(status.User);
+            this.Api.AccountState.UpdateFromUser(status.User);
 
             if (status.IdStr == this.previousStatusId)
                 throw new WebApiException("OK:Delaying?");
@@ -533,25 +532,14 @@ namespace OpenTween
 
         public bool RestrictFavCheck { get; set; }
 
-        public int FollowersCount { get; private set; }
+        public int? FollowersCount
+            => this.Api.AccountState.FollowersCount;
 
-        public int FriendsCount { get; private set; }
+        public int? FriendsCount
+            => this.Api.AccountState.FriendsCount;
 
-        public int StatusesCount { get; private set; }
-
-        public string Location { get; private set; } = "";
-
-        public string Bio { get; private set; } = "";
-
-        /// <summary>ユーザーのフォロワー数などの情報を更新します</summary>
-        private void UpdateUserStats(TwitterUser self)
-        {
-            this.FollowersCount = self.FollowersCount;
-            this.FriendsCount = self.FriendsCount;
-            this.StatusesCount = self.StatusesCount;
-            this.Location = self.Location ?? "";
-            this.Bio = self.Description ?? "";
-        }
+        public int? StatusesCount
+            => this.Api.AccountState.StatusesCount;
 
         /// <summary>
         /// 渡された取得件数がWORKERTYPEに応じた取得可能範囲に収まっているか検証する
@@ -836,7 +824,7 @@ namespace OpenTween
 
         private PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad, bool favTweet)
         {
-            var post = this.postFactory.CreateFromStatus(status, this.UserId, this.followerId, firstLoad, favTweet);
+            var post = this.postFactory.CreateFromStatus(status, this.UserId, this.Api.AccountState.FollowerIds, firstLoad, favTweet);
             _ = this.urlExpander.Expand(post);
 
             return post;
@@ -852,7 +840,7 @@ namespace OpenTween
         }
 
         private PostClass[] FilterNoRetweetUserPosts(PostClass[] posts)
-            => posts.Where(x => x.RetweetedByUserId == null || !this.noRTId.Contains(x.RetweetedByUserId.Value)).ToArray();
+            => posts.Where(x => x.RetweetedByUserId == null || !this.Api.AccountState.NoRetweetUserIds.Contains(x.RetweetedByUserId.Value)).ToArray();
 
         public async Task GetListStatus(ListTimelineTabModel tab, bool more, bool firstLoad)
         {
@@ -1297,8 +1285,8 @@ namespace OpenTween
             }
             while (cursor != 0);
 
-            this.followerId = newFollowerIds.ToHashSet();
-            TabInformations.GetInstance().RefreshOwl(this.followerId);
+            this.Api.AccountState.FollowerIds = newFollowerIds.ToHashSet();
+            TabInformations.GetInstance().RefreshOwl(this.Api.AccountState.FollowerIds);
 
             this.GetFollowersSuccess = true;
         }
@@ -1311,9 +1299,10 @@ namespace OpenTween
         {
             if (MyCommon.EndingFlag) return;
 
-            this.noRTId = await this.Api.NoRetweetIds()
+            var noRetweetUserIds = await this.Api.NoRetweetIds()
                 .ConfigureAwait(false);
 
+            this.Api.AccountState.NoRetweetUserIds = new HashSet<long>(noRetweetUserIds);
             this.GetNoRetweetSuccess = true;
         }
 

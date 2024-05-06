@@ -6774,8 +6774,14 @@ namespace OpenTween
                     ttl.AppendFormat(Properties.Resources.SetMainWindowTitleText4, ur, al);
                     break;
                 case MyCommon.DispTitleEnum.OwnStatus:
-                    if (followers == 0 && this.tw.FollowersCount > 0) followers = this.tw.FollowersCount;
-                    ttl.AppendFormat(Properties.Resources.OwnStatusTitle, this.tw.StatusesCount, this.tw.FriendsCount, this.tw.FollowersCount, this.tw.FollowersCount - followers);
+                    if (followers == 0 && this.tw.FollowersCount != null) followers = this.tw.FollowersCount.Value;
+                    ttl.AppendFormat(
+                        Properties.Resources.OwnStatusTitle,
+                        this.tw.StatusesCount?.ToString() ?? "-",
+                        this.tw.FriendsCount?.ToString() ?? "-",
+                        this.tw.FollowersCount?.ToString() ?? "-",
+                        this.tw.FollowersCount != null ? this.tw.FollowersCount.Value - followers : "-"
+                    );
                     break;
             }
 
