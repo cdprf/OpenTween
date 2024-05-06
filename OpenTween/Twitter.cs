@@ -648,26 +648,6 @@ namespace OpenTween
                 if (!more)
                     tab.CursorTop = response.CursorTop;
             }
-            else if (SettingManager.Instance.Common.EnableTwitterV2Api)
-            {
-                var maxId = more ? tab.CursorBottom?.As<TwitterStatusId>() : null;
-                var request = new GetTimelineRequest(this.UserId)
-                {
-                    MaxResults = count,
-                    UntilId = maxId,
-                };
-
-                var response = await request.Send(this.Api.Connection)
-                    .ConfigureAwait(false);
-
-                if (response.Data == null || response.Data.Length == 0)
-                    return;
-
-                var tweetIds = response.Data.Select(x => x.Id).ToList();
-
-                statuses = await this.Api.StatusesLookup(tweetIds)
-                    .ConfigureAwait(false);
-            }
             else
             {
                 var maxId = more ? tab.CursorBottom?.As<TwitterStatusId>() : null;
