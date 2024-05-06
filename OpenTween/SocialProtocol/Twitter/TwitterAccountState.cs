@@ -21,6 +21,7 @@
 
 #nullable enable
 
+using System.Collections.Generic;
 using OpenTween.Api.DataModel;
 
 namespace OpenTween.SocialProtocol.Twitter
@@ -36,6 +37,10 @@ namespace OpenTween.SocialProtocol.Twitter
         public int? FriendsCount { get; private set; }
 
         public int? StatusesCount { get; private set; }
+
+        public ISet<long> FollowerIds { get; set; } = new HashSet<long>();
+
+        public ISet<long> NoRetweetUserIds { get; set; } = new HashSet<long>();
 
         public TwitterAccountState()
             : this(0L, "")

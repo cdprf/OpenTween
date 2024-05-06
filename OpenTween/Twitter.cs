@@ -171,8 +171,6 @@ namespace OpenTween
         private delegate void GetIconImageDelegate(PostClass post);
 
         private readonly object lockObj = new();
-        private ISet<long> followerId = new HashSet<long>();
-        private long[] noRTId = Array.Empty<long>();
 
         private readonly TwitterPostFactory postFactory;
         private readonly PostUrlExpander urlExpander;
@@ -826,7 +824,7 @@ namespace OpenTween
 
         private PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad, bool favTweet)
         {
-            var post = this.postFactory.CreateFromStatus(status, this.UserId, this.followerId, firstLoad, favTweet);
+            var post = this.postFactory.CreateFromStatus(status, this.UserId, this.Api.AccountState.FollowerIds, firstLoad, favTweet);
             _ = this.urlExpander.Expand(post);
 
             return post;
@@ -842,7 +840,7 @@ namespace OpenTween
         }
 
         private PostClass[] FilterNoRetweetUserPosts(PostClass[] posts)
-            => posts.Where(x => x.RetweetedByUserId == null || !this.noRTId.Contains(x.RetweetedByUserId.Value)).ToArray();
+            => posts.Where(x => x.RetweetedByUserId == null || !this.Api.AccountState.NoRetweetUserIds.Contains(x.RetweetedByUserId.Value)).ToArray();
 
         public async Task GetListStatus(ListTimelineTabModel tab, bool more, bool firstLoad)
         {
@@ -1287,8 +1285,8 @@ namespace OpenTween
             }
             while (cursor != 0);
 
-            this.followerId = newFollowerIds.ToHashSet();
-            TabInformations.GetInstance().RefreshOwl(this.followerId);
+            this.Api.AccountState.FollowerIds = newFollowerIds.ToHashSet();
+            TabInformations.GetInstance().RefreshOwl(this.Api.AccountState.FollowerIds);
 
             this.GetFollowersSuccess = true;
         }
@@ -1301,9 +1299,10 @@ namespace OpenTween
         {
             if (MyCommon.EndingFlag) return;
 
-            this.noRTId = await this.Api.NoRetweetIds()
+            var noRetweetUserIds = await this.Api.NoRetweetIds()
                 .ConfigureAwait(false);
 
+            this.Api.AccountState.NoRetweetUserIds = new HashSet<long>(noRetweetUserIds);
             this.GetNoRetweetSuccess = true;
         }
 
