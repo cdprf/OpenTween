@@ -852,7 +852,7 @@ namespace OpenTween
         }
 
         private PostClass[] FilterNoRetweetUserPosts(PostClass[] posts)
-            => posts.Where(x => x.RetweetedByUserId == null || this.noRTId.Contains(x.RetweetedByUserId.Value)).ToArray();
+            => posts.Where(x => x.RetweetedByUserId == null || !this.noRTId.Contains(x.RetweetedByUserId.Value)).ToArray();
 
         public async Task GetListStatus(ListTimelineTabModel tab, bool more, bool firstLoad)
         {
