@@ -25,14 +25,14 @@ using Xunit;
 
 namespace OpenTween.Api.GraphQL
 {
-    public class TimelineResponseTest
+    public class TimelineGraphqlResponseTest
     {
         [Fact]
         public async Task ToTwitterStatuses_Test()
         {
             using var apiResponse = await TestUtils.CreateApiResponse("Resources/Responses/SearchTimeline_SimpleTweet.json");
             var tweets = TimelineTweet.ExtractTimelineTweets(await apiResponse.ReadAsJsonXml());
-            var timelineResponse = new TimelineResponse(tweets, new(CursorType.Top, new("")), new(CursorType.Bottom, new("")));
+            var timelineResponse = new TimelineGraphqlResponse(tweets, new(CursorType.Top, new("")), new(CursorType.Bottom, new("")));
 
             var statuses = timelineResponse.ToTwitterStatuses();
             Assert.Single(statuses);

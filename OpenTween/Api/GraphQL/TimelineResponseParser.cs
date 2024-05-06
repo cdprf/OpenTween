@@ -29,7 +29,7 @@ namespace OpenTween.Api.GraphQL
 {
     public class TimelineResponseParser
     {
-        public static TimelineResponse Parse(XElement rootElm)
+        public static TimelineGraphqlResponse Parse(XElement rootElm)
         {
             ErrorResponse.ThrowIfError(rootElm);
 

@@ -27,7 +27,7 @@ using OpenTween.Models;
 
 namespace OpenTween.Api.GraphQL
 {
-    public record TimelineResponse(
+    public record TimelineGraphqlResponse(
         TimelineTweet[] Tweets,
         QueryCursor<TwitterGraphqlCursor>? CursorTop,
         QueryCursor<TwitterGraphqlCursor>? CursorBottom
