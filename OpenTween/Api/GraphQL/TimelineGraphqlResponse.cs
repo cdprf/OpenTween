@@ -1,5 +1,5 @@
 ﻿// OpenTween - Client of Twitter
-// Copyright (c) 2024 kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
+// Copyright (c) 2023 kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
 // All rights reserved.
 //
 // This file is part of OpenTween.
@@ -21,25 +21,22 @@
 
 #nullable enable
 
-using System;
-using OpenTween.Connection;
+using System.Linq;
+using OpenTween.Api.DataModel;
+using OpenTween.Models;
 
-namespace OpenTween.SocialProtocol
+namespace OpenTween.Api.GraphQL
 {
-    public interface ISocialAccount : IDisposable
+    public record TimelineGraphqlResponse(
+        TimelineTweet[] Tweets,
+        QueryCursor<TwitterGraphqlCursor>? CursorTop,
+        QueryCursor<TwitterGraphqlCursor>? CursorBottom
+    )
     {
-        public Guid UniqueKey { get; }
-
-        public long UserId { get; }
-
-        public string UserName { get; }
-
-        public IApiConnection Connection { get; }
-
-        public ISocialProtocolQuery Query { get; }
-
-        public bool IsDisposed { get; }
-
-        public void Initialize(UserAccount accountSettings, SettingCommon settingCommon);
+        public TwitterStatus[] ToTwitterStatuses()
+            => this.Tweets
+                .Where(x => x.IsAvailable)
+                .Select(x => x.ToTwitterStatus())
+                .ToArray();
     }
 }

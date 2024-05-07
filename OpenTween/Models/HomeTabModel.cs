@@ -69,21 +69,29 @@ namespace OpenTween.Models
 
         public override async Task RefreshAsync(ISocialAccount account, bool backward, IProgress<string> progress)
         {
-            if (account is not TwitterAccount twAccount)
-                throw new ArgumentException($"Invalid account type: {account.GetType()}", nameof(account));
-
             progress.Report(string.Format(Properties.Resources.GetTimelineWorker_RunWorkerCompletedText5, backward ? -1 : 1));
 
             var firstLoad = !this.IsFirstLoadCompleted;
+            var count = Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, backward, firstLoad);
+            var cursor = backward ? this.CursorBottom : this.CursorTop;
 
-            await twAccount.Legacy.GetHomeTimelineApi(this, backward, firstLoad)
+            var response = await account.Query.GetHomeTimeline(count, cursor, firstLoad)
                 .ConfigureAwait(false);
+
+            foreach (var post in response.Posts)
+                TabInformations.GetInstance().AddPost(post);
 
             // 新着時未読クリア
             if (SettingManager.Instance.Common.ReadOldPosts)
                 TabInformations.GetInstance().SetReadHomeTab();
 
             TabInformations.GetInstance().DistributePosts();
+
+            if (response.CursorTop != null && !backward)
+                this.CursorTop = response.CursorTop;
+
+            if (response.CursorBottom != null)
+                this.CursorBottom = response.CursorBottom;
 
             if (firstLoad)
                 this.IsFirstLoadCompleted = true;
