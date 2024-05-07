@@ -33,6 +33,8 @@ namespace OpenTween.SocialProtocol.Twitter
 
         public Guid UniqueKey { get; }
 
+        public ISocialProtocolQuery Query { get; private set; }
+
         public bool IsDisposed { get; private set; }
 
         public TwitterAccountState AccountState { get; private set; } = new();
@@ -53,7 +55,10 @@ namespace OpenTween.SocialProtocol.Twitter
             => this.Legacy.Api.Connection;
 
         public TwitterAccount(Guid uniqueKey)
-            => this.UniqueKey = uniqueKey;
+        {
+            this.UniqueKey = uniqueKey;
+            this.Query = this.CreateQueryInstance(APIAuthType.None);
+        }
 
         public void Initialize(UserAccount accountSettings, SettingCommon settingCommon)
         {
@@ -61,6 +66,8 @@ namespace OpenTween.SocialProtocol.Twitter
 
             var credential = accountSettings.GetTwitterCredential();
             this.AccountState = new TwitterAccountState(accountSettings.UserId, accountSettings.Username);
+            this.Query = this.CreateQueryInstance(credential.AuthType);
+
             this.twLegacy.Initialize(credential, this.AccountState);
             this.twLegacy.RestrictFavCheck = settingCommon.RestrictFavCheck;
         }
@@ -72,6 +79,15 @@ namespace OpenTween.SocialProtocol.Twitter
 
             this.twLegacy.Dispose();
             this.IsDisposed = true;
+        }
+
+        private ISocialProtocolQuery CreateQueryInstance(APIAuthType authType)
+        {
+            return authType switch
+            {
+                APIAuthType.TwitterComCookie => new TwitterGraphqlQuery(this),
+                _ => new TwitterV1Query(this),
+            };
         }
     }
 }

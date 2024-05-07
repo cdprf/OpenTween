@@ -21,25 +21,13 @@
 
 #nullable enable
 
-using System;
-using OpenTween.Connection;
+using System.Threading.Tasks;
+using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol
 {
-    public interface ISocialAccount : IDisposable
+    public interface ISocialProtocolQuery
     {
-        public Guid UniqueKey { get; }
-
-        public long UserId { get; }
-
-        public string UserName { get; }
-
-        public IApiConnection Connection { get; }
-
-        public ISocialProtocolQuery Query { get; }
-
-        public bool IsDisposed { get; }
-
-        public void Initialize(UserAccount accountSettings, SettingCommon settingCommon);
+        public Task<TimelineResponse> GetHomeTimeline(int count, IQueryCursor? cursor, bool firstLoad);
     }
 }

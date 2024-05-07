@@ -623,57 +623,6 @@ namespace OpenTween
             return Math.Min(count, GetMaxApiResultCount(type));
         }
 
-        public async Task<TimelineResponse> GetHomeTimelineApi(int count, IQueryCursor? cursor, bool firstLoad)
-        {
-            this.CheckAccountState();
-
-            TwitterStatus[] statuses;
-            IQueryCursor? cursorTop = null, cursorBottom = null;
-
-            if (this.Api.AuthType == APIAuthType.TwitterComCookie)
-            {
-                var request = new HomeLatestTimelineRequest
-                {
-                    Count = count,
-                    Cursor = cursor?.As<TwitterGraphqlCursor>(),
-                };
-                var response = await request.Send(this.Api.Connection)
-                    .ConfigureAwait(false);
-
-                statuses = response.ToTwitterStatuses();
-
-                cursorTop = response.CursorTop;
-                cursorBottom = response.CursorBottom;
-            }
-            else
-            {
-                TwitterStatusId? maxId = null, sinceId = null;
-
-                if (cursor is QueryCursor<TwitterStatusId> statusIdCursor)
-                {
-                    if (statusIdCursor.Type == CursorType.Top)
-                        sinceId = statusIdCursor.Value;
-                    else if (statusIdCursor.Type == CursorType.Bottom)
-                        maxId = statusIdCursor.Value;
-                }
-
-                statuses = await this.Api.StatusesHomeTimeline(count, maxId, sinceId)
-                    .ConfigureAwait(false);
-
-                if (statuses.Length > 0)
-                {
-                    var (min, max) = statuses.Select(x => new TwitterStatusId(x.IdStr)).MinMax();
-                    cursorTop = new QueryCursor<TwitterStatusId>(CursorType.Top, max);
-                    cursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
-                }
-            }
-
-            var posts = this.CreatePostsFromJson(statuses, firstLoad);
-            posts = this.FilterNoRetweetUserPosts(posts);
-
-            return new(posts, cursorTop, cursorBottom);
-        }
-
         public async Task GetMentionsTimelineApi(MentionsTabModel tab, bool more, bool firstLoad)
         {
             this.CheckAccountState();
@@ -815,7 +764,7 @@ namespace OpenTween
             return post;
         }
 
-        private PostClass[] CreatePostsFromJson(TwitterStatus[] statuses, bool firstLoad)
+        internal PostClass[] CreatePostsFromJson(TwitterStatus[] statuses, bool firstLoad)
         {
             var posts = statuses.Select(x => this.CreatePostsFromStatusData(x, firstLoad)).ToArray();
 
@@ -824,7 +773,7 @@ namespace OpenTween
             return posts;
         }
 
-        private PostClass[] FilterNoRetweetUserPosts(PostClass[] posts)
+        internal PostClass[] FilterNoRetweetUserPosts(PostClass[] posts)
             => posts.Where(x => x.RetweetedByUserId == null || !this.Api.AccountState.NoRetweetUserIds.Contains(x.RetweetedByUserId.Value)).ToArray();
 
         public async Task GetListStatus(ListTimelineTabModel tab, bool more, bool firstLoad)
@@ -1445,7 +1394,7 @@ namespace OpenTween
         public string[] GetHashList()
             => this.postFactory.GetReceivedHashtags();
 
-        private void CheckAccountState()
+        internal void CheckAccountState()
         {
             if (Twitter.AccountState != MyCommon.ACCOUNT_STATE.Valid)
                 throw new WebApiException("Auth error. Check your account");

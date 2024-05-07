@@ -81,5 +81,46 @@ namespace OpenTween.SocialProtocol.Twitter
             account.Initialize(accountSettings2, settingCommon2);
             Assert.Equal(22222L, account.UserId);
         }
+
+        [Fact]
+        public void Query_V1_Test()
+        {
+            var accountKey = Guid.NewGuid();
+            using var account = new TwitterAccount(accountKey);
+
+            var accountSettings = new UserAccount
+            {
+                UniqueKey = accountKey,
+                TwitterAuthType = APIAuthType.OAuth1,
+                Token = "aaaaa",
+                TokenSecret = "aaaaa",
+                UserId = 11111L,
+                Username = "tetete",
+            };
+            var settingCommon = new SettingCommon();
+            account.Initialize(accountSettings, settingCommon);
+
+            Assert.IsType<TwitterV1Query>(account.Query);
+        }
+
+        [Fact]
+        public void Query_Graphql_Test()
+        {
+            var accountKey = Guid.NewGuid();
+            using var account = new TwitterAccount(accountKey);
+
+            var accountSettings = new UserAccount
+            {
+                UniqueKey = accountKey,
+                TwitterAuthType = APIAuthType.TwitterComCookie,
+                TwitterComCookie = "auth_token=foo; ct0=bar",
+                UserId = 11111L,
+                Username = "tetete",
+            };
+            var settingCommon = new SettingCommon();
+            account.Initialize(accountSettings, settingCommon);
+
+            Assert.IsType<TwitterGraphqlQuery>(account.Query);
+        }
     }
 }
