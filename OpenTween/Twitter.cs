@@ -623,16 +623,15 @@ namespace OpenTween
             return Math.Min(count, GetMaxApiResultCount(type));
         }
 
-        public async Task GetHomeTimelineApi(HomeTabModel tab, bool more, bool firstLoad)
+        public async Task<TimelineResponse> GetHomeTimelineApi(int count, IQueryCursor? cursor, bool firstLoad)
         {
             this.CheckAccountState();
 
-            var count = GetApiResultCount(MyCommon.WORKERTYPE.Timeline, more, firstLoad);
-
             TwitterStatus[] statuses;
+            IQueryCursor? cursorTop = null, cursorBottom = null;
+
             if (this.Api.AuthType == APIAuthType.TwitterComCookie)
             {
-                var cursor = more ? tab.CursorBottom : tab.CursorTop;
                 var request = new HomeLatestTimelineRequest
                 {
                     Count = count,
@@ -643,30 +642,36 @@ namespace OpenTween
 
                 statuses = response.ToTwitterStatuses();
 
-                tab.CursorBottom = response.CursorBottom;
-
-                if (!more)
-                    tab.CursorTop = response.CursorTop;
+                cursorTop = response.CursorTop;
+                cursorBottom = response.CursorBottom;
             }
             else
             {
-                var maxId = more ? tab.CursorBottom?.As<TwitterStatusId>() : null;
+                TwitterStatusId? maxId = null, sinceId = null;
 
-                statuses = await this.Api.StatusesHomeTimeline(count, maxId)
+                if (cursor is QueryCursor<TwitterStatusId> statusIdCursor)
+                {
+                    if (statusIdCursor.Type == CursorType.Top)
+                        sinceId = statusIdCursor.Value;
+                    else if (statusIdCursor.Type == CursorType.Bottom)
+                        maxId = statusIdCursor.Value;
+                }
+
+                statuses = await this.Api.StatusesHomeTimeline(count, maxId, sinceId)
                     .ConfigureAwait(false);
 
                 if (statuses.Length > 0)
                 {
-                    var min = statuses.Select(x => new TwitterStatusId(x.IdStr)).Min();
-                    tab.CursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
+                    var (min, max) = statuses.Select(x => new TwitterStatusId(x.IdStr)).MinMax();
+                    cursorTop = new QueryCursor<TwitterStatusId>(CursorType.Top, max);
+                    cursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
                 }
             }
 
             var posts = this.CreatePostsFromJson(statuses, firstLoad);
             posts = this.FilterNoRetweetUserPosts(posts);
 
-            foreach (var post in posts)
-                TabInformations.GetInstance().AddPost(post);
+            return new(posts, cursorTop, cursorBottom);
         }
 
         public async Task GetMentionsTimelineApi(MentionsTabModel tab, bool more, bool firstLoad)
