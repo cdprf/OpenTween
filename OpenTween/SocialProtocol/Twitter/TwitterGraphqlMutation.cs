@@ -21,27 +21,38 @@
 
 #nullable enable
 
-using System;
-using OpenTween.Connection;
+using System.Threading.Tasks;
+using OpenTween.Api.GraphQL;
+using OpenTween.Models;
 
-namespace OpenTween.SocialProtocol
+namespace OpenTween.SocialProtocol.Twitter
 {
-    public interface ISocialAccount : IDisposable
+    public class TwitterGraphqlMutation : ISocialProtocolMutation
     {
-        public Guid UniqueKey { get; }
+        private readonly TwitterAccount account;
 
-        public long UserId { get; }
+        public TwitterGraphqlMutation(TwitterAccount account)
+        {
+            this.account = account;
+        }
 
-        public string UserName { get; }
+        public async Task FavoritePost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+            var request = new FavoriteTweetRequest
+            {
+                TweetId = statusId,
+            };
 
-        public IApiConnection Connection { get; }
+            await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+        }
 
-        public ISocialProtocolQuery Query { get; }
-
-        public ISocialProtocolMutation Mutation { get; }
-
-        public bool IsDisposed { get; }
-
-        public void Initialize(UserAccount accountSettings, SettingCommon settingCommon);
+        private TwitterStatusId AssertTwitterStatusId(PostId postId)
+        {
+            return postId is TwitterStatusId statusId
+                ? statusId
+                : throw new WebApiException($"Not supported type: {postId.GetType()}");
+        }
     }
 }
