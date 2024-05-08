@@ -29,5 +29,7 @@ namespace OpenTween.SocialProtocol
     public interface ISocialProtocolMutation
     {
         public Task FavoritePost(PostId postId);
+
+        public Task UnfavoritePost(PostId postId);
     }
 }

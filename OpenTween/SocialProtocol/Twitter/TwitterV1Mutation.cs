@@ -56,6 +56,15 @@ namespace OpenTween.SocialProtocol.Twitter
             }
         }
 
+        public async Task UnfavoritePost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+
+            await this.account.Legacy.Api.FavoritesDestroy(statusId)
+                .IgnoreResponse()
+                .ConfigureAwait(false);
+        }
+
         private TwitterStatusId AssertTwitterStatusId(PostId postId)
         {
             return postId is TwitterStatusId statusId

@@ -48,6 +48,18 @@ namespace OpenTween.SocialProtocol.Twitter
                 .ConfigureAwait(false);
         }
 
+        public async Task UnfavoritePost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+            var request = new UnfavoriteTweetRequest
+            {
+                TweetId = statusId,
+            };
+
+            await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+        }
+
         private TwitterStatusId AssertTwitterStatusId(PostId postId)
         {
             return postId is TwitterStatusId statusId
