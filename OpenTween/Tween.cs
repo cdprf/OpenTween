@@ -1381,13 +1381,14 @@ namespace OpenTween
 
                 try
                 {
-                    var twitterStatusId = (post.RetweetedId ?? post.StatusId).ToTwitterStatusId();
+                    var originalPostId = post.RetweetedId ?? post.StatusId;
 
-                    await this.tw.PostFavAdd(twitterStatusId)
+                    await this.CurrentTabAccount.Mutation.FavoritePost(originalPostId)
                         .ConfigureAwait(false);
 
                     if (this.settings.Common.RestrictFavCheck)
                     {
+                        var twitterStatusId = originalPostId.ToTwitterStatusId();
                         var status = await this.tw.Api.StatusesShow(twitterStatusId)
                             .ConfigureAwait(false);
 
@@ -1500,11 +1501,12 @@ namespace OpenTween
                     if (!post.IsFav)
                         continue;
 
-                    var twitterStatusId = (post.RetweetedId ?? post.StatusId).ToTwitterStatusId();
-
                     try
                     {
-                        await this.tw.PostFavRemove(twitterStatusId);
+                        var originalPostId = post.RetweetedId ?? post.StatusId;
+
+                        await this.CurrentTabAccount.Mutation.UnfavoritePost(originalPostId)
+                            .ConfigureAwait(false);
                     }
                     catch (WebApiException)
                     {
