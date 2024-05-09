@@ -366,6 +366,31 @@ namespace OpenTween.Api
         }
 
         [Fact]
+        public async Task StatusesUnretweet_Test()
+        {
+            var mock = this.CreateApiConnectionMock<PostRequest>(r =>
+            {
+                Assert.Equal(new("statuses/unretweet.json", UriKind.Relative), r.RequestUri);
+                var expectedQuery = new Dictionary<string, string>
+                {
+                    ["id"] = "100",
+                    ["include_entities"] = "true",
+                    ["include_ext_alt_text"] = "true",
+                    ["tweet_mode"] = "extended",
+                };
+                Assert.Equal(expectedQuery, r.Query);
+            });
+
+            using var twitterApi = new TwitterApi();
+            twitterApi.ApiConnection = mock.Object;
+
+            await twitterApi.StatusesUnretweet(new("100"))
+                .IgnoreResponse();
+
+            mock.VerifyAll();
+        }
+
+        [Fact]
         public async Task SearchTweets_Test()
         {
             var mock = this.CreateApiConnectionMock<GetRequest>(

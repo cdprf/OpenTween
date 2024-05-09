@@ -278,6 +278,26 @@ namespace OpenTween.Api
             return response.ReadAsLazyJson<TwitterStatus>();
         }
 
+        public async Task<LazyJson<TwitterStatus>> StatusesUnretweet(TwitterStatusId statusId)
+        {
+            var request = new PostRequest
+            {
+                RequestUri = new("statuses/unretweet.json", UriKind.Relative),
+                Query = new Dictionary<string, string>
+                {
+                    ["id"] = statusId.Id,
+                    ["include_entities"] = "true",
+                    ["include_ext_alt_text"] = "true",
+                    ["tweet_mode"] = "extended",
+                },
+            };
+
+            using var response = await this.Connection.SendAsync(request)
+                .ConfigureAwait(false);
+
+            return response.ReadAsLazyJson<TwitterStatus>();
+        }
+
         public async Task<TwitterSearchResult> SearchTweets(string query, string? lang = null, int? count = null, TwitterStatusId? maxId = null, TwitterStatusId? sinceId = null)
         {
             var param = new Dictionary<string, string>

@@ -447,7 +447,7 @@ namespace OpenTween
             }
             else
             {
-                await this.Api.StatusesDestroy(post.StatusId.ToTwitterStatusId())
+                await this.Api.StatusesUnretweet(post.RetweetedId.ToTwitterStatusId())
                     .IgnoreResponse();
             }
         }
