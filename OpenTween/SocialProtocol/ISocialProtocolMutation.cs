@@ -31,5 +31,7 @@ namespace OpenTween.SocialProtocol
         public Task FavoritePost(PostId postId);
 
         public Task UnfavoritePost(PostId postId);
+
+        public Task<PostClass?> RetweetPost(PostId postId);
     }
 }

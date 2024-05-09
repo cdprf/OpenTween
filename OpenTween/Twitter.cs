@@ -387,51 +387,6 @@ namespace OpenTween
             dmTab.AddPostQueue(post);
         }
 
-        public async Task<PostClass?> PostRetweet(PostId id)
-        {
-            this.CheckAccountState();
-
-            // データ部分の生成
-            var post = TabInformations.GetInstance()[id];
-            if (post == null)
-                throw new WebApiException("Err:Target isn't found.");
-
-            var target = post.RetweetedId ?? id;  // 再RTの場合は元発言をRT
-
-            if (this.Api.AuthType == APIAuthType.TwitterComCookie)
-            {
-                var request = new CreateRetweetRequest
-                {
-                    TweetId = target.ToTwitterStatusId(),
-                };
-                await request.Send(this.Api.Connection).ConfigureAwait(false);
-                return null;
-            }
-
-            using var response = await this.Api.StatusesRetweet(target.ToTwitterStatusId())
-                .ConfigureAwait(false);
-
-            var status = await response.LoadJsonAsync()
-                .ConfigureAwait(false);
-
-            // 二重取得回避
-            lock (this.lockObj)
-            {
-                var statusId = new TwitterStatusId(status.IdStr);
-                if (TabInformations.GetInstance().ContainsKey(statusId))
-                    return null;
-            }
-
-            // Retweet判定
-            if (status.RetweetedStatus == null)
-                throw new WebApiException("Invalid Json!");
-
-            // Retweetしたものを返す
-            var retweetPost = this.CreatePostsFromStatusData(status, firstLoad: false);
-
-            return retweetPost;
-        }
-
         public async Task DeleteRetweet(PostClass post)
         {
             if (post.RetweetedId == null)
@@ -708,7 +663,7 @@ namespace OpenTween
         private PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad)
             => this.CreatePostsFromStatusData(status, firstLoad, favTweet: false);
 
-        private PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad, bool favTweet)
+        internal PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad, bool favTweet)
         {
             var post = this.postFactory.CreateFromStatus(status, this.UserId, this.Api.AccountState.FollowerIds, firstLoad, favTweet);
             _ = this.urlExpander.Expand(post);

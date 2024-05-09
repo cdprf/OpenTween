@@ -1,5 +1,11 @@
 ﻿// OpenTween - Client of Twitter
-// Copyright (c) 2024 kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
+// Copyright (c) 2007-2011 kiri_feather (@kiri_feather) <kiri.feather@gmail.com>
+//           (c) 2008-2011 Moz (@syo68k)
+//           (c) 2008-2011 takeshik (@takeshik) <http://www.takeshik.org/>
+//           (c) 2010-2011 anis774 (@anis774) <http://d.hatena.ne.jp/anis774/>
+//           (c) 2010-2011 fantasticswallow (@f_swallow) <http://twitter.com/f_swallow>
+//           (c) 2011      Egtra (@egtra) <http://dev.activebasic.com/egtra/>
+//           (c) 2013      kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
 // All rights reserved.
 //
 // This file is part of OpenTween.
@@ -65,11 +71,32 @@ namespace OpenTween.SocialProtocol.Twitter
                 .ConfigureAwait(false);
         }
 
+        public async Task<PostClass?> RetweetPost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+
+            using var response = await this.account.Legacy.Api.StatusesRetweet(statusId)
+                .ConfigureAwait(false);
+
+            var status = await response.LoadJsonAsync()
+                .ConfigureAwait(false);
+
+            // Retweet判定
+            if (status.RetweetedStatus == null)
+                throw new WebApiException("Invalid Json!");
+
+            // Retweetしたものを返す
+            return this.CreatePostFromJson(status);
+        }
+
         private TwitterStatusId AssertTwitterStatusId(PostId postId)
         {
             return postId is TwitterStatusId statusId
                 ? statusId
                 : throw new WebApiException($"Not supported type: {postId.GetType()}");
         }
+
+        private PostClass CreatePostFromJson(TwitterStatus status)
+            => this.account.Legacy.CreatePostsFromStatusData(status, firstLoad: false, favTweet: false);
     }
 }

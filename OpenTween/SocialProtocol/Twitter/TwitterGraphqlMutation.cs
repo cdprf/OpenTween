@@ -1,5 +1,11 @@
 ﻿// OpenTween - Client of Twitter
-// Copyright (c) 2024 kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
+// Copyright (c) 2007-2011 kiri_feather (@kiri_feather) <kiri.feather@gmail.com>
+//           (c) 2008-2011 Moz (@syo68k)
+//           (c) 2008-2011 takeshik (@takeshik) <http://www.takeshik.org/>
+//           (c) 2010-2011 anis774 (@anis774) <http://d.hatena.ne.jp/anis774/>
+//           (c) 2010-2011 fantasticswallow (@f_swallow) <http://twitter.com/f_swallow>
+//           (c) 2011      Egtra (@egtra) <http://dev.activebasic.com/egtra/>
+//           (c) 2013      kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
 // All rights reserved.
 //
 // This file is part of OpenTween.
@@ -58,6 +64,21 @@ namespace OpenTween.SocialProtocol.Twitter
 
             await request.Send(this.account.Connection)
                 .ConfigureAwait(false);
+        }
+
+        public async Task<PostClass?> RetweetPost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+            var request = new CreateRetweetRequest
+            {
+                TweetId = statusId,
+            };
+
+            await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            // graphql のレスポンスには PostClass 生成に必要な情報が不足しているため null を返す
+            return null;
         }
 
         private TwitterStatusId AssertTwitterStatusId(PostId postId)
