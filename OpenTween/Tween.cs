@@ -2313,11 +2313,11 @@ namespace OpenTween
                         }
                         else
                         {
-                            if (post.RetweetedByUserId == primaryUserId)
+                            if (post.RetweetedId != null && post.RetweetedByUserId == primaryUserId)
                             {
                                 // 自分が RT したツイート (自分が RT した自分のツイートも含む)
                                 //   => RT を取り消し
-                                await this.tw.DeleteRetweet(post);
+                                await this.CurrentTabAccount.Mutation.UnretweetPost(post.RetweetedId);
                             }
                             else
                             {

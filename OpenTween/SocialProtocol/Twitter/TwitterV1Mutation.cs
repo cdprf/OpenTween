@@ -89,6 +89,15 @@ namespace OpenTween.SocialProtocol.Twitter
             return this.CreatePostFromJson(status);
         }
 
+        public async Task UnretweetPost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+
+            await this.account.Legacy.Api.StatusesUnretweet(statusId)
+                .IgnoreResponse()
+                .ConfigureAwait(false);
+        }
+
         private TwitterStatusId AssertTwitterStatusId(PostId postId)
         {
             return postId is TwitterStatusId statusId

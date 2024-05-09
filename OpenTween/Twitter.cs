@@ -387,26 +387,6 @@ namespace OpenTween
             dmTab.AddPostQueue(post);
         }
 
-        public async Task DeleteRetweet(PostClass post)
-        {
-            if (post.RetweetedId == null)
-                throw new ArgumentException("post is not retweeted status", nameof(post));
-
-            if (this.Api.AuthType == APIAuthType.TwitterComCookie)
-            {
-                var request = new DeleteRetweetRequest
-                {
-                    SourceTweetId = post.RetweetedId.ToTwitterStatusId(),
-                };
-                await request.Send(this.Api.Connection).ConfigureAwait(false);
-            }
-            else
-            {
-                await this.Api.StatusesUnretweet(post.RetweetedId.ToTwitterStatusId())
-                    .IgnoreResponse();
-            }
-        }
-
         public async Task<TwitterUser> GetUserInfo(string screenName)
         {
             if (this.Api.AuthType == APIAuthType.TwitterComCookie)
