@@ -287,23 +287,6 @@ namespace OpenTween
             return post;
         }
 
-        public async Task DeleteTweet(TwitterStatusId tweetId)
-        {
-            if (this.Api.AuthType == APIAuthType.TwitterComCookie)
-            {
-                var request = new DeleteTweetRequest
-                {
-                    TweetId = tweetId,
-                };
-                await request.Send(this.Api.Connection);
-            }
-            else
-            {
-                await this.Api.StatusesDestroy(tweetId)
-                    .IgnoreResponse();
-            }
-        }
-
         public async Task<long> UploadMedia(IMediaItem item, string? mediaCategory = null)
         {
             this.CheckAccountState();
@@ -385,71 +368,6 @@ namespace OpenTween
 
             var dmTab = TabInformations.GetInstance().DirectMessageTab;
             dmTab.AddPostQueue(post);
-        }
-
-        public async Task<PostClass?> PostRetweet(PostId id)
-        {
-            this.CheckAccountState();
-
-            // データ部分の生成
-            var post = TabInformations.GetInstance()[id];
-            if (post == null)
-                throw new WebApiException("Err:Target isn't found.");
-
-            var target = post.RetweetedId ?? id;  // 再RTの場合は元発言をRT
-
-            if (this.Api.AuthType == APIAuthType.TwitterComCookie)
-            {
-                var request = new CreateRetweetRequest
-                {
-                    TweetId = target.ToTwitterStatusId(),
-                };
-                await request.Send(this.Api.Connection).ConfigureAwait(false);
-                return null;
-            }
-
-            using var response = await this.Api.StatusesRetweet(target.ToTwitterStatusId())
-                .ConfigureAwait(false);
-
-            var status = await response.LoadJsonAsync()
-                .ConfigureAwait(false);
-
-            // 二重取得回避
-            lock (this.lockObj)
-            {
-                var statusId = new TwitterStatusId(status.IdStr);
-                if (TabInformations.GetInstance().ContainsKey(statusId))
-                    return null;
-            }
-
-            // Retweet判定
-            if (status.RetweetedStatus == null)
-                throw new WebApiException("Invalid Json!");
-
-            // Retweetしたものを返す
-            var retweetPost = this.CreatePostsFromStatusData(status, firstLoad: false);
-
-            return retweetPost;
-        }
-
-        public async Task DeleteRetweet(PostClass post)
-        {
-            if (post.RetweetedId == null)
-                throw new ArgumentException("post is not retweeted status", nameof(post));
-
-            if (this.Api.AuthType == APIAuthType.TwitterComCookie)
-            {
-                var request = new DeleteRetweetRequest
-                {
-                    SourceTweetId = post.RetweetedId.ToTwitterStatusId(),
-                };
-                await request.Send(this.Api.Connection).ConfigureAwait(false);
-            }
-            else
-            {
-                await this.Api.StatusesDestroy(post.StatusId.ToTwitterStatusId())
-                    .IgnoreResponse();
-            }
         }
 
         public async Task<TwitterUser> GetUserInfo(string screenName)
@@ -708,7 +626,7 @@ namespace OpenTween
         private PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad)
             => this.CreatePostsFromStatusData(status, firstLoad, favTweet: false);
 
-        private PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad, bool favTweet)
+        internal PostClass CreatePostsFromStatusData(TwitterStatus status, bool firstLoad, bool favTweet)
         {
             var post = this.postFactory.CreateFromStatus(status, this.UserId, this.Api.AccountState.FollowerIds, firstLoad, favTweet);
             _ = this.urlExpander.Expand(post);

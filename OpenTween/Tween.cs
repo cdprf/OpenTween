@@ -1712,7 +1712,7 @@ namespace OpenTween
                 await this.RefreshTabAsync<HomeTabModel>();
         }
 
-        private async Task RetweetAsync(IReadOnlyList<PostId> statusIds)
+        private async Task RetweetAsync(IReadOnlyList<PostClass> posts)
         {
             await this.workerSemaphore.WaitAsync();
 
@@ -1721,7 +1721,7 @@ namespace OpenTween
                 var progress = new Progress<string>(x => this.StatusLabel.Text = x);
 
                 this.RefreshTasktrayIcon();
-                await this.RetweetAsyncInternal(progress, this.workerCts.Token, statusIds);
+                await this.RetweetAsyncInternal(progress, this.workerCts.Token, posts);
             }
             catch (WebApiException ex)
             {
@@ -1734,7 +1734,7 @@ namespace OpenTween
             }
         }
 
-        private async Task RetweetAsyncInternal(IProgress<string> p, CancellationToken ct, IReadOnlyList<PostId> statusIds)
+        private async Task RetweetAsyncInternal(IProgress<string> p, CancellationToken ct, IReadOnlyList<PostClass> posts)
         {
             if (ct.IsCancellationRequested)
                 return;
@@ -1744,14 +1744,19 @@ namespace OpenTween
 
             p.Report("Posting...");
 
-            var posts = new List<PostClass>();
+            var retweetedPosts = new List<PostClass>();
 
             await Task.Run(async () =>
             {
-                foreach (var statusId in statusIds)
+                foreach (var post in posts)
                 {
-                    var post = await this.tw.PostRetweet(statusId).ConfigureAwait(false);
-                    if (post != null) posts.Add(post);
+                    var statusId = post.RetweetedId ?? post.StatusId;
+
+                    var retweetedPost = await this.CurrentTabAccount.Mutation.RetweetPost(statusId)
+                        .ConfigureAwait(false);
+
+                    if (retweetedPost != null)
+                        retweetedPosts.Add(retweetedPost);
                 }
             });
 
@@ -1771,7 +1776,7 @@ namespace OpenTween
 
             // 自分のRTはTLの更新では取得できない場合があるので、
             // 投稿時取得の有無に関わらず追加しておく
-            posts.ForEach(post => this.statuses.AddPost(post));
+            retweetedPosts.ForEach(post => this.statuses.AddPost(post));
 
             if (this.settings.Common.PostAndGet)
             {
@@ -2308,11 +2313,11 @@ namespace OpenTween
                         }
                         else
                         {
-                            if (post.RetweetedByUserId == primaryUserId)
+                            if (post.RetweetedId != null && post.RetweetedByUserId == primaryUserId)
                             {
                                 // 自分が RT したツイート (自分が RT した自分のツイートも含む)
                                 //   => RT を取り消し
-                                await this.tw.DeleteRetweet(post);
+                                await this.CurrentTabAccount.Mutation.UnretweetPost(post.RetweetedId);
                             }
                             else
                             {
@@ -2322,13 +2327,13 @@ namespace OpenTween
                                     {
                                         // 他人に RT された自分のツイート
                                         //   => RT 元の自分のツイートを削除
-                                        await this.tw.DeleteTweet(post.RetweetedId.ToTwitterStatusId());
+                                        await this.CurrentTabAccount.Mutation.DeletePost(post.RetweetedId);
                                     }
                                     else
                                     {
                                         // 自分のツイート
                                         //   => ツイートを削除
-                                        await this.tw.DeleteTweet(post.StatusId.ToTwitterStatusId());
+                                        await this.CurrentTabAccount.Mutation.DeletePost(post.StatusId);
                                     }
                                 }
                             }
@@ -7938,9 +7943,7 @@ namespace OpenTween
                     }
                 }
 
-                var statusIds = selectedPosts.Select(x => x.StatusId).ToList();
-
-                await this.RetweetAsync(statusIds);
+                await this.RetweetAsync(selectedPosts);
             }
         }
 
