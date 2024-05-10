@@ -219,14 +219,10 @@ namespace OpenTween
             this.Api.AccountState.UpdateFromUser(user);
         }
 
-        public void Initialize(ITwitterCredential credential, TwitterAccountState accountState)
+        public void Initialize(TwitterApiConnection apiConnection, TwitterAccountState accountState)
         {
-            // OAuth認証
-            if (credential is TwitterCredentialNone)
-                this.Api.AccountState.HasUnrecoverableError = true;
-
             this.ResetApiStatus();
-            this.Api.Initialize(credential, accountState);
+            this.Api.Initialize(apiConnection, accountState);
         }
 
         public async Task<PostClass?> PostStatus(PostStatusParams param)

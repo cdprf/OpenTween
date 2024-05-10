@@ -48,21 +48,17 @@ namespace OpenTween.Api
 
         internal IApiConnection ApiConnection;
 
-        public APIAuthType AuthType { get; private set; } = APIAuthType.None;
+        public APIAuthType AuthType
+            => ((TwitterApiConnection)this.ApiConnection).Credential.AuthType;
 
         public TwitterAccountState AccountState { get; private set; } = new();
 
         public TwitterApi()
             => this.ApiConnection = new TwitterApiConnection();
 
-        public void Initialize(ITwitterCredential credential, TwitterAccountState accountState)
+        public void Initialize(IApiConnection apiConnection, TwitterAccountState accountState)
         {
-            this.AuthType = credential.AuthType;
-
-            var newInstance = new TwitterApiConnection(credential, accountState);
-            var oldInstance = Interlocked.Exchange(ref this.ApiConnection, newInstance);
-            oldInstance?.Dispose();
-
+            this.ApiConnection = apiConnection;
             this.AccountState = accountState;
         }
 

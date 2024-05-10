@@ -50,7 +50,7 @@ namespace OpenTween.SocialProtocol.Twitter
                 TweetId = statusId,
             };
 
-            await request.Send(this.account.Legacy.Api.Connection)
+            await request.Send(this.account.Connection)
                 .ConfigureAwait(false);
         }
 

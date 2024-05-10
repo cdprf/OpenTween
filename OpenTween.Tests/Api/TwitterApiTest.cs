@@ -54,27 +54,24 @@ namespace OpenTween.Api
         public void Initialize_Test()
         {
             using var twitterApi = new TwitterApi();
-            var apiConnection = Assert.IsType<TwitterApiConnection>(twitterApi.Connection);
-            Assert.IsType<TwitterCredentialNone>(apiConnection.Credential);
+            var apiConnectionNone = Assert.IsType<TwitterApiConnection>(twitterApi.Connection);
+            Assert.IsType<TwitterCredentialNone>(apiConnectionNone.Credential);
 
             var credential = new TwitterCredentialOAuth1(TwitterAppToken.GetDefault(), "*** AccessToken ***", "*** AccessSecret ***");
             var accountState = new TwitterAccountState(100L, "hogehoge");
-            twitterApi.Initialize(credential, accountState);
+            using var apiConnection = new TwitterApiConnection(credential, accountState);
+            twitterApi.Initialize(apiConnection, accountState);
 
-            apiConnection = Assert.IsType<TwitterApiConnection>(twitterApi.Connection);
-            Assert.Same(credential, apiConnection.Credential);
+            Assert.Same(apiConnection, twitterApi.Connection);
             Assert.Same(accountState, twitterApi.AccountState);
 
             // 複数回 Initialize を実行した場合は新たに TwitterApiConnection が生成される
             var credential2 = new TwitterCredentialOAuth1(TwitterAppToken.GetDefault(), "*** AccessToken2 ***", "*** AccessSecret2 ***");
             var accountState2 = new TwitterAccountState(200L, "foobar");
-            twitterApi.Initialize(credential2, accountState2);
+            using var apiConnection2 = new TwitterApiConnection(credential2, accountState2);
+            twitterApi.Initialize(apiConnection2, accountState2);
 
-            var oldApiConnection = apiConnection;
-            Assert.True(oldApiConnection.IsDisposed);
-
-            apiConnection = Assert.IsType<TwitterApiConnection>(twitterApi.Connection);
-            Assert.Same(credential2, apiConnection.Credential);
+            Assert.Same(apiConnection2, twitterApi.Connection);
             Assert.Same(accountState2, twitterApi.AccountState);
         }
 
