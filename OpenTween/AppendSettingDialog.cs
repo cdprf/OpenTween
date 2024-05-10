@@ -188,7 +188,8 @@ namespace OpenTween
                         };
 
                         using var twitterApi = new TwitterApi();
-                        twitterApi.Initialize(new TwitterCredentialCookie(appToken), new());
+                        using var apiConnection = new TwitterApiConnection(new TwitterCredentialCookie(appToken), new());
+                        twitterApi.Initialize(apiConnection);
                         var twitterUser = await twitterApi.AccountVerifyCredentials();
                         newAccount.UserId = twitterUser.Id;
                         newAccount.Username = twitterUser.ScreenName;

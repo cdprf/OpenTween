@@ -1259,22 +1259,22 @@ namespace OpenTween
             this.BringToFront();
         }
 
-        private static int errorCount = 0;
+        private int errorCount = 0;
 
-        private static bool CheckAccountValid()
+        private bool CheckAccountValid()
         {
-            if (Twitter.AccountState != MyCommon.ACCOUNT_STATE.Valid)
+            if (this.tw.AccountState.HasUnrecoverableError)
             {
-                errorCount += 1;
-                if (errorCount > 5)
+                this.errorCount += 1;
+                if (this.errorCount > 5)
                 {
-                    errorCount = 0;
-                    Twitter.AccountState = MyCommon.ACCOUNT_STATE.Valid;
+                    this.errorCount = 0;
+                    this.tw.AccountState.HasUnrecoverableError = false;
                     return true;
                 }
                 return false;
             }
-            errorCount = 0;
+            this.errorCount = 0;
             return true;
         }
 
@@ -1366,7 +1366,7 @@ namespace OpenTween
             if (ct.IsCancellationRequested)
                 return;
 
-            if (!CheckAccountValid())
+            if (!this.CheckAccountValid())
                 throw new WebApiException("Auth error. Check your account");
 
             if (!tab.Posts.TryGetValue(statusId, out var post))
@@ -1480,7 +1480,7 @@ namespace OpenTween
             if (ct.IsCancellationRequested)
                 return;
 
-            if (!CheckAccountValid())
+            if (!this.CheckAccountValid())
                 throw new WebApiException("Auth error. Check your account");
 
             var successIds = new List<PostId>();
@@ -1598,7 +1598,7 @@ namespace OpenTween
             if (ct.IsCancellationRequested)
                 return;
 
-            if (!CheckAccountValid())
+            if (!this.CheckAccountValid())
                 throw new WebApiException("Auth error. Check your account");
 
             p.Report("Posting...");
@@ -1739,7 +1739,7 @@ namespace OpenTween
             if (ct.IsCancellationRequested)
                 return;
 
-            if (!CheckAccountValid())
+            if (!this.CheckAccountValid())
                 throw new WebApiException("Auth error. Check your account");
 
             p.Report("Posting...");
@@ -2678,7 +2678,7 @@ namespace OpenTween
                 }
             }
 
-            Twitter.AccountState = MyCommon.ACCOUNT_STATE.Valid;
+            this.tw.AccountState.HasUnrecoverableError = false;
 
             this.TopMost = this.settings.Common.AlwaysTop;
             this.SaveConfigsAll(false);
@@ -8538,7 +8538,7 @@ namespace OpenTween
 
         public void ListManageUserContext(string screenName)
         {
-            using var listSelectForm = new MyLists(screenName, this.tw.Api);
+            using var listSelectForm = new MyLists(screenName, this.tw);
             listSelectForm.ShowDialog(this);
         }
 
@@ -8817,7 +8817,7 @@ namespace OpenTween
 
         private async Task DoShowUserStatus(TwitterUser user)
         {
-            using var userDialog = new UserInfoDialog(this, this.tw.Api, this.detailsHtmlBuilder);
+            using var userDialog = new UserInfoDialog(this, this.tw, this.detailsHtmlBuilder);
             var showUserTask = userDialog.ShowUserAsync(user);
             userDialog.ShowDialog(this);
 

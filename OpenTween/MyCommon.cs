@@ -191,12 +191,6 @@ namespace OpenTween
         public static bool DebugBuild = false;
 #endif
 
-        public enum ACCOUNT_STATE
-        {
-            Valid,
-            Invalid,
-        }
-
         public enum REPLY_ICONSTATE
         {
             None,

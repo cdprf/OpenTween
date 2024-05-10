@@ -30,6 +30,7 @@ namespace OpenTween.SocialProtocol.Twitter
     public class TwitterAccount : ISocialAccount
     {
         private readonly OpenTween.Twitter twLegacy = new(new());
+        private TwitterApiConnection apiConnection = new();
 
         public Guid UniqueKey { get; }
 
@@ -54,7 +55,7 @@ namespace OpenTween.SocialProtocol.Twitter
             => this.Legacy.Api.AuthType;
 
         public IApiConnection Connection
-            => this.Legacy.Api.Connection;
+            => this.apiConnection;
 
         public TwitterAccount(Guid uniqueKey)
         {
@@ -68,11 +69,20 @@ namespace OpenTween.SocialProtocol.Twitter
             Debug.Assert(accountSettings.UniqueKey == this.UniqueKey, "UniqueKey must be same as current value.");
 
             var credential = accountSettings.GetTwitterCredential();
-            this.AccountState = new TwitterAccountState(accountSettings.UserId, accountSettings.Username);
+
+            this.AccountState = new TwitterAccountState(accountSettings.UserId, accountSettings.Username)
+            {
+                HasUnrecoverableError = credential is TwitterCredentialNone,
+            };
+
+            var newConnection = new TwitterApiConnection(credential, this.AccountState);
+            (this.apiConnection, var oldConnection) = (newConnection, this.apiConnection);
+            oldConnection.Dispose();
+
             this.Query = this.CreateQueryInstance(credential.AuthType);
             this.Mutation = this.CreateMutationInstance(credential.AuthType);
 
-            this.twLegacy.Initialize(credential, this.AccountState);
+            this.twLegacy.Initialize(newConnection, this.AccountState);
             this.twLegacy.RestrictFavCheck = settingCommon.RestrictFavCheck;
         }
 
