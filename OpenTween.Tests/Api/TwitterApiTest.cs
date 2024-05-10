@@ -32,7 +32,6 @@ using System.Threading.Tasks;
 using Moq;
 using OpenTween.Api.DataModel;
 using OpenTween.Connection;
-using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 
 namespace OpenTween.Api
@@ -58,21 +57,17 @@ namespace OpenTween.Api
             Assert.IsType<TwitterCredentialNone>(apiConnectionNone.Credential);
 
             var credential = new TwitterCredentialOAuth1(TwitterAppToken.GetDefault(), "*** AccessToken ***", "*** AccessSecret ***");
-            var accountState = new TwitterAccountState(100L, "hogehoge");
-            using var apiConnection = new TwitterApiConnection(credential, accountState);
-            twitterApi.Initialize(apiConnection, accountState);
+            using var apiConnection = new TwitterApiConnection(credential, new());
+            twitterApi.Initialize(apiConnection);
 
             Assert.Same(apiConnection, twitterApi.Connection);
-            Assert.Same(accountState, twitterApi.AccountState);
 
             // 複数回 Initialize を実行した場合は新たに TwitterApiConnection が生成される
             var credential2 = new TwitterCredentialOAuth1(TwitterAppToken.GetDefault(), "*** AccessToken2 ***", "*** AccessSecret2 ***");
-            var accountState2 = new TwitterAccountState(200L, "foobar");
-            using var apiConnection2 = new TwitterApiConnection(credential2, accountState2);
-            twitterApi.Initialize(apiConnection2, accountState2);
+            using var apiConnection2 = new TwitterApiConnection(credential2, new());
+            twitterApi.Initialize(apiConnection2);
 
             Assert.Same(apiConnection2, twitterApi.Connection);
-            Assert.Same(accountState2, twitterApi.AccountState);
         }
 
         private Mock<IApiConnection> CreateApiConnectionMock<T>(Action<T> verifyRequest)

@@ -204,7 +204,7 @@ namespace OpenTween
             if (this.tw == null || !this.tw.AccessLevel.HasFlag(TwitterApiAccessLevel.DirectMessage))
                 return false;
 
-            if (this.tw.Api.AccountState.HasUnrecoverableError)
+            if (this.tw.AccountState.HasUnrecoverableError)
                 return false;
 
             return true;

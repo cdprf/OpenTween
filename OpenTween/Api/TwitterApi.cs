@@ -32,18 +32,11 @@ using System.Threading.Tasks;
 using OpenTween.Api.DataModel;
 using OpenTween.Connection;
 using OpenTween.Models;
-using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Api
 {
     public sealed class TwitterApi : IDisposable
     {
-        public long CurrentUserId
-            => this.AccountState.UserId;
-
-        public string CurrentScreenName
-            => this.AccountState.UserName;
-
         public IApiConnection Connection => this.ApiConnection;
 
         internal IApiConnection ApiConnection;
@@ -51,15 +44,12 @@ namespace OpenTween.Api
         public APIAuthType AuthType
             => ((TwitterApiConnection)this.ApiConnection).Credential.AuthType;
 
-        public TwitterAccountState AccountState { get; private set; } = new();
-
         public TwitterApi()
             => this.ApiConnection = new TwitterApiConnection();
 
-        public void Initialize(IApiConnection apiConnection, TwitterAccountState accountState)
+        public void Initialize(IApiConnection apiConnection)
         {
             this.ApiConnection = apiConnection;
-            this.AccountState = accountState;
         }
 
         public async Task<TwitterStatus[]> StatusesHomeTimeline(int? count = null, TwitterStatusId? maxId = null, TwitterStatusId? sinceId = null)
