@@ -195,7 +195,7 @@ namespace OpenTween
 
         public void ClearAuthInfo()
         {
-            Twitter.AccountState = MyCommon.ACCOUNT_STATE.Invalid;
+            this.Api.AccountState.HasUnrecoverableError = true;
             this.ResetApiStatus();
         }
 
@@ -223,7 +223,7 @@ namespace OpenTween
         {
             // OAuth認証
             if (credential is TwitterCredentialNone)
-                Twitter.AccountState = MyCommon.ACCOUNT_STATE.Invalid;
+                this.Api.AccountState.HasUnrecoverableError = true;
 
             this.ResetApiStatus();
             this.Api.Initialize(credential, accountState);
@@ -397,8 +397,6 @@ namespace OpenTween
 
         public long UserId
             => this.Api.CurrentUserId;
-
-        public static MyCommon.ACCOUNT_STATE AccountState { get; set; } = MyCommon.ACCOUNT_STATE.Valid;
 
         public bool RestrictFavCheck { get; set; }
 
@@ -1209,7 +1207,8 @@ namespace OpenTween
 
         public async Task<TwitterApiStatus?> GetInfoApi()
         {
-            if (Twitter.AccountState != MyCommon.ACCOUNT_STATE.Valid) return null;
+            if (this.Api.AccountState.HasUnrecoverableError)
+                return null;
 
             if (MyCommon.EndingFlag) return null;
 
@@ -1266,7 +1265,7 @@ namespace OpenTween
 
         internal void CheckAccountState()
         {
-            if (Twitter.AccountState != MyCommon.ACCOUNT_STATE.Valid)
+            if (this.Api.AccountState.HasUnrecoverableError)
                 throw new WebApiException("Auth error. Check your account");
         }
 

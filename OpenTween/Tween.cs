@@ -1263,13 +1263,13 @@ namespace OpenTween
 
         private bool CheckAccountValid()
         {
-            if (Twitter.AccountState != MyCommon.ACCOUNT_STATE.Valid)
+            if (this.tw.Api.AccountState.HasUnrecoverableError)
             {
                 this.errorCount += 1;
                 if (this.errorCount > 5)
                 {
                     this.errorCount = 0;
-                    Twitter.AccountState = MyCommon.ACCOUNT_STATE.Valid;
+                    this.tw.Api.AccountState.HasUnrecoverableError = false;
                     return true;
                 }
                 return false;
@@ -2678,7 +2678,7 @@ namespace OpenTween
                 }
             }
 
-            Twitter.AccountState = MyCommon.ACCOUNT_STATE.Valid;
+            this.tw.Api.AccountState.HasUnrecoverableError = false;
 
             this.TopMost = this.settings.Common.AlwaysTop;
             this.SaveConfigsAll(false);

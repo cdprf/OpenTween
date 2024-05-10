@@ -53,13 +53,13 @@ namespace OpenTween.Api
         public TwitterAccountState AccountState { get; private set; } = new();
 
         public TwitterApi()
-            => this.ApiConnection = new TwitterApiConnection(new TwitterCredentialNone());
+            => this.ApiConnection = new TwitterApiConnection();
 
         public void Initialize(ITwitterCredential credential, TwitterAccountState accountState)
         {
             this.AuthType = credential.AuthType;
 
-            var newInstance = new TwitterApiConnection(credential);
+            var newInstance = new TwitterApiConnection(credential, accountState);
             var oldInstance = Interlocked.Exchange(ref this.ApiConnection, newInstance);
             oldInstance?.Dispose();
 
