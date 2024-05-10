@@ -287,23 +287,6 @@ namespace OpenTween
             return post;
         }
 
-        public async Task DeleteTweet(TwitterStatusId tweetId)
-        {
-            if (this.Api.AuthType == APIAuthType.TwitterComCookie)
-            {
-                var request = new DeleteTweetRequest
-                {
-                    TweetId = tweetId,
-                };
-                await request.Send(this.Api.Connection);
-            }
-            else
-            {
-                await this.Api.StatusesDestroy(tweetId)
-                    .IgnoreResponse();
-            }
-        }
-
         public async Task<long> UploadMedia(IMediaItem item, string? mediaCategory = null)
         {
             this.CheckAccountState();

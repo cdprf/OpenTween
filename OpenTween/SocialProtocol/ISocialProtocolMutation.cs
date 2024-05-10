@@ -28,6 +28,8 @@ namespace OpenTween.SocialProtocol
 {
     public interface ISocialProtocolMutation
     {
+        public Task DeletePost(PostId postId);
+
         public Task FavoritePost(PostId postId);
 
         public Task UnfavoritePost(PostId postId);

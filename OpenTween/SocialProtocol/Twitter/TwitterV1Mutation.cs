@@ -45,6 +45,14 @@ namespace OpenTween.SocialProtocol.Twitter
             this.account = account;
         }
 
+        public async Task DeletePost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+
+            await this.account.Legacy.Api.StatusesDestroy(statusId)
+                .IgnoreResponse();
+        }
+
         public async Task FavoritePost(PostId postId)
         {
             var statusId = this.AssertTwitterStatusId(postId);

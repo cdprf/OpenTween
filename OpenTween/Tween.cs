@@ -2327,13 +2327,13 @@ namespace OpenTween
                                     {
                                         // 他人に RT された自分のツイート
                                         //   => RT 元の自分のツイートを削除
-                                        await this.tw.DeleteTweet(post.RetweetedId.ToTwitterStatusId());
+                                        await this.CurrentTabAccount.Mutation.DeletePost(post.RetweetedId);
                                     }
                                     else
                                     {
                                         // 自分のツイート
                                         //   => ツイートを削除
-                                        await this.tw.DeleteTweet(post.StatusId.ToTwitterStatusId());
+                                        await this.CurrentTabAccount.Mutation.DeletePost(post.StatusId);
                                     }
                                 }
                             }
