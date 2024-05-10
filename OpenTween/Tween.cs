@@ -8538,7 +8538,7 @@ namespace OpenTween
 
         public void ListManageUserContext(string screenName)
         {
-            using var listSelectForm = new MyLists(screenName, this.tw.Api);
+            using var listSelectForm = new MyLists(screenName, this.tw);
             listSelectForm.ShowDialog(this);
         }
 
@@ -8817,7 +8817,7 @@ namespace OpenTween
 
         private async Task DoShowUserStatus(TwitterUser user)
         {
-            using var userDialog = new UserInfoDialog(this, this.tw.Api, this.detailsHtmlBuilder);
+            using var userDialog = new UserInfoDialog(this, this.tw, this.detailsHtmlBuilder);
             var showUserTask = userDialog.ShowUserAsync(user);
             userDialog.ShowDialog(this);
 

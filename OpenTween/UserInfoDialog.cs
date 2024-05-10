@@ -54,13 +54,13 @@ namespace OpenTween
         private CancellationTokenSource? cancellationTokenSource = null;
 
         private readonly TweenMain mainForm;
-        private readonly TwitterApi twitterApi;
+        private readonly Twitter twitter;
         private readonly DetailsHtmlBuilder detailsHtmlBuilder;
 
-        public UserInfoDialog(TweenMain mainForm, TwitterApi twitterApi, DetailsHtmlBuilder detailsHtmlBuilder)
+        public UserInfoDialog(TweenMain mainForm, Twitter twitter, DetailsHtmlBuilder detailsHtmlBuilder)
         {
             this.mainForm = mainForm;
-            this.twitterApi = twitterApi;
+            this.twitter = twitter;
             this.detailsHtmlBuilder = detailsHtmlBuilder;
 
             this.InitializeComponent();
@@ -138,7 +138,7 @@ namespace OpenTween
             this.LinkLabelTweet.Tag = profileUrl;
             this.ToolTip1.SetToolTip(this.LinkLabelTweet, profileUrl);
 
-            if (this.twitterApi.CurrentUserId == user.Id)
+            if (this.twitter.UserId == user.Id)
             {
                 this.ButtonEdit.Enabled = true;
                 this.ChangeIconToolStripMenuItem.Enabled = true;
@@ -288,13 +288,13 @@ namespace OpenTween
             this.ButtonFollow.Enabled = false;
             this.ButtonUnFollow.Enabled = false;
 
-            if (this.twitterApi.CurrentScreenName == screenName)
+            if (this.twitter.Username == screenName)
                 return;
 
             TwitterFriendship friendship;
             try
             {
-                friendship = await this.twitterApi.FriendshipsShow(this.twitterApi.CurrentScreenName, screenName);
+                friendship = await this.twitter.Api.FriendshipsShow(this.twitter.Username, screenName);
             }
             catch (WebApiException)
             {
@@ -363,7 +363,7 @@ namespace OpenTween
             {
                 try
                 {
-                    await this.twitterApi.FriendshipsCreate(this.displayUser.ScreenName)
+                    await this.twitter.Api.FriendshipsCreate(this.displayUser.ScreenName)
                         .IgnoreResponse();
                 }
                 catch (WebApiException ex)
@@ -392,7 +392,7 @@ namespace OpenTween
                 {
                     try
                     {
-                        await this.twitterApi.FriendshipsDestroy(this.displayUser.ScreenName)
+                        await this.twitter.Api.FriendshipsDestroy(this.displayUser.ScreenName)
                             .IgnoreResponse();
                     }
                     catch (WebApiException ex)
@@ -484,7 +484,7 @@ namespace OpenTween
         private async void ButtonEdit_Click(object sender, EventArgs e)
         {
             // 自分以外のプロフィールは変更できない
-            if (this.twitterApi.CurrentUserId != this.displayUser.Id)
+            if (this.twitter.UserId != this.displayUser.Id)
                 return;
 
             using (ControlTransaction.Disabled(this.ButtonEdit))
@@ -530,7 +530,7 @@ namespace OpenTween
                     {
                         try
                         {
-                            using var response = await this.twitterApi.AccountUpdateProfile(
+                            using var response = await this.twitter.Api.AccountUpdateProfile(
                                 this.TextBoxName.Text,
                                 this.TextBoxWeb.Text,
                                 this.TextBoxLocation.Text,
@@ -578,7 +578,7 @@ namespace OpenTween
             {
                 var mediaItem = new FileMediaItem(filename);
 
-                await this.twitterApi.AccountUpdateProfileImage(mediaItem)
+                await this.twitter.Api.AccountUpdateProfileImage(mediaItem)
                     .IgnoreResponse();
             }
             catch (WebApiException ex)
@@ -591,7 +591,7 @@ namespace OpenTween
 
             try
             {
-                var user = await this.twitterApi.UsersShow(this.displayUser.ScreenName);
+                var user = await this.twitter.Api.UsersShow(this.displayUser.ScreenName);
 
                 if (user != null)
                     await this.ShowUserAsync(user);
@@ -639,7 +639,7 @@ namespace OpenTween
                 {
                     try
                     {
-                        await this.twitterApi.BlocksCreate(this.displayUser.ScreenName)
+                        await this.twitter.Api.BlocksCreate(this.displayUser.ScreenName)
                             .IgnoreResponse();
                     }
                     catch (WebApiException ex)
@@ -666,7 +666,7 @@ namespace OpenTween
                 {
                     try
                     {
-                        await this.twitterApi.UsersReportSpam(this.displayUser.ScreenName)
+                        await this.twitter.Api.UsersReportSpam(this.displayUser.ScreenName)
                             .IgnoreResponse();
                     }
                     catch (WebApiException ex)
@@ -693,7 +693,7 @@ namespace OpenTween
                 {
                     try
                     {
-                        await this.twitterApi.BlocksDestroy(this.displayUser.ScreenName)
+                        await this.twitter.Api.BlocksDestroy(this.displayUser.ScreenName)
                             .IgnoreResponse();
                     }
                     catch (WebApiException ex)
