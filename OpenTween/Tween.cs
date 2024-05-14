@@ -5134,7 +5134,7 @@ namespace OpenTween
             {
                 try
                 {
-                    var post = await this.tw.GetStatusApi(currentPost.StatusId.ToTwitterStatusId());
+                    var post = await this.CurrentTabAccount.Client.GetPostById(currentPost.StatusId, firstLoad: false);
 
                     currentPost = currentPost with
                     {
@@ -5182,7 +5182,7 @@ namespace OpenTween
                 {
                     await Task.Run(async () =>
                     {
-                        var post = await this.tw.GetStatusApi(currentPost.InReplyToStatusId.ToTwitterStatusId())
+                        var post = await this.CurrentTabAccount.Client.GetPostById(currentPost.InReplyToStatusId, firstLoad: false)
                             .ConfigureAwait(false);
 
                         this.statuses.AddPost(post);
@@ -9062,7 +9062,7 @@ namespace OpenTween
             {
                 try
                 {
-                    post = await this.tw.GetStatusApi(statusId.ToTwitterStatusId());
+                    post = await this.CurrentTabAccount.Client.GetPostById(statusId, firstLoad: false);
                 }
                 catch (WebApiException ex)
                 {

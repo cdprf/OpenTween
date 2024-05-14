@@ -28,6 +28,8 @@ namespace OpenTween.SocialProtocol
 {
     public interface ISocialProtocolClient
     {
+        public Task<PostClass> GetPostById(PostId postId, bool firstLoad);
+
         public Task<TimelineResponse> GetHomeTimeline(int count, IQueryCursor? cursor, bool firstLoad);
 
         public Task DeletePost(PostId postId);

@@ -27,6 +27,7 @@
 
 #nullable enable
 
+using System.Linq;
 using System.Threading.Tasks;
 using OpenTween.Api.GraphQL;
 using OpenTween.Models;
@@ -40,6 +41,28 @@ namespace OpenTween.SocialProtocol.Twitter
         public TwitterGraphqlClient(TwitterAccount account)
         {
             this.account = account;
+        }
+
+        public async Task<PostClass> GetPostById(PostId postId, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+
+            var statusId = this.AssertTwitterStatusId(postId);
+            var request = new TweetDetailRequest
+            {
+                FocalTweetId = statusId,
+            };
+
+            var tweets = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            var status = tweets.Select(x => x.ToTwitterStatus())
+                .Where(x => x.IdStr == statusId.Id)
+                .FirstOrDefault() ?? throw new WebApiException("Empty result set");
+
+            var post = this.account.Legacy.CreatePostsFromStatusData(status, firstLoad, favTweet: false);
+
+            return post;
         }
 
         public async Task<TimelineResponse> GetHomeTimeline(int count, IQueryCursor? cursor, bool firstLoad)

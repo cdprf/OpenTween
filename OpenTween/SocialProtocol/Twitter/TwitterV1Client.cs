@@ -45,6 +45,19 @@ namespace OpenTween.SocialProtocol.Twitter
             this.account = account;
         }
 
+        public async Task<PostClass> GetPostById(PostId postId, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+
+            var statusId = this.AssertTwitterStatusId(postId);
+            var status = await this.account.Legacy.Api.StatusesShow(statusId)
+                .ConfigureAwait(false);
+
+            var post = this.account.Legacy.CreatePostsFromStatusData(status, firstLoad, favTweet: false);
+
+            return post;
+        }
+
         public async Task<TimelineResponse> GetHomeTimeline(int count, IQueryCursor? cursor, bool firstLoad)
         {
             this.account.Legacy.CheckAccountState();

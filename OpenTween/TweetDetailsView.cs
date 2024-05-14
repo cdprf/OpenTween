@@ -363,8 +363,7 @@ namespace OpenTween
             {
                 try
                 {
-                    var twitterAccount = (SocialProtocol.Twitter.TwitterAccount)this.Owner.CurrentTabAccount;
-                    post = await twitterAccount.Legacy.GetStatusApi(statusId.ToTwitterStatusId())
+                    post = await this.Owner.CurrentTabAccount.Client.GetPostById(statusId, firstLoad: false)
                         .ConfigureAwait(false);
                 }
                 catch (WebApiException ex)
