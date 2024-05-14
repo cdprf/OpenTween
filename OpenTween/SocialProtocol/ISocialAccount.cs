@@ -28,6 +28,8 @@ namespace OpenTween.SocialProtocol
 {
     public interface ISocialAccount : IDisposable
     {
+        public string AccountType { get; }
+
         public Guid UniqueKey { get; }
 
         public long UserId { get; }
@@ -36,9 +38,7 @@ namespace OpenTween.SocialProtocol
 
         public IApiConnection Connection { get; }
 
-        public ISocialProtocolQuery Query { get; }
-
-        public ISocialProtocolMutation Mutation { get; }
+        public ISocialProtocolClient Client { get; }
 
         public bool IsDisposed { get; }
 

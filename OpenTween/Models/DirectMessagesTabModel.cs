@@ -58,7 +58,7 @@ namespace OpenTween.Models
         public override async Task RefreshAsync(ISocialAccount account, bool backward, IProgress<string> progress)
         {
             if (account is not TwitterAccount twAccount)
-                throw new ArgumentException($"Invalid account type: {account.GetType()}", nameof(account));
+                throw new ArgumentException($"Invalid account type: {account.AccountType}", nameof(account));
 
             progress.Report(string.Format(Properties.Resources.GetTimelineWorker_RunWorkerCompletedText8, backward ? -1 : 1));
 

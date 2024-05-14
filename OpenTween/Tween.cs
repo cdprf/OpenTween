@@ -121,7 +121,7 @@ namespace OpenTween
         private ISocialAccount PrimaryAccount
             => this.accounts.Primary;
 
-        private ISocialAccount CurrentTabAccount
+        public ISocialAccount CurrentTabAccount
             => this.accounts.GetAccountForTab(this.CurrentTab) ?? throw new InvalidOperationException("Account not found");
 
         // Growl呼び出し部
@@ -1383,7 +1383,7 @@ namespace OpenTween
                 {
                     var originalPostId = post.RetweetedId ?? post.StatusId;
 
-                    await this.CurrentTabAccount.Mutation.FavoritePost(originalPostId)
+                    await this.CurrentTabAccount.Client.FavoritePost(originalPostId)
                         .ConfigureAwait(false);
 
                     if (this.settings.Common.RestrictFavCheck)
@@ -1505,7 +1505,7 @@ namespace OpenTween
                     {
                         var originalPostId = post.RetweetedId ?? post.StatusId;
 
-                        await this.CurrentTabAccount.Mutation.UnfavoritePost(originalPostId)
+                        await this.CurrentTabAccount.Client.UnfavoritePost(originalPostId)
                             .ConfigureAwait(false);
                     }
                     catch (WebApiException)
@@ -1752,7 +1752,7 @@ namespace OpenTween
                 {
                     var statusId = post.RetweetedId ?? post.StatusId;
 
-                    var retweetedPost = await this.CurrentTabAccount.Mutation.RetweetPost(statusId)
+                    var retweetedPost = await this.CurrentTabAccount.Client.RetweetPost(statusId)
                         .ConfigureAwait(false);
 
                     if (retweetedPost != null)
@@ -2317,7 +2317,7 @@ namespace OpenTween
                             {
                                 // 自分が RT したツイート (自分が RT した自分のツイートも含む)
                                 //   => RT を取り消し
-                                await this.CurrentTabAccount.Mutation.UnretweetPost(post.RetweetedId);
+                                await this.CurrentTabAccount.Client.UnretweetPost(post.RetweetedId);
                             }
                             else
                             {
@@ -2327,13 +2327,13 @@ namespace OpenTween
                                     {
                                         // 他人に RT された自分のツイート
                                         //   => RT 元の自分のツイートを削除
-                                        await this.CurrentTabAccount.Mutation.DeletePost(post.RetweetedId);
+                                        await this.CurrentTabAccount.Client.DeletePost(post.RetweetedId);
                                     }
                                     else
                                     {
                                         // 自分のツイート
                                         //   => ツイートを削除
-                                        await this.CurrentTabAccount.Mutation.DeletePost(post.StatusId);
+                                        await this.CurrentTabAccount.Client.DeletePost(post.StatusId);
                                     }
                                 }
                             }
@@ -5134,7 +5134,7 @@ namespace OpenTween
             {
                 try
                 {
-                    var post = await this.tw.GetStatusApi(currentPost.StatusId.ToTwitterStatusId());
+                    var post = await this.CurrentTabAccount.Client.GetPostById(currentPost.StatusId, firstLoad: false);
 
                     currentPost = currentPost with
                     {
@@ -5182,7 +5182,7 @@ namespace OpenTween
                 {
                     await Task.Run(async () =>
                     {
-                        var post = await this.tw.GetStatusApi(currentPost.InReplyToStatusId.ToTwitterStatusId())
+                        var post = await this.CurrentTabAccount.Client.GetPostById(currentPost.InReplyToStatusId, firstLoad: false)
                             .ConfigureAwait(false);
 
                         this.statuses.AddPost(post);
@@ -8712,9 +8712,6 @@ namespace OpenTween
         private void MenuItemTab_DropDownOpening(object sender, EventArgs e)
             => this.ContextMenuTabProperty_Opening(sender, null!);
 
-        public Twitter TwitterInstance
-            => this.tw;
-
         private void SplitContainer3_SplitterMoved(object sender, SplitterEventArgs e)
         {
             if (this.initialLayout)
@@ -9065,7 +9062,7 @@ namespace OpenTween
             {
                 try
                 {
-                    post = await this.tw.GetStatusApi(statusId.ToTwitterStatusId());
+                    post = await this.CurrentTabAccount.Client.GetPostById(statusId, firstLoad: false);
                 }
                 catch (WebApiException ex)
                 {

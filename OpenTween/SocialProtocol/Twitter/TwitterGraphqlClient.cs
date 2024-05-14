@@ -27,19 +27,99 @@
 
 #nullable enable
 
+using System.Linq;
 using System.Threading.Tasks;
 using OpenTween.Api.GraphQL;
 using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol.Twitter
 {
-    public class TwitterGraphqlMutation : ISocialProtocolMutation
+    public class TwitterGraphqlClient : ISocialProtocolClient
     {
         private readonly TwitterAccount account;
 
-        public TwitterGraphqlMutation(TwitterAccount account)
+        public TwitterGraphqlClient(TwitterAccount account)
         {
             this.account = account;
+        }
+
+        public async Task<PostClass> GetPostById(PostId postId, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+
+            var statusId = this.AssertTwitterStatusId(postId);
+            var request = new TweetDetailRequest
+            {
+                FocalTweetId = statusId,
+            };
+
+            var tweets = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            var status = tweets.Select(x => x.ToTwitterStatus())
+                .Where(x => x.IdStr == statusId.Id)
+                .FirstOrDefault() ?? throw new WebApiException("Empty result set");
+
+            var post = this.account.Legacy.CreatePostsFromStatusData(status, firstLoad, favTweet: false);
+
+            return post;
+        }
+
+        public async Task<TimelineResponse> GetHomeTimeline(int count, IQueryCursor? cursor, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+
+            var request = new HomeLatestTimelineRequest
+            {
+                Count = count,
+                Cursor = cursor?.As<TwitterGraphqlCursor>(),
+            };
+
+            var response = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            var statuses = response.ToTwitterStatuses();
+            var cursorTop = response.CursorTop;
+            var cursorBottom = response.CursorBottom;
+
+            var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            return new(posts, cursorTop, cursorBottom);
+        }
+
+        public async Task<TimelineResponse> GetSearchTimeline(string query, string lang, int count, IQueryCursor? cursor, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+
+            if (!MyCommon.IsNullOrEmpty(lang))
+                query = $"({query}) lang:{lang}";
+
+            var request = new SearchTimelineRequest(query)
+            {
+                Count = count,
+                Cursor = cursor?.As<TwitterGraphqlCursor>(),
+            };
+
+            var response = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            var statuses = response.ToTwitterStatuses();
+            var cursorTop = response.CursorTop;
+            var cursorBottom = response.CursorBottom;
+
+            var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            return new(posts, cursorTop, cursorBottom);
+        }
+
+        public async Task<PostClass[]> GetRelatedPosts(PostClass targetPost, bool firstLoad)
+        {
+            var tabinfo = TabInformations.GetInstance();
+            var fetcher = new RelatedTweetsFetcher(tabinfo, this);
+
+            return await fetcher.Run(targetPost, firstLoad);
         }
 
         public async Task DeletePost(PostId postId)

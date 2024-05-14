@@ -75,7 +75,7 @@ namespace OpenTween.Models
             var count = Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, backward, firstLoad);
             var cursor = backward ? this.CursorBottom : this.CursorTop;
 
-            var response = await account.Query.GetHomeTimeline(count, cursor, firstLoad)
+            var response = await account.Client.GetHomeTimeline(count, cursor, firstLoad)
                 .ConfigureAwait(false);
 
             foreach (var post in response.Posts)

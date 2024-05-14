@@ -28,13 +28,8 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using OpenTween.Setting;
 using OpenTween.SocialProtocol;
-using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Models
 {
@@ -73,20 +68,28 @@ namespace OpenTween.Models
 
         public override async Task RefreshAsync(ISocialAccount account, bool backward, IProgress<string> progress)
         {
-            if (account is not TwitterAccount twAccount)
-                throw new ArgumentException($"Invalid account type: {account.GetType()}", nameof(account));
-
             if (MyCommon.IsNullOrEmpty(this.SearchWords))
                 return;
 
             progress.Report("Search refreshing...");
 
             var firstLoad = !this.IsFirstLoadCompleted;
+            var count = Twitter.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, backward, firstLoad);
+            var cursor = backward ? this.CursorBottom : this.CursorTop;
 
-            await twAccount.Legacy.GetSearch(this, backward, firstLoad)
+            var response = await account.Client.GetSearchTimeline(this.SearchWords, this.SearchLang, count, cursor, firstLoad)
                 .ConfigureAwait(false);
 
+            foreach (var post in response.Posts)
+                this.AddPostQueue(post);
+
             TabInformations.GetInstance().DistributePosts();
+
+            if (response.CursorTop != null && !backward)
+                this.CursorTop = response.CursorTop;
+
+            if (response.CursorBottom != null)
+                this.CursorBottom = response.CursorBottom;
 
             if (firstLoad)
                 this.IsFirstLoadCompleted = true;
