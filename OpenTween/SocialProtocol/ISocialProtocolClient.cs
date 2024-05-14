@@ -34,6 +34,8 @@ namespace OpenTween.SocialProtocol
 
         public Task<TimelineResponse> GetSearchTimeline(string query, string lang, int count, IQueryCursor? cursor, bool firstLoad);
 
+        public Task<PostClass[]> GetRelatedPosts(PostClass targetPost, bool firstLoad);
+
         public Task DeletePost(PostId postId);
 
         public Task FavoritePost(PostId postId);

@@ -114,6 +114,14 @@ namespace OpenTween.SocialProtocol.Twitter
             return new(posts, cursorTop, cursorBottom);
         }
 
+        public async Task<PostClass[]> GetRelatedPosts(PostClass targetPost, bool firstLoad)
+        {
+            var tabinfo = TabInformations.GetInstance();
+            var fetcher = new RelatedTweetsFetcher(tabinfo, this);
+
+            return await fetcher.Run(targetPost, firstLoad);
+        }
+
         public async Task DeletePost(PostId postId)
         {
             var statusId = this.AssertTwitterStatusId(postId);

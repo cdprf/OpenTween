@@ -28,13 +28,8 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using OpenTween.Setting;
 using OpenTween.SocialProtocol;
-using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Models
 {
@@ -58,28 +53,22 @@ namespace OpenTween.Models
 
         public override async Task RefreshAsync(ISocialAccount account, bool backward, IProgress<string> progress)
         {
-            if (account is not TwitterAccount twAccount)
-                throw new ArgumentException($"Invalid account type: {account.AccountType}", nameof(account));
+            progress.Report("Related refreshing...");
 
-            try
-            {
-                progress.Report("Related refreshing...");
+            var firstLoad = !this.IsFirstLoadCompleted;
 
-                var firstLoad = !this.IsFirstLoadCompleted;
+            var posts = await account.Client.GetRelatedPosts(this.TargetPost, firstLoad)
+                .ConfigureAwait(false);
 
-                await twAccount.Legacy.GetRelatedResult(this, firstLoad)
-                    .ConfigureAwait(false);
+            foreach (var post in posts)
+                this.AddPostQueue(post);
 
-                if (firstLoad)
-                    this.IsFirstLoadCompleted = true;
+            TabInformations.GetInstance().DistributePosts();
 
-                progress.Report("Related refreshed");
-            }
-            finally
-            {
-                // WebException が発生した場合も一部のツイートは読み込めている可能性があるため常に DistoributePosts を呼ぶ
-                TabInformations.GetInstance().DistributePosts();
-            }
+            if (firstLoad)
+                this.IsFirstLoadCompleted = true;
+
+            progress.Report("Related refreshed");
         }
     }
 }

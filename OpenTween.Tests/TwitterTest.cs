@@ -20,12 +20,10 @@
 // Boston, MA 02110-1301, USA.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using OpenTween.Api;
-using OpenTween.Api.DataModel;
 using OpenTween.Models;
 using OpenTween.Setting;
 using Xunit;
@@ -81,31 +79,6 @@ namespace OpenTween
                 .Select(x => x.Groups["StatusId"].Value).ToArray();
 
             Assert.Equal(expected, results);
-        }
-
-        [Fact]
-        public void FindTopOfReplyChainTest()
-        {
-            var posts = new Dictionary<PostId, PostClass>
-            {
-                [new TwitterStatusId("950")] = new PostClass { StatusId = new TwitterStatusId("950"), InReplyToStatusId = null }, // このツイートが末端
-                [new TwitterStatusId("987")] = new PostClass { StatusId = new TwitterStatusId("987"), InReplyToStatusId = new TwitterStatusId("950") },
-                [new TwitterStatusId("999")] = new PostClass { StatusId = new TwitterStatusId("999"), InReplyToStatusId = new TwitterStatusId("987") },
-                [new TwitterStatusId("1000")] = new PostClass { StatusId = new TwitterStatusId("1000"), InReplyToStatusId = new TwitterStatusId("999") },
-            };
-            Assert.Equal(new TwitterStatusId("950"), Twitter.FindTopOfReplyChain(posts, new TwitterStatusId("1000")).StatusId);
-            Assert.Equal(new TwitterStatusId("950"), Twitter.FindTopOfReplyChain(posts, new TwitterStatusId("950")).StatusId);
-            Assert.Throws<ArgumentException>(() => Twitter.FindTopOfReplyChain(posts, new TwitterStatusId("500")));
-
-            posts = new Dictionary<PostId, PostClass>
-            {
-                // new TwitterStatusId("1200") は posts の中に存在しない
-                [new TwitterStatusId("1210")] = new PostClass { StatusId = new TwitterStatusId("1210"), InReplyToStatusId = new TwitterStatusId("1200") },
-                [new TwitterStatusId("1220")] = new PostClass { StatusId = new TwitterStatusId("1220"), InReplyToStatusId = new TwitterStatusId("1210") },
-                [new TwitterStatusId("1230")] = new PostClass { StatusId = new TwitterStatusId("1230"), InReplyToStatusId = new TwitterStatusId("1220") },
-            };
-            Assert.Equal(new TwitterStatusId("1210"), Twitter.FindTopOfReplyChain(posts, new TwitterStatusId("1230")).StatusId);
-            Assert.Equal(new TwitterStatusId("1210"), Twitter.FindTopOfReplyChain(posts, new TwitterStatusId("1210")).StatusId);
         }
 
         [Fact]
