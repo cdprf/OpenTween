@@ -83,6 +83,13 @@ namespace OpenTween.SocialProtocol.Twitter
         }
 
         [Fact]
+        public void AccountType_Test()
+        {
+            using var account = new TwitterAccount(Guid.NewGuid());
+            Assert.Equal("Twitter", account.AccountType);
+        }
+
+        [Fact]
         public void Client_V1_Test()
         {
             var accountKey = Guid.NewGuid();

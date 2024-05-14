@@ -28,6 +28,8 @@ namespace OpenTween.SocialProtocol
 {
     public interface ISocialAccount : IDisposable
     {
+        public string AccountType { get; }
+
         public Guid UniqueKey { get; }
 
         public long UserId { get; }

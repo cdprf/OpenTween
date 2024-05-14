@@ -32,6 +32,9 @@ namespace OpenTween.SocialProtocol.Twitter
         private readonly OpenTween.Twitter twLegacy = new(new());
         private TwitterApiConnection apiConnection = new();
 
+        public string AccountType
+            => "Twitter";
+
         public Guid UniqueKey { get; }
 
         public ISocialProtocolClient Client { get; private set; }
