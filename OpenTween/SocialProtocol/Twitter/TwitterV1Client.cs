@@ -62,28 +62,12 @@ namespace OpenTween.SocialProtocol.Twitter
         {
             this.account.Legacy.CheckAccountState();
 
-            TwitterStatusId? maxId = null, sinceId = null;
-
-            if (cursor is QueryCursor<TwitterStatusId> statusIdCursor)
-            {
-                if (statusIdCursor.Type == CursorType.Top)
-                    sinceId = statusIdCursor.Value;
-                else if (statusIdCursor.Type == CursorType.Bottom)
-                    maxId = statusIdCursor.Value;
-            }
+            var (sinceId, maxId) = GetCursorParams(cursor);
 
             var statuses = await this.account.Legacy.Api.StatusesHomeTimeline(count, maxId, sinceId)
                 .ConfigureAwait(false);
 
-            IQueryCursor? cursorTop = null, cursorBottom = null;
-
-            if (statuses.Length > 0)
-            {
-                var (min, max) = statuses.Select(x => new TwitterStatusId(x.IdStr)).MinMax();
-                cursorTop = new QueryCursor<TwitterStatusId>(CursorType.Top, max);
-                cursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
-            }
-
+            var (cursorTop, cursorBottom) = GetCursorFromResponse(statuses);
             var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
             posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
 
@@ -94,30 +78,14 @@ namespace OpenTween.SocialProtocol.Twitter
         {
             this.account.Legacy.CheckAccountState();
 
-            TwitterStatusId? maxId = null, sinceId = null;
-
-            if (cursor is QueryCursor<TwitterStatusId> statusIdCursor)
-            {
-                if (statusIdCursor.Type == CursorType.Top)
-                    sinceId = statusIdCursor.Value;
-                else if (statusIdCursor.Type == CursorType.Bottom)
-                    maxId = statusIdCursor.Value;
-            }
+            var (sinceId, maxId) = GetCursorParams(cursor);
 
             var searchResult = await this.account.Legacy.Api.SearchTweets(query, lang, count, maxId, sinceId)
                 .ConfigureAwait(false);
 
             var statuses = searchResult.Statuses;
 
-            IQueryCursor? cursorTop = null, cursorBottom = null;
-
-            if (statuses.Length > 0)
-            {
-                var (min, max) = statuses.Select(x => new TwitterStatusId(x.IdStr)).MinMax();
-                cursorTop = new QueryCursor<TwitterStatusId>(CursorType.Top, max);
-                cursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
-            }
-
+            var (cursorTop, cursorBottom) = GetCursorFromResponse(statuses);
             var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
             posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
 
@@ -202,5 +170,34 @@ namespace OpenTween.SocialProtocol.Twitter
 
         private PostClass CreatePostFromJson(TwitterStatus status)
             => this.account.Legacy.CreatePostsFromStatusData(status, firstLoad: false, favTweet: false);
+
+        public static (TwitterStatusId? SinceId, TwitterStatusId? MaxId) GetCursorParams(IQueryCursor? cursor)
+        {
+            TwitterStatusId? sinceId = null, maxId = null;
+
+            if (cursor is QueryCursor<TwitterStatusId> statusIdCursor)
+            {
+                if (statusIdCursor.Type == CursorType.Top)
+                    sinceId = statusIdCursor.Value;
+                else if (statusIdCursor.Type == CursorType.Bottom)
+                    maxId = statusIdCursor.Value;
+            }
+
+            return (sinceId, maxId);
+        }
+
+        public static (IQueryCursor? CursorTop, IQueryCursor? CursorBottom) GetCursorFromResponse(TwitterStatus[] statuses)
+        {
+            IQueryCursor? cursorTop = null, cursorBottom = null;
+
+            if (statuses.Length > 0)
+            {
+                var (min, max) = statuses.Select(x => new TwitterStatusId(x.IdStr)).MinMax();
+                cursorTop = new QueryCursor<TwitterStatusId>(CursorType.Top, max);
+                cursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
+            }
+
+            return (cursorTop, cursorBottom);
+        }
     }
 }
