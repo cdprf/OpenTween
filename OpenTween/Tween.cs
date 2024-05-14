@@ -121,7 +121,7 @@ namespace OpenTween
         private ISocialAccount PrimaryAccount
             => this.accounts.Primary;
 
-        private ISocialAccount CurrentTabAccount
+        public ISocialAccount CurrentTabAccount
             => this.accounts.GetAccountForTab(this.CurrentTab) ?? throw new InvalidOperationException("Account not found");
 
         // Growl呼び出し部
@@ -8711,9 +8711,6 @@ namespace OpenTween
 
         private void MenuItemTab_DropDownOpening(object sender, EventArgs e)
             => this.ContextMenuTabProperty_Opening(sender, null!);
-
-        public Twitter TwitterInstance
-            => this.tw;
 
         private void SplitContainer3_SplitterMoved(object sender, SplitterEventArgs e)
         {

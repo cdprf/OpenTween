@@ -363,7 +363,8 @@ namespace OpenTween
             {
                 try
                 {
-                    post = await this.Owner.TwitterInstance.GetStatusApi(statusId.ToTwitterStatusId())
+                    var twitterAccount = (SocialProtocol.Twitter.TwitterAccount)this.Owner.CurrentTabAccount;
+                    post = await twitterAccount.Legacy.GetStatusApi(statusId.ToTwitterStatusId())
                         .ConfigureAwait(false);
                 }
                 catch (WebApiException ex)
@@ -642,7 +643,7 @@ namespace OpenTween
             }
             if (this.CurrentPost != null)
             {
-                if (this.CurrentPost.UserId == this.Owner.TwitterInstance.UserId)
+                if (this.CurrentPost.UserId == this.Owner.CurrentTabAccount.UserId)
                 {
                     this.FollowToolStripMenuItem.Enabled = false;
                     this.UnFollowToolStripMenuItem.Enabled = false;
@@ -680,7 +681,7 @@ namespace OpenTween
             if (this.CurrentPost == null)
                 return;
 
-            if (this.CurrentPost.UserId == this.Owner.TwitterInstance.UserId)
+            if (this.CurrentPost.UserId == this.Owner.CurrentTabAccount.UserId)
                 return;
 
             await this.Owner.FollowCommand(this.CurrentPost.ScreenName);
@@ -691,7 +692,7 @@ namespace OpenTween
             if (this.CurrentPost == null)
                 return;
 
-            if (this.CurrentPost.UserId == this.Owner.TwitterInstance.UserId)
+            if (this.CurrentPost.UserId == this.Owner.CurrentTabAccount.UserId)
                 return;
 
             await this.Owner.RemoveCommand(this.CurrentPost.ScreenName, false);
@@ -702,7 +703,7 @@ namespace OpenTween
             if (this.CurrentPost == null)
                 return;
 
-            if (this.CurrentPost.UserId == this.Owner.TwitterInstance.UserId)
+            if (this.CurrentPost.UserId == this.Owner.CurrentTabAccount.UserId)
                 return;
 
             await this.Owner.ShowFriendship(this.CurrentPost.ScreenName);
@@ -859,7 +860,7 @@ namespace OpenTween
             var fAllFlag = false;
             foreach (Match mu in ma)
             {
-                if (!mu.Result("${ScreenName}").Equals(this.Owner.TwitterInstance.Username, StringComparison.InvariantCultureIgnoreCase))
+                if (!mu.Result("${ScreenName}").Equals(this.Owner.CurrentTabAccount.UserName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     fAllFlag = true;
                     break;
@@ -978,7 +979,7 @@ namespace OpenTween
             var ids = new List<string>();
             foreach (Match mu in ma)
             {
-                if (!mu.Result("${ScreenName}").Equals(this.Owner.TwitterInstance.Username, StringComparison.InvariantCultureIgnoreCase))
+                if (!mu.Result("${ScreenName}").Equals(this.Owner.CurrentTabAccount.UserName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     ids.Add(mu.Result("${ScreenName}"));
                 }

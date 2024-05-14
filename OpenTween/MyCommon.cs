@@ -54,6 +54,7 @@ using System.Windows.Forms;
 using OpenTween.Api;
 using OpenTween.Models;
 using OpenTween.Setting;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {
@@ -387,8 +388,8 @@ namespace OpenTween
                 var mainForm = Application.OpenForms.OfType<TweenMain>().FirstOrDefault();
 
                 ErrorReport report;
-                if (mainForm != null && !mainForm.IsDisposed)
-                    report = new ErrorReport(mainForm.TwitterInstance, errorReport);
+                if (mainForm != null && mainForm.CurrentTabAccount is TwitterAccount twitterAccount && !mainForm.IsDisposed)
+                    report = new ErrorReport(twitterAccount.Legacy, errorReport);
                 else
                     report = new ErrorReport(errorReport);
 
