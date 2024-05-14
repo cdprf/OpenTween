@@ -34,9 +34,7 @@ namespace OpenTween.SocialProtocol.Twitter
 
         public Guid UniqueKey { get; }
 
-        public ISocialProtocolQuery Query { get; private set; }
-
-        public ISocialProtocolMutation Mutation { get; private set; }
+        public ISocialProtocolClient Client { get; private set; }
 
         public bool IsDisposed { get; private set; }
 
@@ -60,8 +58,7 @@ namespace OpenTween.SocialProtocol.Twitter
         public TwitterAccount(Guid uniqueKey)
         {
             this.UniqueKey = uniqueKey;
-            this.Query = this.CreateQueryInstance(APIAuthType.None);
-            this.Mutation = this.CreateMutationInstance(APIAuthType.None);
+            this.Client = this.CreateClientInstance(APIAuthType.None);
         }
 
         public void Initialize(UserAccount accountSettings, SettingCommon settingCommon)
@@ -79,8 +76,7 @@ namespace OpenTween.SocialProtocol.Twitter
             (this.apiConnection, var oldConnection) = (newConnection, this.apiConnection);
             oldConnection.Dispose();
 
-            this.Query = this.CreateQueryInstance(credential.AuthType);
-            this.Mutation = this.CreateMutationInstance(credential.AuthType);
+            this.Client = this.CreateClientInstance(credential.AuthType);
 
             this.twLegacy.Initialize(newConnection, this.AccountState);
             this.twLegacy.RestrictFavCheck = settingCommon.RestrictFavCheck;
@@ -95,21 +91,12 @@ namespace OpenTween.SocialProtocol.Twitter
             this.IsDisposed = true;
         }
 
-        private ISocialProtocolQuery CreateQueryInstance(APIAuthType authType)
+        private ISocialProtocolClient CreateClientInstance(APIAuthType authType)
         {
             return authType switch
             {
-                APIAuthType.TwitterComCookie => new TwitterGraphqlQuery(this),
-                _ => new TwitterV1Query(this),
-            };
-        }
-
-        private ISocialProtocolMutation CreateMutationInstance(APIAuthType authType)
-        {
-            return authType switch
-            {
-                APIAuthType.TwitterComCookie => new TwitterGraphqlMutation(this),
-                _ => new TwitterV1Mutation(this),
+                APIAuthType.TwitterComCookie => new TwitterGraphqlClient(this),
+                _ => new TwitterV1Client(this),
             };
         }
     }

@@ -26,8 +26,18 @@ using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol
 {
-    public interface ISocialProtocolQuery
+    public interface ISocialProtocolClient
     {
         public Task<TimelineResponse> GetHomeTimeline(int count, IQueryCursor? cursor, bool firstLoad);
+
+        public Task DeletePost(PostId postId);
+
+        public Task FavoritePost(PostId postId);
+
+        public Task UnfavoritePost(PostId postId);
+
+        public Task<PostClass?> RetweetPost(PostId postId);
+
+        public Task UnretweetPost(PostId postId);
     }
 }

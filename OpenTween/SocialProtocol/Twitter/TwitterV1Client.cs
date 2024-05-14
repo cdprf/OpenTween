@@ -29,15 +29,18 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+using OpenTween.Api;
+using OpenTween.Api.DataModel;
+using OpenTween.Connection;
 using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol.Twitter
 {
-    public class TwitterV1Query : ISocialProtocolQuery
+    public class TwitterV1Client : ISocialProtocolClient
     {
         private readonly TwitterAccount account;
 
-        public TwitterV1Query(TwitterAccount account)
+        public TwitterV1Client(TwitterAccount account)
         {
             this.account = account;
         }
@@ -73,5 +76,76 @@ namespace OpenTween.SocialProtocol.Twitter
 
             return new(posts, cursorTop, cursorBottom);
         }
+
+        public async Task DeletePost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+
+            await this.account.Legacy.Api.StatusesDestroy(statusId)
+                .IgnoreResponse();
+        }
+
+        public async Task FavoritePost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+
+            try
+            {
+                await this.account.Legacy.Api.FavoritesCreate(statusId)
+                    .IgnoreResponse()
+                    .ConfigureAwait(false);
+            }
+            catch (TwitterApiException ex)
+                when (ex.Errors.All(x => x.Code == TwitterErrorCode.AlreadyFavorited))
+            {
+                // エラーコード 139 のみの場合は成功と見なす
+            }
+        }
+
+        public async Task UnfavoritePost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+
+            await this.account.Legacy.Api.FavoritesDestroy(statusId)
+                .IgnoreResponse()
+                .ConfigureAwait(false);
+        }
+
+        public async Task<PostClass?> RetweetPost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+
+            using var response = await this.account.Legacy.Api.StatusesRetweet(statusId)
+                .ConfigureAwait(false);
+
+            var status = await response.LoadJsonAsync()
+                .ConfigureAwait(false);
+
+            // Retweet判定
+            if (status.RetweetedStatus == null)
+                throw new WebApiException("Invalid Json!");
+
+            // Retweetしたものを返す
+            return this.CreatePostFromJson(status);
+        }
+
+        public async Task UnretweetPost(PostId postId)
+        {
+            var statusId = this.AssertTwitterStatusId(postId);
+
+            await this.account.Legacy.Api.StatusesUnretweet(statusId)
+                .IgnoreResponse()
+                .ConfigureAwait(false);
+        }
+
+        private TwitterStatusId AssertTwitterStatusId(PostId postId)
+        {
+            return postId is TwitterStatusId statusId
+                ? statusId
+                : throw new WebApiException($"Not supported type: {postId.GetType()}");
+        }
+
+        private PostClass CreatePostFromJson(TwitterStatus status)
+            => this.account.Legacy.CreatePostsFromStatusData(status, firstLoad: false, favTweet: false);
     }
 }

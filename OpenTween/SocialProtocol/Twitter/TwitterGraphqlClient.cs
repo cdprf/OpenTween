@@ -33,13 +33,36 @@ using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol.Twitter
 {
-    public class TwitterGraphqlMutation : ISocialProtocolMutation
+    public class TwitterGraphqlClient : ISocialProtocolClient
     {
         private readonly TwitterAccount account;
 
-        public TwitterGraphqlMutation(TwitterAccount account)
+        public TwitterGraphqlClient(TwitterAccount account)
         {
             this.account = account;
+        }
+
+        public async Task<TimelineResponse> GetHomeTimeline(int count, IQueryCursor? cursor, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+
+            var request = new HomeLatestTimelineRequest
+            {
+                Count = count,
+                Cursor = cursor?.As<TwitterGraphqlCursor>(),
+            };
+
+            var response = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            var statuses = response.ToTwitterStatuses();
+            var cursorTop = response.CursorTop;
+            var cursorBottom = response.CursorBottom;
+
+            var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            return new(posts, cursorTop, cursorBottom);
         }
 
         public async Task DeletePost(PostId postId)

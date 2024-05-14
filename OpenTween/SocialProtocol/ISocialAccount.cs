@@ -36,9 +36,7 @@ namespace OpenTween.SocialProtocol
 
         public IApiConnection Connection { get; }
 
-        public ISocialProtocolQuery Query { get; }
-
-        public ISocialProtocolMutation Mutation { get; }
+        public ISocialProtocolClient Client { get; }
 
         public bool IsDisposed { get; }
 
