@@ -90,6 +90,40 @@ namespace OpenTween.SocialProtocol.Twitter
             return new(posts, cursorTop, cursorBottom);
         }
 
+        public async Task<TimelineResponse> GetSearchTimeline(string query, string lang, int count, IQueryCursor? cursor, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+
+            TwitterStatusId? maxId = null, sinceId = null;
+
+            if (cursor is QueryCursor<TwitterStatusId> statusIdCursor)
+            {
+                if (statusIdCursor.Type == CursorType.Top)
+                    sinceId = statusIdCursor.Value;
+                else if (statusIdCursor.Type == CursorType.Bottom)
+                    maxId = statusIdCursor.Value;
+            }
+
+            var searchResult = await this.account.Legacy.Api.SearchTweets(query, lang, count, maxId, sinceId)
+                .ConfigureAwait(false);
+
+            var statuses = searchResult.Statuses;
+
+            IQueryCursor? cursorTop = null, cursorBottom = null;
+
+            if (statuses.Length > 0)
+            {
+                var (min, max) = statuses.Select(x => new TwitterStatusId(x.IdStr)).MinMax();
+                cursorTop = new QueryCursor<TwitterStatusId>(CursorType.Top, max);
+                cursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
+            }
+
+            var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            return new(posts, cursorTop, cursorBottom);
+        }
+
         public async Task DeletePost(PostId postId)
         {
             var statusId = this.AssertTwitterStatusId(postId);
