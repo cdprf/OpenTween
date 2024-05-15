@@ -128,15 +128,15 @@ namespace OpenTween
         /// <summary>
         /// ツイートへのパーマリンクURLを判定する正規表現
         /// </summary>
-        public static readonly Regex StatusUrlRegex = new(@"https?://([^.]+\.)?twitter\.com/(#!/)?(?<ScreenName>[a-zA-Z0-9_]+)/status(es)?/(?<StatusId>[0-9]+)(/photo)?", RegexOptions.IgnoreCase);
+        public static readonly Regex StatusUrlRegex = new(@"https?://([^.]+\.)?(twitter|x)\.com/(#!/)?(?<ScreenName>[a-zA-Z0-9_]+)/status(es)?/(?<StatusId>[0-9]+)(/photo)?", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// attachment_url に指定可能な URL を判定する正規表現
         /// </summary>
         public static readonly Regex AttachmentUrlRegex = new(
             @"https?://(
-   twitter\.com/[0-9A-Za-z_]+/status/[0-9]+
- | mobile\.twitter\.com/[0-9A-Za-z_]+/status/[0-9]+
+   (twitter|x)\.com/[0-9A-Za-z_]+/status/[0-9]+
+ | mobile\.(twitter|x)\.com/[0-9A-Za-z_]+/status/[0-9]+
  | twitter\.com/messages/compose\?recipient_id=[0-9]+(&.+)?
 )$",
             RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
