@@ -459,7 +459,7 @@ namespace OpenTween
 
         private string? GetUserId()
         {
-            var m = Regex.Match(this.postBrowserStatusText, @"^https?://twitter.com/(#!/)?(?<ScreenName>[a-zA-Z0-9_]+)(/status(es)?/[0-9]+)?$");
+            var m = Twitter.StatusUrlRegex.Match(this.postBrowserStatusText);
             if (m.Success && this.Owner.IsTwitterId(m.Result("${ScreenName}")))
                 return m.Result("${ScreenName}");
             else
@@ -821,7 +821,7 @@ namespace OpenTween
                     this.SearchAtPostsDetailToolStripMenuItem.Enabled = false;
                 }
 
-                if (Regex.IsMatch(this.postBrowserStatusText, @"^https?://twitter.com/search\?q=%23"))
+                if (Regex.IsMatch(this.postBrowserStatusText, @"^https?://(twitter|x).com/search\?q=%23"))
                     this.UseHashtagMenuItem.Enabled = true;
                 else
                     this.UseHashtagMenuItem.Enabled = false;
@@ -855,7 +855,7 @@ namespace OpenTween
                 this.SelectionTranslationToolStripMenuItem.Enabled = true;
             }
             // 発言内に自分以外のユーザーが含まれてればフォロー状態全表示を有効に
-            var ma = Regex.Matches(this.PostBrowser.DocumentText, @"href=""https?://twitter.com/(#!/)?(?<ScreenName>[a-zA-Z0-9_]+)(/status(es)?/[0-9]+)?""");
+            var ma = Regex.Matches(this.PostBrowser.DocumentText, @"href=""https?://(twitter|x).com/(#!/)?(?<ScreenName>[a-zA-Z0-9_]+)(/status(es)?/[0-9]+)?""");
             var fAllFlag = false;
             foreach (Match mu in ma)
             {
@@ -974,7 +974,7 @@ namespace OpenTween
 
         private async void FriendshipAllMenuItem_Click(object sender, EventArgs e)
         {
-            var ma = Regex.Matches(this.PostBrowser.DocumentText, @"href=""https?://twitter.com/(#!/)?(?<ScreenName>[a-zA-Z0-9_]+)(/status(es)?/[0-9]+)?""");
+            var ma = Regex.Matches(this.PostBrowser.DocumentText, @"href=""https?://(twitter|x).com/(#!/)?(?<ScreenName>[a-zA-Z0-9_]+)(/status(es)?/[0-9]+)?""");
             var ids = new List<string>();
             foreach (Match mu in ma)
             {
@@ -1038,7 +1038,7 @@ namespace OpenTween
 
         private void UseHashtagMenuItem_Click(object sender, EventArgs e)
         {
-            var m = Regex.Match(this.postBrowserStatusText, @"^https?://twitter.com/search\?q=%23(?<hash>.+)$");
+            var m = Regex.Match(this.postBrowserStatusText, @"^https?://(twitter|x).com/search\?q=%23(?<hash>.+)$");
             if (m.Success)
                 this.Owner.SetPermanentHashtag(Uri.UnescapeDataString(m.Groups["hash"].Value));
         }
