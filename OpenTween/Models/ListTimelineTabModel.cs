@@ -43,12 +43,17 @@ namespace OpenTween.Models
         public override MyCommon.TabUsageType TabType
             => MyCommon.TabUsageType.Lists;
 
-        public ListElement ListInfo { get; set; }
+        public SettingTabs.SettingTabListElement ListInfo { get; set; }
 
-        public ListTimelineTabModel(string tabName, ListElement list)
+        public ListTimelineTabModel(string tabName, SettingTabs.SettingTabListElement list)
             : base(tabName)
         {
             this.ListInfo = list;
+        }
+
+        public ListTimelineTabModel(string tabName, ListElement list)
+            : this(tabName, new SettingTabs.SettingTabListElement(list))
+        {
         }
 
         public override async Task RefreshAsync(ISocialAccount account, bool backward, IProgress<string> progress)
