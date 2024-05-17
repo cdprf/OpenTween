@@ -54,9 +54,9 @@ namespace OpenTween.Models
 
         public Stack<TabModel> RemovedTab { get; } = new();
 
-        public ISet<long> BlockIds { get; set; } = new HashSet<long>();
+        public ISet<PersonId> BlockIds { get; set; } = new HashSet<PersonId>();
 
-        public ISet<long> MuteUserIds { get; set; } = new HashSet<long>();
+        public ISet<PersonId> MuteUserIds { get; set; } = new HashSet<PersonId>();
 
         // 発言の追加
         // AddPost(複数回) -> DistributePosts          -> SubmitUpdate
@@ -260,7 +260,7 @@ namespace OpenTween.Models
                 MyCommon.TabUsageType.UserTimeline
                     => new UserTimelineTabModel(tabName, tabSetting.User!)
                     {
-                        UserId = tabSetting.UserId,
+                        UserId = tabSetting.UserId is { } userId ? new TwitterUserId(userId) : null,
                     },
                 MyCommon.TabUsageType.PublicSearch
                     => new PublicSearchTabModel(tabName)
@@ -643,7 +643,7 @@ namespace OpenTween.Models
             if (this.MuteUserIds.Contains(post.UserId))
                 return true;
 
-            if (post.RetweetedByUserId != null && this.MuteUserIds.Contains(post.RetweetedByUserId.Value))
+            if (post.RetweetedByUserId != null && this.MuteUserIds.Contains(post.RetweetedByUserId))
                 return true;
 
             return false;
@@ -890,7 +890,7 @@ namespace OpenTween.Models
             }
         }
 
-        public void RefreshOwl(ISet<long> follower)
+        public void RefreshOwl(ISet<PersonId> follower)
         {
             lock (this.lockObj)
             {

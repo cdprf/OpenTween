@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using OpenTween.Connection;
+using OpenTween.Models;
 
 namespace OpenTween.Api.GraphQL
 {
@@ -34,7 +35,7 @@ namespace OpenTween.Api.GraphQL
 
         private static readonly Uri EndpointUri = new("https://twitter.com/i/api/graphql/G_zHbTiwSqLm0TAK_3sNWQ/Likes");
 
-        public required string UserId { get; set; }
+        public required TwitterUserId UserId { get; set; }
 
         public int Count { get; set; } = 20;
 
@@ -47,7 +48,7 @@ namespace OpenTween.Api.GraphQL
             return new()
             {
                 ["variables"] = "{" +
-                    $@"""userId"":""{JsonUtils.EscapeJsonString(this.UserId)}""," +
+                    $@"""userId"":""{JsonUtils.EscapeJsonString(this.UserId.Id)}""," +
                     $@"""count"":{this.Count}," +
                     $@"""includePromotedContent"":false," +
                     $@"""withClientEventToken"":false," +

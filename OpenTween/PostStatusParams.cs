@@ -41,7 +41,7 @@ namespace OpenTween
 
         public bool AutoPopulateReplyMetadata { get; set; }
 
-        public IReadOnlyList<long> ExcludeReplyUserIds { get; set; } = Array.Empty<long>();
+        public IReadOnlyList<PersonId> ExcludeReplyUserIds { get; set; } = Array.Empty<PersonId>();
 
         public string? AttachmentUrl { get; set; }
     }

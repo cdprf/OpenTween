@@ -24,6 +24,7 @@
 using System;
 using System.Diagnostics;
 using OpenTween.Connection;
+using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol.Twitter
 {
@@ -46,7 +47,7 @@ namespace OpenTween.SocialProtocol.Twitter
         public OpenTween.Twitter Legacy
             => this.twLegacy;
 
-        public long UserId
+        public PersonId UserId
             => this.AccountState.UserId;
 
         public string UserName
@@ -69,8 +70,9 @@ namespace OpenTween.SocialProtocol.Twitter
             Debug.Assert(accountSettings.UniqueKey == this.UniqueKey, "UniqueKey must be same as current value.");
 
             var credential = accountSettings.GetTwitterCredential();
+            var userId = new TwitterUserId(accountSettings.UserId);
 
-            this.AccountState = new TwitterAccountState(accountSettings.UserId, accountSettings.Username)
+            this.AccountState = new TwitterAccountState(userId, accountSettings.Username)
             {
                 HasUnrecoverableError = credential is TwitterCredentialNone,
             };

@@ -112,7 +112,7 @@ namespace OpenTween
             return password;
         }
 
-        public long UserId = 0;
+        public string UserId = "";
         public List<string> TabList = new();
         public int TimelinePeriod = 180;
         public int ReplyPeriod = 180;
@@ -339,7 +339,7 @@ namespace OpenTween
 
             this.SelectedAccountKey = selectedAccount?.UniqueKey;
 
-            if (selectedAccount?.UserId == 0)
+            if (selectedAccount != null && MyCommon.IsNullOrEmpty(selectedAccount.UserId))
                 selectedAccount.UserId = this.UserId;
 
             if (MyCommon.IsNullOrEmpty(this.Token))
@@ -352,7 +352,7 @@ namespace OpenTween
         public Guid UniqueKey { get; set; } = Guid.NewGuid();
 
         public string Username = "";
-        public long UserId = 0;
+        public string UserId = "";
 
         public APIAuthType TwitterAuthType { get; set; } = APIAuthType.OAuth1;
 

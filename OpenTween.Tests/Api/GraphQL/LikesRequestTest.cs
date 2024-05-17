@@ -51,7 +51,7 @@ namespace OpenTween.Api.GraphQL
 
             var request = new LikesRequest
             {
-                UserId = "12345",
+                UserId = new("12345"),
                 Count = 20,
             };
 
@@ -83,7 +83,7 @@ namespace OpenTween.Api.GraphQL
 
             var request = new LikesRequest
             {
-                UserId = "12345",
+                UserId = new("12345"),
                 Count = 20,
                 Cursor = new("aaa"),
             };

@@ -23,6 +23,7 @@
 
 using System;
 using OpenTween.Connection;
+using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol
 {
@@ -32,7 +33,7 @@ namespace OpenTween.SocialProtocol
 
         public Guid UniqueKey { get; }
 
-        public long UserId { get; }
+        public PersonId UserId { get; }
 
         public string UserName { get; }
 

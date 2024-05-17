@@ -45,7 +45,7 @@ namespace OpenTween.Models
 
         public string ScreenName { get; }
 
-        public string? UserId { get; set; }
+        public PersonId? UserId { get; set; }
 
         public UserTimelineTabModel(string tabName, string screenName)
             : base(tabName)

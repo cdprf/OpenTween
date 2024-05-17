@@ -193,7 +193,7 @@ namespace OpenTween.Api
             TwitterStatusId? replyToId,
             IReadOnlyList<long>? mediaIds,
             bool? autoPopulateReplyMetadata = null,
-            IReadOnlyList<long>? excludeReplyUserIds = null,
+            IReadOnlyList<TwitterUserId>? excludeReplyUserIds = null,
             string? attachmentUrl = null)
         {
             var param = new Dictionary<string, string>
@@ -613,7 +613,7 @@ namespace OpenTween.Api
                 .ConfigureAwait(false);
         }
 
-        public async Task<LazyJson<TwitterMessageEventSingle>> DirectMessagesEventsNew(long recipientId, string text, long? mediaId = null)
+        public async Task<LazyJson<TwitterMessageEventSingle>> DirectMessagesEventsNew(TwitterUserId recipientId, string text, long? mediaId = null)
         {
             var attachment = "";
             if (mediaId != null)
@@ -634,7 +634,7 @@ namespace OpenTween.Api
                     "type": "message_create",
                     "message_create": {
                       "target": {
-                        "recipient_id": "{{JsonUtils.EscapeJsonString(recipientId.ToString())}}"
+                        "recipient_id": "{{JsonUtils.EscapeJsonString(recipientId.Id)}}"
                       },
                       "message_data": {
                         "text": "{{JsonUtils.EscapeJsonString(text)}}"{{attachment}}
@@ -694,14 +694,14 @@ namespace OpenTween.Api
                 .ConfigureAwait(false);
         }
 
-        public async Task<TwitterUser[]> UsersLookup(IReadOnlyList<string> userIds)
+        public async Task<TwitterUser[]> UsersLookup(IReadOnlyList<TwitterUserId> userIds)
         {
             var request = new GetRequest
             {
                 RequestUri = new("users/lookup.json", UriKind.Relative),
                 Query = new Dictionary<string, string>
                 {
-                    ["user_id"] = string.Join(",", userIds),
+                    ["user_id"] = string.Join(",", userIds.Select(x => x.Id)),
                     ["include_entities"] = "true",
                     ["include_ext_alt_text"] = "true",
                     ["tweet_mode"] = "extended",
@@ -854,7 +854,7 @@ namespace OpenTween.Api
             return response.ReadAsLazyJson<TwitterFriendship>();
         }
 
-        public async Task<long[]> NoRetweetIds()
+        public async Task<TwitterUserId[]> NoRetweetIds()
         {
             var request = new GetRequest
             {
@@ -865,8 +865,10 @@ namespace OpenTween.Api
             using var response = await this.Connection.SendAsync(request)
                 .ConfigureAwait(false);
 
-            return await response.ReadAsJson<long[]>()
+            var idsStr = await response.ReadAsJson<string[]>()
                 .ConfigureAwait(false);
+
+            return idsStr.Select(x => new TwitterUserId(x)).ToArray();
         }
 
         public async Task<TwitterIds> FollowersIds(long? cursor = null)

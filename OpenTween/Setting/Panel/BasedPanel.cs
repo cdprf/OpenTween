@@ -102,7 +102,7 @@ namespace OpenTween.Setting.Panel
             }
             else
             {
-                settingCommon.UserId = 0;
+                settingCommon.UserId = "";
                 settingCommon.UserName = "";
                 settingCommon.Token = "";
                 settingCommon.TokenSecret = "";

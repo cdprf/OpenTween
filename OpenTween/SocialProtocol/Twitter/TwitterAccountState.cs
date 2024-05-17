@@ -23,12 +23,13 @@
 
 using System.Collections.Generic;
 using OpenTween.Api.DataModel;
+using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol.Twitter
 {
     public class TwitterAccountState
     {
-        public long UserId { get; private set; }
+        public TwitterUserId UserId { get; private set; }
 
         public string UserName { get; private set; }
 
@@ -38,18 +39,18 @@ namespace OpenTween.SocialProtocol.Twitter
 
         public int? StatusesCount { get; private set; }
 
-        public ISet<long> FollowerIds { get; set; } = new HashSet<long>();
+        public ISet<PersonId> FollowerIds { get; set; } = new HashSet<PersonId>();
 
-        public ISet<long> NoRetweetUserIds { get; set; } = new HashSet<long>();
+        public ISet<TwitterUserId> NoRetweetUserIds { get; set; } = new HashSet<TwitterUserId>();
 
         public bool HasUnrecoverableError { get; set; } = true;
 
         public TwitterAccountState()
-            : this(0L, "")
+            : this(new("0"), "")
         {
         }
 
-        public TwitterAccountState(long userId, string userName)
+        public TwitterAccountState(TwitterUserId userId, string userName)
         {
             this.UserId = userId;
             this.UserName = userName;
@@ -58,7 +59,7 @@ namespace OpenTween.SocialProtocol.Twitter
         /// <summary>ユーザー情報を更新します</summary>
         public void UpdateFromUser(TwitterUser self)
         {
-            this.UserId = self.Id;
+            this.UserId = new(self.IdStr);
             this.UserName = self.ScreenName;
             this.FollowersCount = self.FollowersCount;
             this.FriendsCount = self.FriendsCount;

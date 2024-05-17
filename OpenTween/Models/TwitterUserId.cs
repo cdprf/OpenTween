@@ -19,35 +19,20 @@
 // the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
 // Boston, MA 02110-1301, USA.
 
-using OpenTween.Api.DataModel;
-using OpenTween.Models;
-using Xunit;
+#nullable enable
 
-namespace OpenTween.SocialProtocol.Twitter
+namespace OpenTween.Models
 {
-    public class TwitterAccountStateTest
+    public class TwitterUserId : PersonId
     {
-        [Fact]
-        public void UpdateFromUser_Test()
-        {
-            var accountState = new TwitterAccountState();
+        public override string IdType => "twitter_user";
 
-            var twitterUser = new TwitterUser
-            {
-                Id = 514241801L,
-                IdStr = "514241801",
-                ScreenName = "OpenTween",
-                StatusesCount = 31,
-                FriendsCount = 1,
-                FollowersCount = 302,
-            };
-            accountState.UpdateFromUser(twitterUser);
+        public override string Id { get; }
 
-            Assert.Equal(new TwitterUserId("514241801"), accountState.UserId);
-            Assert.Equal("OpenTween", accountState.UserName);
-            Assert.Equal(31, accountState.StatusesCount);
-            Assert.Equal(1, accountState.FriendsCount);
-            Assert.Equal(302, accountState.FollowersCount);
-        }
+        public TwitterUserId(string id)
+            => this.Id = id;
+
+        public TwitterUserId(long id)
+            => this.Id = id.ToString();
     }
 }
