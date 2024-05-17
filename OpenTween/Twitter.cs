@@ -230,7 +230,7 @@ namespace OpenTween
                 {
                     TweetText = param.Text,
                     InReplyToTweetId = param.InReplyToStatusId?.ToTwitterStatusId(),
-                    ExcludeReplyUserIds = param.ExcludeReplyUserIds.Select(x => x.ToString()).ToArray(),
+                    ExcludeReplyUserIds = param.ExcludeReplyUserIds.OfType<TwitterUserId>().ToArray(),
                     MediaIds = param.MediaIds.Select(x => x.ToString()).ToArray(),
                     AttachmentUrl = param.AttachmentUrl,
                 };
@@ -245,7 +245,7 @@ namespace OpenTween
                         param.InReplyToStatusId?.ToTwitterStatusId(),
                         param.MediaIds,
                         param.AutoPopulateReplyMetadata,
-                        param.ExcludeReplyUserIds,
+                        param.ExcludeReplyUserIds.OfType<TwitterUserId>().ToArray(),
                         param.AttachmentUrl
                     )
                     .ConfigureAwait(false);
@@ -337,7 +337,8 @@ namespace OpenTween
             var recipient = await this.GetUserInfo(recipientName)
                 .ConfigureAwait(false);
 
-            using var response = await this.Api.DirectMessagesEventsNew(recipient.Id, body, mediaId)
+            var recipientUserId = new TwitterUserId(recipient.IdStr);
+            using var response = await this.Api.DirectMessagesEventsNew(recipientUserId, body, mediaId)
                 .ConfigureAwait(false);
 
             var messageEventSingle = await response.LoadJsonAsync()
@@ -375,7 +376,7 @@ namespace OpenTween
         public string Username
             => this.AccountState.UserName;
 
-        public long UserId
+        public TwitterUserId UserId
             => this.AccountState.UserId;
 
         public bool RestrictFavCheck { get; set; }
@@ -526,14 +527,14 @@ namespace OpenTween
             TwitterStatus[] statuses;
             if (this.Api.AuthType == APIAuthType.TwitterComCookie)
             {
-                var userId = tab.UserId;
-                if (MyCommon.IsNullOrEmpty(userId))
+                var userId = tab.UserId as TwitterUserId;
+                if (userId == null)
                 {
                     var user = await this.GetUserInfo(tab.ScreenName)
                         .ConfigureAwait(false);
 
-                    userId = user.IdStr;
-                    tab.UserId = user.IdStr;
+                    userId = new TwitterUserId(user.IdStr);
+                    tab.UserId = userId;
                 }
 
                 var cursor = more ? tab.CursorBottom : tab.CursorTop;
@@ -546,7 +547,7 @@ namespace OpenTween
                     .ConfigureAwait(false);
 
                 statuses = response.ToTwitterStatuses()
-                    .Where(x => x.User.IdStr == userId) // リプライツリーに含まれる他ユーザーのツイートを除外
+                    .Where(x => x.User.IdStr == userId.Id) // リプライツリーに含まれる他ユーザーのツイートを除外
                     .ToArray();
 
                 tab.CursorBottom = response.CursorBottom;
@@ -595,7 +596,7 @@ namespace OpenTween
         }
 
         internal PostClass[] FilterNoRetweetUserPosts(PostClass[] posts)
-            => posts.Where(x => x.RetweetedByUserId == null || !this.AccountState.NoRetweetUserIds.Contains(x.RetweetedByUserId.Value)).ToArray();
+            => posts.Where(x => x.RetweetedByUserId == null || !this.AccountState.NoRetweetUserIds.Contains(x.RetweetedByUserId)).ToArray();
 
         public async Task GetListStatus(ListTimelineTabModel tab, bool more, bool firstLoad)
         {
@@ -697,12 +698,12 @@ namespace OpenTween
                 return Array.Empty<PostClass>();
 
             var userIds = Enumerable.Concat(
-                events.Select(x => x.MessageCreate.SenderId),
-                events.Select(x => x.MessageCreate.Target.RecipientId)
+                events.Select(x => new TwitterUserId(x.MessageCreate.SenderId)),
+                events.Select(x => new TwitterUserId(x.MessageCreate.Target.RecipientId))
             ).Distinct().ToArray();
 
             var users = (await this.Api.UsersLookup(userIds).ConfigureAwait(false))
-                .ToDictionary(x => x.IdStr);
+                .ToDictionary(x => new TwitterUserId(x.IdStr));
 
             var apps = eventList.Apps ?? new Dictionary<string, TwitterMessageEventList.App>();
 
@@ -711,7 +712,7 @@ namespace OpenTween
 
         private PostClass[] CreateDirectMessagesEventFromJson(
             IReadOnlyCollection<TwitterMessageEvent> events,
-            IReadOnlyDictionary<string, TwitterUser> users,
+            IReadOnlyDictionary<TwitterUserId, TwitterUser> users,
             IReadOnlyDictionary<string, TwitterMessageEventList.App> apps,
             bool firstLoad)
         {
@@ -741,7 +742,7 @@ namespace OpenTween
                 var cursor = backward ? tab.CursorBottom : tab.CursorTop;
                 var request = new LikesRequest
                 {
-                    UserId = this.UserId.ToString(CultureInfo.InvariantCulture),
+                    UserId = this.UserId,
                     Count = count,
                     Cursor = cursor?.As<TwitterGraphqlCursor>(),
                 };
@@ -785,7 +786,7 @@ namespace OpenTween
             if (MyCommon.EndingFlag) return;
 
             var cursor = -1L;
-            var newFollowerIds = Enumerable.Empty<long>();
+            var newFollowerIds = Enumerable.Empty<PersonId>();
             do
             {
                 var ret = await this.Api.FollowersIds(cursor)
@@ -794,7 +795,7 @@ namespace OpenTween
                 if (ret.Ids == null)
                     throw new WebApiException("ret.ids == null");
 
-                newFollowerIds = newFollowerIds.Concat(ret.Ids);
+                newFollowerIds = newFollowerIds.Concat(ret.Ids.Select(x => new TwitterUserId(x)));
                 cursor = ret.NextCursor;
             }
             while (cursor != 0);
@@ -816,7 +817,7 @@ namespace OpenTween
             var noRetweetUserIds = await this.Api.NoRetweetIds()
                 .ConfigureAwait(false);
 
-            this.AccountState.NoRetweetUserIds = new HashSet<long>(noRetweetUserIds);
+            this.AccountState.NoRetweetUserIds = new HashSet<TwitterUserId>(noRetweetUserIds);
             this.GetNoRetweetSuccess = true;
         }
 
@@ -941,13 +942,13 @@ namespace OpenTween
             if (MyCommon.EndingFlag) return;
 
             var cursor = -1L;
-            var newBlockIds = Enumerable.Empty<long>();
+            var newBlockIds = Enumerable.Empty<PersonId>();
             do
             {
                 var ret = await this.Api.BlocksIds(cursor)
                     .ConfigureAwait(false);
 
-                newBlockIds = newBlockIds.Concat(ret.Ids);
+                newBlockIds = newBlockIds.Concat(ret.Ids.Select(x => new TwitterUserId(x)));
                 cursor = ret.NextCursor;
             }
             while (cursor != 0);
@@ -969,7 +970,7 @@ namespace OpenTween
             var ids = await TwitterIds.GetAllItemsAsync(x => this.Api.MutesUsersIds(x))
                 .ConfigureAwait(false);
 
-            TabInformations.GetInstance().MuteUserIds = ids.ToHashSet();
+            TabInformations.GetInstance().MuteUserIds = ids.ToHashSet<PersonId>();
         }
 
         public string[] GetHashList()

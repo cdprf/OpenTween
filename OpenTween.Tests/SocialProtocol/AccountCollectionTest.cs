@@ -38,7 +38,7 @@ namespace OpenTween.SocialProtocol
                 TwitterAuthType = APIAuthType.OAuth1,
                 Token = "aaaaa",
                 TokenSecret = "bbbbb",
-                UserId = this.random.Next(),
+                UserId = this.random.Next().ToString(),
                 Username = "tetete",
             };
         }
@@ -59,7 +59,7 @@ namespace OpenTween.SocialProtocol
             accounts.LoadFromSettings(settingCommon);
 
             Assert.Single(accounts.Items);
-            Assert.Equal(settingCommon.UserAccounts[0].UserId, accounts.Primary.UserId);
+            Assert.Equal(new TwitterUserId(settingCommon.UserAccounts[0].UserId), accounts.Primary.UserId);
         }
 
         [Fact]
@@ -78,7 +78,7 @@ namespace OpenTween.SocialProtocol
             accounts.LoadFromSettings(settingCommon1);
 
             var accountItem1 = Assert.Single(accounts.Items);
-            Assert.Equal(settingCommon1.UserAccounts[0].UserId, accounts.Primary.UserId);
+            Assert.Equal(new TwitterUserId(settingCommon1.UserAccounts[0].UserId), accounts.Primary.UserId);
 
             var settingCommon2 = new SettingCommon
             {
@@ -112,7 +112,7 @@ namespace OpenTween.SocialProtocol
             accounts.LoadFromSettings(settingCommon1);
 
             var accountItem1 = Assert.Single(accounts.Items);
-            Assert.Equal(settingCommon1.UserAccounts[0].UserId, accounts.Primary.UserId);
+            Assert.Equal(new TwitterUserId(settingCommon1.UserAccounts[0].UserId), accounts.Primary.UserId);
 
             var settingCommon2 = new SettingCommon
             {
@@ -126,16 +126,16 @@ namespace OpenTween.SocialProtocol
             accounts.LoadFromSettings(settingCommon2);
 
             var accountItem2 = Assert.Single(accounts.Items);
-            Assert.Equal(settingCommon2.UserAccounts[0].UserId, accounts.Primary.UserId);
+            Assert.Equal(new TwitterUserId(settingCommon2.UserAccounts[0].UserId), accounts.Primary.UserId);
 
             // 同一の ID は同じインスタンスを使用
             Assert.Same(accountItem1, accountItem2);
             Assert.NotEqual(
-                settingCommon1.UserAccounts[0].UserId,
+                new TwitterUserId(settingCommon1.UserAccounts[0].UserId),
                 accountItem2.UserId
             );
             Assert.Equal(
-                settingCommon2.UserAccounts[0].UserId,
+                new TwitterUserId(settingCommon2.UserAccounts[0].UserId),
                 accountItem2.UserId
             );
             Assert.False(accountItem2.IsDisposed);

@@ -93,21 +93,21 @@ namespace OpenTween.Models
 
         public Uri? SourceUri { get; init; }
 
-        public List<(long UserId, string ScreenName)> ReplyToList { get; init; } = new();
+        public List<(PersonId UserId, string ScreenName)> ReplyToList { get; init; } = new();
 
         public bool IsMe { get; init; }
 
         public bool IsDm { get; init; }
 
-        public long UserId { get; init; }
+        public PersonId UserId { get; init; } = null!;
 
         public string? RetweetedBy { get; init; }
 
         public PostId? RetweetedId { get; init; }
 
-        public long? RetweetedByUserId { get; init; }
+        public PersonId? RetweetedByUserId { get; init; }
 
-        public long? InReplyToUserId { get; init; }
+        public PersonId? InReplyToUserId { get; init; }
 
         public List<MediaInfo> Media { get; init; } = new();
 
@@ -203,7 +203,7 @@ namespace OpenTween.Models
         /// </summary>
         /// <param name="selfUserId">ツイートを削除しようとするユーザーのID</param>
         /// <returns>削除可能であれば true、そうでなければ false</returns>
-        public bool CanDeleteBy(long selfUserId)
+        public bool CanDeleteBy(PersonId selfUserId)
         {
             // 自分が送った DM と自分に届いた DM のどちらも削除可能
             if (this.IsDm)
@@ -225,7 +225,7 @@ namespace OpenTween.Models
         /// </summary>
         /// <param name="selfUserId">リツイートしようとするユーザーのID</param>
         /// <returns>リツイート可能であれば true、そうでなければ false</returns>
-        public bool CanRetweetBy(long selfUserId)
+        public bool CanRetweetBy(PersonId selfUserId)
         {
             // DM は常にリツイート不可
             if (this.IsDm)

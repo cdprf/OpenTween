@@ -138,7 +138,8 @@ namespace OpenTween
             this.LinkLabelTweet.Tag = profileUrl;
             this.ToolTip1.SetToolTip(this.LinkLabelTweet, profileUrl);
 
-            if (this.twitter.UserId == user.Id)
+            var userId = new TwitterUserId(user.IdStr);
+            if (this.twitter.UserId == userId)
             {
                 this.ButtonEdit.Enabled = true;
                 this.ChangeIconToolStripMenuItem.Enabled = true;
@@ -483,8 +484,9 @@ namespace OpenTween
 
         private async void ButtonEdit_Click(object sender, EventArgs e)
         {
+            var displayUserId = new TwitterUserId(this.displayUser.IdStr);
             // 自分以外のプロフィールは変更できない
-            if (this.twitter.UserId != this.displayUser.Id)
+            if (this.twitter.UserId != displayUserId)
                 return;
 
             using (ControlTransaction.Disabled(this.ButtonEdit))

@@ -58,13 +58,14 @@ namespace OpenTween.Models
 
         public PostClass CreateFromStatus(
             TwitterStatus status,
-            long selfUserId,
-            ISet<long> followerIds,
+            TwitterUserId selfUserId,
+            ISet<PersonId> followerIds,
             bool firstLoad,
             bool favTweet = false
         )
         {
             var statusUser = status.User ?? TwitterUser.CreateUnknownUser();
+            var statusUserId = new TwitterUserId(statusUser.IdStr);
 
             // リツイートでない場合は null
             var retweetedStatus = (TwitterStatus?)null;
@@ -80,8 +81,9 @@ namespace OpenTween.Models
             // リツイートであるか否かに関わらず常にオリジナルのツイート及びユーザーを指す
             var originalStatus = retweetedStatus ?? status;
             var originalStatusUser = originalStatus.User ?? TwitterUser.CreateUnknownUser();
+            var originalStatusUserId = new TwitterUserId(originalStatusUser.IdStr);
 
-            var isMe = statusUser.Id == selfUserId;
+            var isMe = statusUserId == selfUserId;
 
             bool isFav = favTweet;
             if (isFav == false)
@@ -140,7 +142,7 @@ namespace OpenTween.Models
 
             var isOwl = false;
             if (!isMe && followerIds.Count > 0)
-                isOwl = !followerIds.Contains(originalStatusUser.Id);
+                isOwl = !followerIds.Contains(originalStatusUserId);
 
             var createdAtForSorting = ParseDateTimeFromSnowflakeId(status.Id, status.CreatedAt);
             var createdAt = retweetedStatus != null
@@ -179,10 +181,10 @@ namespace OpenTween.Models
                 IsReply = retweetedStatus == null && replyToList.Any(x => x.UserId == selfUserId),
                 InReplyToStatusId = originalStatus.InReplyToStatusIdStr != null ? new TwitterStatusId(originalStatus.InReplyToStatusIdStr) : null,
                 InReplyToUser = originalStatus.InReplyToScreenName,
-                InReplyToUserId = originalStatus.InReplyToUserId,
+                InReplyToUserId = originalStatus.InReplyToUserIdStr is { } inReplyToUserId ? new TwitterUserId(inReplyToUserId) : null,
 
                 // originalStatusUser から生成
-                UserId = originalStatusUser.Id,
+                UserId = originalStatusUserId,
                 ScreenName = screenName,
                 Nickname = nickname,
                 ImageUrl = imageUrl,
@@ -194,7 +196,7 @@ namespace OpenTween.Models
 
                 // retweeterUser から生成
                 RetweetedBy = retweeterUser != null ? string.Intern(retweeterUser.ScreenName) : null,
-                RetweetedByUserId = retweeterUser?.Id,
+                RetweetedByUserId = retweeterUser?.IdStr is { } retweetedByUserId ? new TwitterUserId(retweetedByUserId) : null,
 
                 IsRead = this.DetermineUnreadState(isMe, firstLoad),
             };
@@ -202,9 +204,9 @@ namespace OpenTween.Models
 
         public PostClass CreateFromDirectMessageEvent(
             TwitterMessageEvent eventItem,
-            IReadOnlyDictionary<string, TwitterUser> users,
+            IReadOnlyDictionary<TwitterUserId, TwitterUser> users,
             IReadOnlyDictionary<string, TwitterMessageEventList.App> apps,
-            long selfUserId,
+            TwitterUserId selfUserId,
             bool firstLoad
         )
         {
@@ -242,10 +244,11 @@ namespace OpenTween.Models
                 .ToArray();
 
             // 以下、ユーザー情報
-            var senderIsMe = eventItem.MessageCreate.SenderId == selfUserId.ToString(CultureInfo.InvariantCulture);
+            var senderId = new TwitterUserId(eventItem.MessageCreate.SenderId);
+            var senderIsMe = senderId == selfUserId;
             var displayUserId = senderIsMe
-                ? eventItem.MessageCreate.Target.RecipientId
-                : eventItem.MessageCreate.SenderId;
+                ? new TwitterUserId(eventItem.MessageCreate.Target.RecipientId)
+                : senderId;
 
             if (!users.TryGetValue(displayUserId, out var displayUser))
                 displayUser = TwitterUser.CreateUnknownUser();
@@ -293,7 +296,7 @@ namespace OpenTween.Models
                 SourceUri = sourceUri,
 
                 // displayUser から生成
-                UserId = displayUser.Id,
+                UserId = new TwitterUserId(displayUser.IdStr),
                 ScreenName = screenName,
                 Nickname = nickname,
                 ImageUrl = imageUrl,
@@ -342,9 +345,9 @@ namespace OpenTween.Models
             return text;
         }
 
-        private (List<(long UserId, string ScreenName)> ReplyToList, List<MediaInfo> Media) ExtractEntities(TwitterEntities? entities)
+        private (List<(PersonId UserId, string ScreenName)> ReplyToList, List<MediaInfo> Media) ExtractEntities(TwitterEntities? entities)
         {
-            var atList = new List<(long UserId, string ScreenName)>();
+            var atList = new List<(PersonId UserId, string ScreenName)>();
             var media = new List<MediaInfo>();
 
             if (entities == null)
@@ -361,7 +364,7 @@ namespace OpenTween.Models
             if (entities.UserMentions != null)
             {
                 foreach (var ent in entities.UserMentions)
-                    atList.Add((ent.Id, ent.ScreenName));
+                    atList.Add((new TwitterUserId(ent.IdStr), ent.ScreenName));
             }
 
             if (entities.Media != null)

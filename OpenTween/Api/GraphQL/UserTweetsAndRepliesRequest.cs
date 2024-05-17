@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using OpenTween.Connection;
+using OpenTween.Models;
 
 namespace OpenTween.Api.GraphQL
 {
@@ -34,13 +35,13 @@ namespace OpenTween.Api.GraphQL
 
         private static readonly Uri EndpointUri = new("https://twitter.com/i/api/graphql/YlkSUg0mRBx7-EkxCvc-bw/UserTweetsAndReplies");
 
-        public string UserId { get; set; }
+        public TwitterUserId UserId { get; set; }
 
         public int Count { get; set; } = 20;
 
         public TwitterGraphqlCursor? Cursor { get; set; }
 
-        public UserTweetsAndRepliesRequest(string userId)
+        public UserTweetsAndRepliesRequest(TwitterUserId userId)
             => this.UserId = userId;
 
         public Dictionary<string, string> CreateParameters()
@@ -50,7 +51,7 @@ namespace OpenTween.Api.GraphQL
             return new()
             {
                 ["variables"] = "{" +
-                    $@"""userId"":""{JsonUtils.EscapeJsonString(this.UserId)}""," +
+                    $@"""userId"":""{JsonUtils.EscapeJsonString(this.UserId.Id)}""," +
                     $@"""count"":{this.Count}," +
                     $@"""includePromotedContent"":true," +
                     $@"""withCommunity"":true," +

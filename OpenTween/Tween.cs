@@ -2491,7 +2491,7 @@ namespace OpenTween
         private async void SettingStripMenuItem_Click(object sender, EventArgs e)
         {
             // 設定画面表示前のユーザー情報
-            var previousUserId = this.settings.Common.UserId;
+            var previousAccountId = this.settings.Common.SelectedAccountKey;
             var oldIconCol = this.Use2ColumnsMode;
 
             if (this.ShowSettingDialog() == DialogResult.OK)
@@ -2683,7 +2683,7 @@ namespace OpenTween
             this.TopMost = this.settings.Common.AlwaysTop;
             this.SaveConfigsAll(false);
 
-            if (this.PrimaryAccount.UserId != previousUserId)
+            if (this.PrimaryAccount.UniqueKey != previousAccountId)
                 await this.DoGetFollowersMenu();
         }
 
@@ -3299,9 +3299,9 @@ namespace OpenTween
         /// <summary>
         /// 投稿時に auto_populate_reply_metadata オプションによって自動で追加されるメンションを除去します
         /// </summary>
-        private string RemoveAutoPopuratedMentions(string statusText, out long[] autoPopulatedUserIds)
+        private string RemoveAutoPopuratedMentions(string statusText, out PersonId[] autoPopulatedUserIds)
         {
-            var autoPopulatedUserIdList = new List<long>();
+            var autoPopulatedUserIdList = new List<PersonId>();
 
             var replyToPost = this.inReplyTo != null ? this.statuses[this.inReplyTo.Value.StatusId] : null;
             if (replyToPost != null)
@@ -3357,7 +3357,7 @@ namespace OpenTween
         /// <summary>
         /// <see cref="FormatStatusText"/> に加えて、拡張モードで140字にカウントされない文字列の除去を行います
         /// </summary>
-        private string FormatStatusTextExtended(string statusText, out long[] autoPopulatedUserIds, out string? attachmentUrl)
+        private string FormatStatusTextExtended(string statusText, out PersonId[] autoPopulatedUserIds, out string? attachmentUrl)
         {
             statusText = this.RemoveAutoPopuratedMentions(statusText, out autoPopulatedUserIds);
 
@@ -5612,7 +5612,7 @@ namespace OpenTween
                         break;
                     case UserTimelineTabModel userTab:
                         tabSetting.User = userTab.ScreenName;
-                        tabSetting.UserId = userTab.UserId;
+                        tabSetting.UserId = userTab.UserId?.Id;
                         break;
                     case PublicSearchTabModel searchTab:
                         tabSetting.SearchWords = searchTab.SearchWords;

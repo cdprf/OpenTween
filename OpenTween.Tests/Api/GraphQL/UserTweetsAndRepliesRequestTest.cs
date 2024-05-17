@@ -22,6 +22,7 @@
 using System.Threading.Tasks;
 using Moq;
 using OpenTween.Connection;
+using OpenTween.Models;
 using Xunit;
 
 namespace OpenTween.Api.GraphQL
@@ -49,7 +50,7 @@ namespace OpenTween.Api.GraphQL
                 })
                 .ReturnsAsync(apiResponse);
 
-            var request = new UserTweetsAndRepliesRequest(userId: "40480664")
+            var request = new UserTweetsAndRepliesRequest(userId: new("40480664"))
             {
                 Count = 20,
             };
@@ -83,7 +84,7 @@ namespace OpenTween.Api.GraphQL
                 })
                 .ReturnsAsync(apiResponse);
 
-            var request = new UserTweetsAndRepliesRequest(userId: "40480664")
+            var request = new UserTweetsAndRepliesRequest(userId: new("40480664"))
             {
                 Count = 20,
                 Cursor = new("aaa"),

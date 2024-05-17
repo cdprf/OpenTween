@@ -219,7 +219,7 @@ namespace OpenTween
                 {
                     StatusId = new TwitterStatusId("100"),
                     Text = "hoge",
-                    UserId = 111L,
+                    UserId = new TwitterUserId("111"),
                     ScreenName = "opentween",
                     CreatedAt = new(2024, 1, 1, 0, 0, 0),
                 };

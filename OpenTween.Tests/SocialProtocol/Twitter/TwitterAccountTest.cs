@@ -20,6 +20,7 @@
 // Boston, MA 02110-1301, USA.
 
 using System;
+using OpenTween.Models;
 using Xunit;
 
 namespace OpenTween.SocialProtocol.Twitter
@@ -38,12 +39,12 @@ namespace OpenTween.SocialProtocol.Twitter
                 TwitterAuthType = APIAuthType.OAuth1,
                 Token = "aaaaa",
                 TokenSecret = "aaaaa",
-                UserId = 11111L,
+                UserId = "11111",
                 Username = "tetete",
             };
             var settingCommon = new SettingCommon();
             account.Initialize(accountSettings, settingCommon);
-            Assert.Equal(11111L, account.UserId);
+            Assert.Equal(new TwitterUserId("11111"), account.UserId);
             Assert.Equal("tetete", account.UserName);
             Assert.Equal(APIAuthType.OAuth1, account.AuthType);
             Assert.Same(account.Legacy.Api.Connection, account.Connection);
@@ -61,12 +62,12 @@ namespace OpenTween.SocialProtocol.Twitter
                 TwitterAuthType = APIAuthType.OAuth1,
                 Token = "aaaaa",
                 TokenSecret = "aaaaa",
-                UserId = 11111L,
+                UserId = "11111",
                 Username = "tetete",
             };
             var settingCommon1 = new SettingCommon();
             account.Initialize(accountSettings1, settingCommon1);
-            Assert.Equal(11111L, account.UserId);
+            Assert.Equal(new TwitterUserId("11111"), account.UserId);
 
             var accountSettings2 = new UserAccount
             {
@@ -74,12 +75,12 @@ namespace OpenTween.SocialProtocol.Twitter
                 TwitterAuthType = APIAuthType.OAuth1,
                 Token = "bbbbb",
                 TokenSecret = "bbbbb",
-                UserId = 22222L,
+                UserId = "22222",
                 Username = "hoge",
             };
             var settingCommon2 = new SettingCommon();
             account.Initialize(accountSettings2, settingCommon2);
-            Assert.Equal(22222L, account.UserId);
+            Assert.Equal(new TwitterUserId("22222"), account.UserId);
         }
 
         [Fact]
@@ -101,7 +102,7 @@ namespace OpenTween.SocialProtocol.Twitter
                 TwitterAuthType = APIAuthType.OAuth1,
                 Token = "aaaaa",
                 TokenSecret = "aaaaa",
-                UserId = 11111L,
+                UserId = "11111",
                 Username = "tetete",
             };
             var settingCommon = new SettingCommon();
@@ -121,7 +122,7 @@ namespace OpenTween.SocialProtocol.Twitter
                 UniqueKey = accountKey,
                 TwitterAuthType = APIAuthType.TwitterComCookie,
                 TwitterComCookie = "auth_token=foo; ct0=bar",
-                UserId = 11111L,
+                UserId = "11111",
                 Username = "tetete",
             };
             var settingCommon = new SettingCommon();

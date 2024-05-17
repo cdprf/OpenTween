@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Moq;
 using OpenTween.Api.DataModel;
 using OpenTween.Connection;
+using OpenTween.Models;
 using Xunit;
 
 namespace OpenTween.Api
@@ -276,7 +277,7 @@ namespace OpenTween.Api
                     replyToId: new("100"),
                     mediaIds: new[] { 10L, 20L },
                     autoPopulateReplyMetadata: true,
-                    excludeReplyUserIds: new[] { 100L, 200L },
+                    excludeReplyUserIds: new TwitterUserId[] { new("100"), new("200") },
                     attachmentUrl: "https://twitter.com/twitterapi/status/22634515958"
                 )
                 .IgnoreResponse();
@@ -304,7 +305,7 @@ namespace OpenTween.Api
             using var twitterApi = new TwitterApi();
             twitterApi.ApiConnection = mock.Object;
 
-            await twitterApi.StatusesUpdate("hogehoge", replyToId: null, mediaIds: null, excludeReplyUserIds: Array.Empty<long>())
+            await twitterApi.StatusesUpdate("hogehoge", replyToId: null, mediaIds: null, excludeReplyUserIds: Array.Empty<TwitterUserId>())
                 .IgnoreResponse();
 
             mock.VerifyAll();
@@ -770,7 +771,7 @@ namespace OpenTween.Api
             using var twitterApi = new TwitterApi();
             twitterApi.ApiConnection = mock.Object;
 
-            await twitterApi.DirectMessagesEventsNew(recipientId: 12345L, text: "hogehoge", mediaId: 67890L);
+            await twitterApi.DirectMessagesEventsNew(recipientId: new("12345"), text: "hogehoge", mediaId: 67890L);
 
             mock.VerifyAll();
         }
@@ -847,7 +848,7 @@ namespace OpenTween.Api
             using var twitterApi = new TwitterApi();
             twitterApi.ApiConnection = mock.Object;
 
-            await twitterApi.UsersLookup(userIds: new[] { "11111", "22222" });
+            await twitterApi.UsersLookup(userIds: new TwitterUserId[] { new("11111"), new("22222") });
 
             mock.VerifyAll();
         }

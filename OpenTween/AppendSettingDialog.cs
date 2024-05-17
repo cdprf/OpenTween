@@ -191,7 +191,7 @@ namespace OpenTween
                         using var apiConnection = new TwitterApiConnection(new TwitterCredentialCookie(appToken), new());
                         twitterApi.Initialize(apiConnection);
                         var twitterUser = await twitterApi.AccountVerifyCredentials();
-                        newAccount.UserId = twitterUser.Id;
+                        newAccount.UserId = twitterUser.IdStr;
                         newAccount.Username = twitterUser.ScreenName;
                     }
                     else
@@ -280,7 +280,7 @@ namespace OpenTween
                 TwitterOAuth1ConsumerKey = appToken.OAuth1CustomConsumerKey?.Value ?? "",
                 TwitterOAuth1ConsumerSecret = appToken.OAuth1CustomConsumerSecret?.Value ?? "",
                 Username = accessTokenResponse["screen_name"],
-                UserId = long.Parse(accessTokenResponse["user_id"]),
+                UserId = accessTokenResponse["user_id"],
                 Token = accessTokenResponse["oauth_token"],
                 TokenSecret = accessTokenResponse["oauth_token_secret"],
             };
