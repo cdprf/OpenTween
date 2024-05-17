@@ -215,8 +215,21 @@ namespace OpenTween
 
         public async Task VerifyCredentialsAsync()
         {
-            var user = await this.Api.AccountVerifyCredentials()
-                .ConfigureAwait(false);
+            TwitterUser user;
+
+            if (this.Api.AuthType == APIAuthType.TwitterComCookie)
+            {
+                var request = new ViewerRequest();
+                var graphqlUser = await request.Send(this.Api.Connection)
+                    .ConfigureAwait(false);
+
+                user = graphqlUser.ToTwitterUser();
+            }
+            else
+            {
+                user = await this.Api.AccountVerifyCredentials()
+                    .ConfigureAwait(false);
+            }
 
             this.AccountState.UpdateFromUser(user);
         }
