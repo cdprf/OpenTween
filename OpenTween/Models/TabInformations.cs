@@ -110,7 +110,7 @@ namespace OpenTween.Models
                         {
                             if (tb.ListInfo.Id == list.Id)
                             {
-                                tb.ListInfo = list;
+                                tb.ListInfo = new(list);
                                 break;
                             }
                         }
