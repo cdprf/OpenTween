@@ -201,26 +201,6 @@ namespace OpenTween
             this.ResetApiStatus();
         }
 
-        public void VerifyCredentials()
-        {
-            try
-            {
-                this.VerifyCredentialsAsync().Wait();
-            }
-            catch (AggregateException ex) when (ex.InnerException is WebApiException)
-            {
-                throw new WebApiException(ex.InnerException.Message, ex);
-            }
-        }
-
-        public async Task VerifyCredentialsAsync()
-        {
-            var user = await this.Api.AccountVerifyCredentials()
-                .ConfigureAwait(false);
-
-            this.AccountState.UpdateFromUser(user);
-        }
-
         public void Initialize(TwitterApiConnection apiConnection, TwitterAccountState accountState)
         {
             this.AccountState = accountState;

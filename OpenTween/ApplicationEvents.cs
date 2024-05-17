@@ -152,7 +152,7 @@ namespace OpenTween
             // ここが Twitter API への最初のアクセスになるようにすること
             try
             {
-                ((TwitterAccount)accounts.Primary).Legacy.VerifyCredentials();
+                VerifyCredentialsSync(accounts.Primary);
             }
             catch (WebApiException ex)
             {
@@ -162,6 +162,18 @@ namespace OpenTween
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
                 );
+            }
+        }
+
+        private static void VerifyCredentialsSync(ISocialAccount account)
+        {
+            try
+            {
+                account.Client.VerifyCredentials().Wait();
+            }
+            catch (AggregateException ex) when (ex.InnerException is WebApiException)
+            {
+                throw new WebApiException(ex.InnerException.Message, ex);
             }
         }
     }

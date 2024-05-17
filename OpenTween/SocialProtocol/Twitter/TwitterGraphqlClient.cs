@@ -43,6 +43,18 @@ namespace OpenTween.SocialProtocol.Twitter
             this.account = account;
         }
 
+        public async Task<UserInfo> VerifyCredentials()
+        {
+            var request = new ViewerRequest();
+            var graphqlUser = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            var twitterUser = graphqlUser.ToTwitterUser();
+            this.account.AccountState.UpdateFromUser(twitterUser);
+
+            return new(twitterUser);
+        }
+
         public async Task<PostClass> GetPostById(PostId postId, bool firstLoad)
         {
             this.account.Legacy.CheckAccountState();
