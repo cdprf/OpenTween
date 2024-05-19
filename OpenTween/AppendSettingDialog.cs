@@ -32,7 +32,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using OpenTween.Api;
 using OpenTween.Connection;
 using OpenTween.Models;
 using OpenTween.Setting.Panel;
@@ -47,7 +46,8 @@ namespace OpenTween
         {
             this.InitializeComponent();
 
-            this.BasedPanel.AddAccountButton.Click += this.AddAccountButton_Click;
+            this.BasedPanel.ApplyNetworkSettings = this.ApplyNetworkSettings;
+            this.BasedPanel.OpenInBrowser = this.OpenInBrowser;
             this.GetPeriodPanel.CheckPostAndGet.CheckedChanged += this.CheckPostAndGet_CheckedChanged;
             this.ActionPanel.UReadMng.CheckedChanged += this.UReadMng_CheckedChanged;
 
@@ -166,60 +166,6 @@ namespace OpenTween
             }
         }
 
-        private async void AddAccountButton_Click(object sender, EventArgs e)
-        {
-            using (ControlTransaction.Disabled(this.BasedPanel.AddAccountButton))
-            {
-                try
-                {
-                    this.ApplyNetworkSettings();
-
-                    var appToken = this.SelectAuthType();
-                    if (appToken == null)
-                        return;
-
-                    UserAccount newAccount;
-                    if (appToken.AuthType == APIAuthType.TwitterComCookie)
-                    {
-                        newAccount = new()
-                        {
-                            TwitterAuthType = appToken.AuthType,
-                            TwitterComCookie = appToken.TwitterComCookie,
-                        };
-
-                        using var twitterApi = new TwitterApi();
-                        using var apiConnection = new TwitterApiConnection(new TwitterCredentialCookie(appToken), new());
-                        twitterApi.Initialize(apiConnection);
-                        var twitterUser = await twitterApi.AccountVerifyCredentials();
-                        newAccount.UserId = twitterUser.IdStr;
-                        newAccount.Username = twitterUser.ScreenName;
-                    }
-                    else
-                    {
-                        var account = await this.PinAuth(appToken);
-                        if (account == null)
-                            return;
-                        newAccount = account;
-                    }
-
-                    this.BasedPanel.AddAccount(newAccount);
-
-                    MessageBox.Show(
-                        this,
-                        Properties.Resources.AuthorizeButton_Click1,
-                        "Authenticate",
-                        MessageBoxButtons.OK);
-                }
-                catch (TwitterApiException ex)
-                {
-                    var message = Properties.Resources.AuthorizeButton_Click2 + Environment.NewLine +
-                        string.Join(Environment.NewLine, ex.LongMessages);
-
-                    MessageBox.Show(this, message, "Authenticate", MessageBoxButtons.OK);
-                }
-            }
-        }
-
         /// <summary>
         /// 現在設定画面に入力されているネットワーク関係の設定を適用します
         /// </summary>
@@ -250,40 +196,10 @@ namespace OpenTween
             TwitterApiConnection.RestApiHost = this.ConnectionPanel.TwitterAPIText.Text.Trim();
         }
 
-        private TwitterAppToken? SelectAuthType()
+        private async Task OpenInBrowser(IWin32Window? owner, Uri uri)
         {
-            using var dialog = new AuthTypeSelectDialog();
-
-            var ret = dialog.ShowDialog(this);
-            if (ret != DialogResult.OK)
-                return null;
-
-            return dialog.Result;
-        }
-
-        private async Task<UserAccount?> PinAuth(TwitterAppToken appToken)
-        {
-            var requestToken = await TwitterApiConnection.GetRequestTokenAsync(appToken);
-
-            var pinPageUrl = TwitterApiConnection.GetAuthorizeUri(requestToken);
-
             var browserPath = this.ActionPanel.BrowserPathText.Text;
-            var pin = AuthDialog.DoAuth(this, pinPageUrl, browserPath);
-            if (MyCommon.IsNullOrEmpty(pin))
-                return null; // キャンセルされた場合
-
-            var accessTokenResponse = await TwitterApiConnection.GetAccessTokenAsync(requestToken, pin);
-
-            return new UserAccount
-            {
-                TwitterAuthType = appToken.AuthType,
-                TwitterOAuth1ConsumerKey = appToken.OAuth1CustomConsumerKey?.Value ?? "",
-                TwitterOAuth1ConsumerSecret = appToken.OAuth1CustomConsumerSecret?.Value ?? "",
-                Username = accessTokenResponse["screen_name"],
-                UserId = accessTokenResponse["user_id"],
-                Token = accessTokenResponse["oauth_token"],
-                TokenSecret = accessTokenResponse["oauth_token_secret"],
-            };
+            await MyCommon.OpenInBrowserAsync(owner, browserPath, uri);
         }
 
         private void CheckPostAndGet_CheckedChanged(object sender, EventArgs e)

@@ -22,14 +22,17 @@
 #nullable enable
 
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTween.Api;
 
 namespace OpenTween.SocialProtocol.Twitter
 {
-    public partial class TwitterCookieSetupDialog : OTBaseForm
+    public partial class TwitterCookieSetupDialog : OTBaseForm, IAccountFactory
     {
         public TwitterCookieSetup Model { get; } = new();
+
+        public Func<IWin32Window?, Uri, Task>? OpenInBrowser { get; set; }
 
         public TwitterCookieSetupDialog()
         {
@@ -46,6 +49,15 @@ namespace OpenTween.SocialProtocol.Twitter
                 this.bindingSource,
                 nameof(TwitterCookieSetup.TwitterComCookie)
             );
+        }
+
+        public UserAccount? ShowAccountSetupDialog(IWin32Window? owner)
+        {
+            var ret = this.ShowDialog(owner);
+            if (ret != DialogResult.OK)
+                return null;
+
+            return this.Model.AuthorizedAccount!;
         }
 
         private async void ButtonOK_Click(object sender, EventArgs e)

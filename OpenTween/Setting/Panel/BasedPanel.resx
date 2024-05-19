@@ -24,6 +24,8 @@
 	<data name="&gt;&gt;AddAccountButton.Parent"><value>panel1</value></data>
 	<data name="&gt;&gt;AddAccountButton.Type"><value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></data>
 	<data name="&gt;&gt;AddAccountButton.ZOrder"><value>2</value></data>
+	<data name="&gt;&gt;contextMenuAddAccount.Name"><value>contextMenuAddAccount</value></data>
+	<data name="&gt;&gt;contextMenuAddAccount.Type"><value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></data>
 	<data name="&gt;&gt;MakePrimaryButton.Name"><value>MakePrimaryButton</value></data>
 	<data name="&gt;&gt;MakePrimaryButton.Parent"><value>panel1</value></data>
 	<data name="&gt;&gt;MakePrimaryButton.Type"><value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></data>
@@ -31,7 +33,7 @@
 	<data name="&gt;&gt;panel1.Name"><value>panel1</value></data>
 	<data name="&gt;&gt;panel1.Parent"><value>$this</value></data>
 	<data name="&gt;&gt;panel1.Type"><value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></data>
-	<data name="&gt;&gt;panel1.ZOrder"><value>0</value></data>
+	<data name="&gt;&gt;panel1.ZOrder"><value>1</value></data>
 	<data name="&gt;&gt;RemoveAccountButton.Name"><value>RemoveAccountButton</value></data>
 	<data name="&gt;&gt;RemoveAccountButton.Parent"><value>panel1</value></data>
 	<data name="&gt;&gt;RemoveAccountButton.Type"><value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></data>
@@ -57,6 +59,8 @@
 	<data name="AddAccountButton.Size" type="System.Drawing.Size, System.Drawing"><value>100, 25</value></data>
 	<data name="AddAccountButton.TabIndex" type="System.Int32, mscorlib"><value>2</value></data>
 	<data name="AddAccountButton.Text"><value>追加</value></data>
+	<data name="contextMenuAddAccount.Size" type="System.Drawing.Size, System.Drawing"><value>181, 26</value></data>
+	<metadata name="contextMenuAddAccount.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"><value>17, 17</value></metadata>
 	<data name="MakePrimaryButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms"><value>Top, Right</value></data>
 	<data name="MakePrimaryButton.AutoSize" type="System.Boolean, mscorlib"><value>True</value></data>
 	<data name="MakePrimaryButton.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms"><value>NoControl</value></data>

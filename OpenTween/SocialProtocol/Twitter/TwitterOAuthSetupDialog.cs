@@ -23,14 +23,17 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTween.Api;
 
 namespace OpenTween.SocialProtocol.Twitter
 {
-    public partial class TwitterOAuthSetupDialog : OTBaseForm
+    public partial class TwitterOAuthSetupDialog : OTBaseForm, IAccountFactory
     {
         public TwitterOAuthSetup Model { get; } = new();
+
+        public Func<IWin32Window?, Uri, Task>? OpenInBrowser { get; set; }
 
         public TwitterOAuthSetupDialog()
         {
@@ -96,6 +99,15 @@ namespace OpenTween.SocialProtocol.Twitter
             );
         }
 
+        public UserAccount? ShowAccountSetupDialog(IWin32Window? owner)
+        {
+            var ret = this.ShowDialog(owner);
+            if (ret != DialogResult.OK)
+                return null;
+
+            return this.Model.AuthorizedAccount!;
+        }
+
         private async void ButtonGetAuthorizeUri_Click(object sender, EventArgs e)
         {
             using (ControlTransaction.Disabled(this))
@@ -123,7 +135,10 @@ namespace OpenTween.SocialProtocol.Twitter
             if (e.Button == MouseButtons.Right)
                 return;
 
-            await MyCommon.OpenInBrowserAsync(this, this.Model.AuthorizeUri);
+            if (this.OpenInBrowser == null)
+                throw new InvalidOperationException($"{nameof(this.OpenInBrowser)} is not set");
+
+            await this.OpenInBrowser(this, this.Model.AuthorizeUri);
         }
 
         private void MenuItemCopyLink_Click(object sender, EventArgs e)
