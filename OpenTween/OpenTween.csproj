@@ -83,12 +83,6 @@
     <Compile Update="AppendSettingDialog.Designer.cs">
       <DependentUpon>AppendSettingDialog.cs</DependentUpon>
     </Compile>
-    <Compile Update="AuthDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="AuthDialog.Designer.cs">
-      <DependentUpon>AuthDialog.cs</DependentUpon>
-    </Compile>
     <Compile Update="EncryptApiKeyDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -339,12 +333,6 @@
   <ItemGroup>
     <EmbeddedResource Update="ApiInfoDialog.resx">
       <DependentUpon>ApiInfoDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="AuthDialog.en.resx">
-      <DependentUpon>AuthDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="AuthDialog.resx">
-      <DependentUpon>AuthDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Update="Controls\PublicSearchHeaderPanel.resx">
       <DependentUpon>PublicSearchHeaderPanel.cs</DependentUpon>
