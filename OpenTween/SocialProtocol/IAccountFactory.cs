@@ -1,5 +1,5 @@
 ﻿// OpenTween - Client of Twitter
-// Copyright (c) 2023 kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
+// Copyright (c) 2024 kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
 // All rights reserved.
 //
 // This file is part of OpenTween.
@@ -19,21 +19,18 @@
 // the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
 // Boston, MA 02110-1301, USA.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+#nullable enable
 
-namespace OpenTween
+using System;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace OpenTween.SocialProtocol
 {
-    public class AuthTypeSelectDialogTest
+    public interface IAccountFactory : IDisposable
     {
-        [WinFormsFact]
-        public void Initialize_Test()
-        {
-            using var dialog = new AuthTypeSelectDialog();
-        }
+        public Func<IWin32Window?, Uri, Task>? OpenInBrowser { get; set; }
+
+        public UserAccount? ShowAccountSetupDialog(IWin32Window? owner);
     }
 }

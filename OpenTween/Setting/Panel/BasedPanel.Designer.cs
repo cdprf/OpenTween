@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BasedPanel));
             this.AccountListLabel = new System.Windows.Forms.Label();
             this.AccountsListBox = new System.Windows.Forms.ListBox();
@@ -35,6 +36,7 @@
             this.RemoveAccountButton = new System.Windows.Forms.Button();
             this.MakePrimaryButton = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.contextMenuAddAccount = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -54,6 +56,7 @@
             resources.ApplyResources(this.AddAccountButton, "AddAccountButton");
             this.AddAccountButton.Name = "AddAccountButton";
             this.AddAccountButton.UseVisualStyleBackColor = true;
+            this.AddAccountButton.Click += new System.EventHandler(this.AddAccountButton_Click);
             // 
             // RemoveAccountButton
             // 
@@ -79,6 +82,11 @@
             resources.ApplyResources(this.panel1, "panel1");
             this.panel1.Name = "panel1";
             // 
+            // contextMenuAddAccount
+            // 
+            this.contextMenuAddAccount.Name = "contextMenuAddAccount";
+            resources.ApplyResources(this.contextMenuAddAccount, "contextMenuAddAccount");
+            // 
             // BasedPanel
             // 
             resources.ApplyResources(this, "$this");
@@ -98,5 +106,6 @@
         internal System.Windows.Forms.Button RemoveAccountButton;
         internal System.Windows.Forms.Button MakePrimaryButton;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuAddAccount;
     }
 }

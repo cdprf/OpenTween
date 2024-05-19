@@ -30,12 +30,21 @@ using System;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using OpenTween.SocialProtocol;
 
 namespace OpenTween.Setting.Panel
 {
     public partial class BasedPanel : SettingPanelBase
     {
         internal BindingList<AccountListBoxItem> AccountsList { get; } = new();
+
+        internal Action? ApplyNetworkSettings { get; set; }
+
+        internal Func<IWin32Window?, Uri, Task>? OpenInBrowser { get; set; }
+
+        private readonly AccountSetupDispatcher setupDispatcher = new();
 
         internal record AccountListBoxItem(UserAccount AccountSettings, bool IsPrimary)
         {
@@ -61,12 +70,29 @@ namespace OpenTween.Setting.Panel
         {
             this.InitializeComponent();
             this.InitializeBinding();
+            this.InitializeAddAccountDropdown();
         }
 
         private void InitializeBinding()
         {
             this.AccountsListBox.DataSource = this.AccountsList;
             this.AccountsListBox.DisplayMember = nameof(AccountListBoxItem.DisplayText);
+        }
+
+        private void InitializeAddAccountDropdown()
+        {
+            foreach (var (id, caption) in this.setupDispatcher.GetCaptions())
+            {
+                var menuItem = new ToolStripMenuItem
+                {
+                    Text = caption,
+                    Tag = id,
+                };
+                menuItem.Click += this.AddAccountMenuItem_Click;
+
+                this.contextMenuAddAccount.Items.Add(menuItem);
+                this.components.Add(menuItem);
+            }
         }
 
         public void LoadConfig(SettingCommon settingCommon)
@@ -153,6 +179,34 @@ namespace OpenTween.Setting.Panel
 
             this.AccountsList[index] =
                 this.AccountsList[index] with { IsPrimary = true };
+        }
+
+        private void AddAccountButton_Click(object sender, EventArgs e)
+        {
+            this.contextMenuAddAccount.Show(
+                this.AddAccountButton,
+                new(x: 0, y: this.AddAccountButton.Height)
+            );
+        }
+
+        private void AddAccountMenuItem_Click(object sender, EventArgs e)
+        {
+            var setupId = (Guid)((ToolStripMenuItem)sender).Tag;
+
+            this.ApplyNetworkSettings?.Invoke();
+
+            var authorizedAccount = this.setupDispatcher.Dispatch(this, setupId, this.OpenInBrowser);
+            if (authorizedAccount == null)
+                return;
+
+            this.AddAccount(authorizedAccount);
+
+            MessageBox.Show(
+                this,
+                Properties.Resources.AuthorizeButton_Click1,
+                "Authenticate",
+                MessageBoxButtons.OK
+            );
         }
 
         private void RemoveAccountButton_Click(object sender, EventArgs e)
