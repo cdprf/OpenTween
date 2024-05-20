@@ -549,9 +549,6 @@ namespace OpenTween
             return posts;
         }
 
-        internal PostClass[] FilterNoRetweetUserPosts(PostClass[] posts)
-            => posts.Where(x => x.RetweetedByUserId == null || !this.AccountState.NoRetweetUserIds.Contains(x.RetweetedByUserId)).ToArray();
-
         public async Task GetDirectMessageEvents(DirectMessagesTabModel dmTab, bool backward, bool firstLoad)
         {
             this.CheckAccountState();

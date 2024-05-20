@@ -97,7 +97,9 @@ namespace OpenTween.SocialProtocol.Twitter
             var cursorBottom = response.CursorBottom;
 
             var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
-            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            var filter = new TimelineResponseFilter(this.account.AccountState);
+            posts = filter.Run(posts);
 
             return new(posts, cursorTop, cursorBottom);
         }
@@ -120,7 +122,9 @@ namespace OpenTween.SocialProtocol.Twitter
             var cursorBottom = response.CursorBottom;
 
             var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
-            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            var filter = new TimelineResponseFilter(this.account.AccountState);
+            posts = filter.Run(posts);
 
             return new(posts, cursorTop, cursorBottom);
         }
@@ -144,7 +148,9 @@ namespace OpenTween.SocialProtocol.Twitter
             var cursorBottom = response.CursorBottom;
 
             var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
-            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            var filter = new TimelineResponseFilter(this.account.AccountState);
+            posts = filter.Run(posts);
 
             return new(posts, cursorTop, cursorBottom);
         }
@@ -167,7 +173,9 @@ namespace OpenTween.SocialProtocol.Twitter
             var cursorBottom = response.CursorBottom;
 
             var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
-            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            var filter = new TimelineResponseFilter(this.account.AccountState);
+            posts = filter.Run(posts);
 
             return new(posts, cursorTop, cursorBottom);
         }
@@ -193,7 +201,9 @@ namespace OpenTween.SocialProtocol.Twitter
             var cursorBottom = response.CursorBottom;
 
             var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
-            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            var filter = new TimelineResponseFilter(this.account.AccountState);
+            posts = filter.Run(posts);
 
             return new(posts, cursorTop, cursorBottom);
         }
