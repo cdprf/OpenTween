@@ -33,6 +33,7 @@ using OpenTween.Api;
 using OpenTween.Api.DataModel;
 using OpenTween.Connection;
 using OpenTween.Models;
+using OpenTween.Setting;
 
 namespace OpenTween.SocialProtocol.Twitter
 {
@@ -75,6 +76,54 @@ namespace OpenTween.SocialProtocol.Twitter
             var (sinceId, maxId) = GetCursorParams(cursor);
 
             var statuses = await this.account.Legacy.Api.StatusesHomeTimeline(count, maxId, sinceId)
+                .ConfigureAwait(false);
+
+            var (cursorTop, cursorBottom) = GetCursorFromResponse(statuses);
+            var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            return new(posts, cursorTop, cursorBottom);
+        }
+
+        public async Task<TimelineResponse> GetMentionsTimeline(int count, IQueryCursor? cursor, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+
+            var (sinceId, maxId) = GetCursorParams(cursor);
+
+            var statuses = await this.account.Legacy.Api.StatusesMentionsTimeline(count, maxId, sinceId)
+                .ConfigureAwait(false);
+
+            var (cursorTop, cursorBottom) = GetCursorFromResponse(statuses);
+            var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            return new(posts, cursorTop, cursorBottom);
+        }
+
+        public async Task<TimelineResponse> GetFavoritesTimeline(int count, IQueryCursor? cursor, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+
+            var (sinceId, maxId) = GetCursorParams(cursor);
+
+            var statuses = await this.account.Legacy.Api.FavoritesList(count, maxId, sinceId)
+                .ConfigureAwait(false);
+
+            var (cursorTop, cursorBottom) = GetCursorFromResponse(statuses);
+            var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            return new(posts, cursorTop, cursorBottom);
+        }
+
+        public async Task<TimelineResponse> GetListTimeline(long listId, int count, IQueryCursor? cursor, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+            var (sinceId, maxId) = GetCursorParams(cursor);
+
+            var includeRTs = SettingManager.Instance.Common.IsListsIncludeRts;
+            var statuses = await this.account.Legacy.Api.ListsStatuses(listId, count, maxId, sinceId, includeRTs)
                 .ConfigureAwait(false);
 
             var (cursorTop, cursorBottom) = GetCursorFromResponse(statuses);
