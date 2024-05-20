@@ -684,53 +684,6 @@ namespace OpenTween
             return posts.ToArray();
         }
 
-        public async Task GetFavoritesApi(FavoritesTabModel tab, bool backward, bool firstLoad)
-        {
-            this.CheckAccountState();
-
-            var count = GetApiResultCount(MyCommon.WORKERTYPE.Favorites, backward, firstLoad);
-
-            TwitterStatus[] statuses;
-            if (this.Api.AuthType == APIAuthType.TwitterComCookie)
-            {
-                var cursor = backward ? tab.CursorBottom : tab.CursorTop;
-                var request = new LikesRequest
-                {
-                    UserId = this.UserId,
-                    Count = count,
-                    Cursor = cursor?.As<TwitterGraphqlCursor>(),
-                };
-                var response = await request.Send(this.Api.Connection)
-                    .ConfigureAwait(false);
-
-                statuses = response.ToTwitterStatuses();
-
-                tab.CursorBottom = response.CursorBottom;
-
-                if (!backward)
-                    tab.CursorTop = response.CursorTop;
-            }
-            else
-            {
-                var maxId = backward ? tab.CursorBottom : null;
-
-                statuses = await this.Api.FavoritesList(count, maxId: maxId?.As<TwitterStatusId>())
-                    .ConfigureAwait(false);
-
-                if (statuses.Length > 0)
-                {
-                    var min = statuses.Select(x => new TwitterStatusId(x.IdStr)).Min();
-                    tab.CursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
-                }
-            }
-
-            var posts = this.CreatePostsFromJson(statuses, firstLoad);
-            posts = this.FilterNoRetweetUserPosts(posts);
-
-            foreach (var post in posts)
-                TabInformations.GetInstance().AddPost(post);
-        }
-
         /// <summary>
         /// フォロワーIDを更新します
         /// </summary>

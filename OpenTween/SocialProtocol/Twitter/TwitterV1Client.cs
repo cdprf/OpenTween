@@ -100,6 +100,22 @@ namespace OpenTween.SocialProtocol.Twitter
             return new(posts, cursorTop, cursorBottom);
         }
 
+        public async Task<TimelineResponse> GetFavoritesTimeline(int count, IQueryCursor? cursor, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+
+            var (sinceId, maxId) = GetCursorParams(cursor);
+
+            var statuses = await this.account.Legacy.Api.FavoritesList(count, maxId, sinceId)
+                .ConfigureAwait(false);
+
+            var (cursorTop, cursorBottom) = GetCursorFromResponse(statuses);
+            var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            return new(posts, cursorTop, cursorBottom);
+        }
+
         public async Task<TimelineResponse> GetSearchTimeline(string query, string lang, int count, IQueryCursor? cursor, bool firstLoad)
         {
             this.account.Legacy.CheckAccountState();
