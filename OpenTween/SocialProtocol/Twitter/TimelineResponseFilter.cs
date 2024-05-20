@@ -51,7 +51,10 @@ namespace OpenTween.SocialProtocol.Twitter
             filteredPosts = this.FilterNoRetweetUserPosts(filteredPosts);
 
             if (this.IsHomeTimeline)
+            {
                 filteredPosts = this.FilterBlockedUserPosts(filteredPosts);
+                filteredPosts = this.FilterMutedUserPosts(filteredPosts);
+            }
 
             return filteredPosts.ToArray();
         }
@@ -61,5 +64,26 @@ namespace OpenTween.SocialProtocol.Twitter
 
         private IEnumerable<PostClass> FilterBlockedUserPosts(IEnumerable<PostClass> posts)
             => posts.Where(x => !this.accountState.BlockedUserIds.Contains(x.UserId));
+
+        private IEnumerable<PostClass> FilterMutedUserPosts(IEnumerable<PostClass> posts)
+            => posts.Where(x => !this.IsMutedPost(x));
+
+        private bool IsMutedPost(PostClass post)
+        {
+            // Twitter 標準のミュート機能に準じた判定
+            // 参照: https://support.twitter.com/articles/20171399-muting-users-on-twitter
+
+            // リプライはミュート対象外
+            if (post.IsReply)
+                return false;
+
+            if (this.accountState.MutedUserIds.Contains(post.UserId))
+                return true;
+
+            if (post.RetweetedByUserId != null && this.accountState.MutedUserIds.Contains(post.RetweetedByUserId))
+                return true;
+
+            return false;
+        }
     }
 }

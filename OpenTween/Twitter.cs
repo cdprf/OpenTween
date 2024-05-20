@@ -826,7 +826,7 @@ namespace OpenTween
             var ids = await TwitterIds.GetAllItemsAsync(x => this.Api.MutesUsersIds(x))
                 .ConfigureAwait(false);
 
-            TabInformations.GetInstance().MuteUserIds = ids.ToHashSet<PersonId>();
+            this.AccountState.MutedUserIds = ids.ToHashSet<PersonId>();
         }
 
         public string[] GetHashList()

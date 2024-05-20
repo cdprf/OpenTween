@@ -54,8 +54,6 @@ namespace OpenTween.Models
 
         public Stack<TabModel> RemovedTab { get; } = new();
 
-        public ISet<PersonId> MuteUserIds { get; set; } = new HashSet<PersonId>();
-
         // 発言の追加
         // AddPost(複数回) -> DistributePosts          -> SubmitUpdate
 
@@ -574,7 +572,7 @@ namespace OpenTween.Models
 
             lock (this.lockObj)
             {
-                if (this.IsMuted(item, isHomeTimeline: true))
+                if (this.IsMuted(item))
                     return;
 
                 if (this.Posts.TryGetValue(item.StatusId, out var status))
@@ -618,27 +616,10 @@ namespace OpenTween.Models
             }
         }
 
-        public bool IsMuted(PostClass post, bool isHomeTimeline)
+        public bool IsMuted(PostClass post)
         {
             var muteTab = this.MuteTab;
             if (muteTab != null && muteTab.AddFiltered(post) == MyCommon.HITRESULT.Move)
-                return true;
-
-            // これ以降は Twitter 標準のミュート機能に準じた判定
-            // 参照: https://support.twitter.com/articles/20171399-muting-users-on-twitter
-
-            // ホームタイムライン以外 (検索・リストなど) は対象外
-            if (!isHomeTimeline)
-                return false;
-
-            // リプライはミュート対象外
-            if (post.IsReply)
-                return false;
-
-            if (this.MuteUserIds.Contains(post.UserId))
-                return true;
-
-            if (post.RetweetedByUserId != null && this.MuteUserIds.Contains(post.RetweetedByUserId))
                 return true;
 
             return false;
@@ -658,7 +639,7 @@ namespace OpenTween.Models
         {
             lock (this.lockObj)
             {
-                if (this.IsMuted(item, isHomeTimeline: false))
+                if (this.IsMuted(item))
                     return false;
 
                 this.quotes[item.StatusId] = item;

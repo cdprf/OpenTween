@@ -194,5 +194,150 @@ namespace OpenTween.SocialProtocol.Twitter
             Assert.Single(filteredPosts);
             Assert.Equal(new TwitterStatusId("100"), filteredPosts[0].StatusId);
         }
+
+        [Fact]
+        public void Run_FilterMutedUserPosts_FilteredTest()
+        {
+            var accountState = new TwitterAccountState
+            {
+                MutedUserIds = new HashSet<PersonId>
+                {
+                    new TwitterUserId("111"),
+                },
+            };
+            var posts = new[]
+            {
+                new PostClass
+                {
+                    StatusId = new TwitterStatusId("100"),
+                    UserId = new TwitterUserId("111"),
+                },
+            };
+
+            var filter = new TimelineResponseFilter(accountState)
+            {
+                IsHomeTimeline = true,
+            };
+            var filteredPosts = filter.Run(posts);
+
+            Assert.Empty(filteredPosts);
+        }
+
+        [Fact]
+        public void Run_FilterMutedUserPosts_FilteredRetweetTest()
+        {
+            var accountState = new TwitterAccountState
+            {
+                MutedUserIds = new HashSet<PersonId>
+                {
+                    new TwitterUserId("111"),
+                },
+            };
+            var posts = new[]
+            {
+                new PostClass
+                {
+                    StatusId = new TwitterStatusId("100"),
+                    UserId = new TwitterUserId("222"),
+                    RetweetedByUserId = new TwitterUserId("111"), // RT したユーザーもミュート対象となる
+                },
+            };
+
+            var filter = new TimelineResponseFilter(accountState)
+            {
+                IsHomeTimeline = true,
+            };
+            var filteredPosts = filter.Run(posts);
+
+            Assert.Empty(filteredPosts);
+        }
+
+        [Fact]
+        public void Run_FilterMutedUserPosts_NotFilteredTest()
+        {
+            var accountState = new TwitterAccountState
+            {
+                MutedUserIds = new HashSet<PersonId>
+                {
+                    new TwitterUserId("111"),
+                },
+            };
+            var posts = new[]
+            {
+                new PostClass
+                {
+                    StatusId = new TwitterStatusId("100"),
+                    UserId = new TwitterUserId("222"), // MutedUserIds にないユーザー
+                },
+            };
+
+            var filter = new TimelineResponseFilter(accountState)
+            {
+                IsHomeTimeline = true,
+            };
+            var filteredPosts = filter.Run(posts);
+
+            Assert.Single(filteredPosts);
+            Assert.Equal(new TwitterStatusId("100"), filteredPosts[0].StatusId);
+        }
+
+        [Fact]
+        public void Run_FilterMutedUserPosts_ReplyTest()
+        {
+            var accountState = new TwitterAccountState
+            {
+                MutedUserIds = new HashSet<PersonId>
+                {
+                    new TwitterUserId("111"),
+                },
+            };
+            var posts = new[]
+            {
+                new PostClass
+                {
+                    StatusId = new TwitterStatusId("100"),
+                    UserId = new TwitterUserId("111"),
+                    IsReply = true, // リプライの場合は MutedUserIds に含まれていてもフィルタ対象外
+                },
+            };
+
+            var filter = new TimelineResponseFilter(accountState)
+            {
+                IsHomeTimeline = true,
+            };
+            var filteredPosts = filter.Run(posts);
+
+            Assert.Single(filteredPosts);
+            Assert.Equal(new TwitterStatusId("100"), filteredPosts[0].StatusId);
+        }
+
+        [Fact]
+        public void Run_FilterMutedUserPosts_NotHomeTimelineTest()
+        {
+            var accountState = new TwitterAccountState
+            {
+                MutedUserIds = new HashSet<PersonId>
+                {
+                    new TwitterUserId("111"),
+                },
+            };
+            var posts = new[]
+            {
+                new PostClass
+                {
+                    StatusId = new TwitterStatusId("100"),
+                    UserId = new TwitterUserId("111"),
+                },
+            };
+
+            var filter = new TimelineResponseFilter(accountState)
+            {
+                IsHomeTimeline = false, // ホームタイムライン以外では MutedUserIds によるフィルタを行わない
+            };
+            var filteredPosts = filter.Run(posts);
+
+            Assert.Single(filteredPosts);
+            Assert.Equal(new TwitterStatusId("100"), filteredPosts[0].StatusId);
+        }
     }
 }

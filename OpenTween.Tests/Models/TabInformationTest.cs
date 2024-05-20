@@ -540,93 +540,8 @@ namespace OpenTween.Models
         }
 
         [Fact]
-        public void IsMuted_Test()
+        public void IsMuted_MuteTabRules_Test()
         {
-            this.tabinfo.MuteUserIds = new HashSet<PersonId> { new TwitterUserId("12345") };
-
-            var post = new PostClass
-            {
-                UserId = new TwitterUserId("12345"),
-                Text = "hogehoge",
-            };
-            Assert.True(this.tabinfo.IsMuted(post, isHomeTimeline: true));
-        }
-
-        [Fact]
-        public void IsMuted_NotMutingTest()
-        {
-            this.tabinfo.MuteUserIds = new HashSet<PersonId> { new TwitterUserId("12345") };
-
-            var post = new PostClass
-            {
-                UserId = new TwitterUserId("11111"),
-                Text = "hogehoge",
-            };
-            Assert.False(this.tabinfo.IsMuted(post, isHomeTimeline: true));
-        }
-
-        [Fact]
-        public void IsMuted_RetweetTest()
-        {
-            this.tabinfo.MuteUserIds = new HashSet<PersonId> { new TwitterUserId("12345") };
-
-            var post = new PostClass
-            {
-                UserId = new TwitterUserId("11111"),
-                RetweetedByUserId = new TwitterUserId("12345"),
-                Text = "hogehoge",
-            };
-            Assert.True(this.tabinfo.IsMuted(post, isHomeTimeline: true));
-        }
-
-        [Fact]
-        public void IsMuted_RetweetNotMutingTest()
-        {
-            this.tabinfo.MuteUserIds = new HashSet<PersonId> { new TwitterUserId("12345") };
-
-            var post = new PostClass
-            {
-                UserId = new TwitterUserId("11111"),
-                RetweetedByUserId = new TwitterUserId("22222"),
-                Text = "hogehoge",
-            };
-            Assert.False(this.tabinfo.IsMuted(post, isHomeTimeline: true));
-        }
-
-        [Fact]
-        public void IsMuted_ReplyTest()
-        {
-            this.tabinfo.MuteUserIds = new HashSet<PersonId> { new TwitterUserId("12345") };
-
-            // ミュート対象のユーザーであってもリプライの場合は対象外とする
-            var post = new PostClass
-            {
-                UserId = new TwitterUserId("12345"),
-                Text = "@foo hogehoge",
-                IsReply = true,
-            };
-            Assert.False(this.tabinfo.IsMuted(post, isHomeTimeline: true));
-        }
-
-        [Fact]
-        public void IsMuted_NotInHomeTimelineTest()
-        {
-            this.tabinfo.MuteUserIds = new HashSet<PersonId> { new TwitterUserId("12345") };
-
-            // Recent以外のタブ（検索など）の場合は対象外とする
-            var post = new PostClass
-            {
-                UserId = new TwitterUserId("12345"),
-                Text = "hogehoge",
-            };
-            Assert.False(this.tabinfo.IsMuted(post, isHomeTimeline: false));
-        }
-
-        [Fact]
-        public void IsMuted_MuteTabRulesTest()
-        {
-            this.tabinfo.MuteUserIds = new HashSet<PersonId> { };
-
             var muteTab = new MuteTabModel();
             muteTab.AddFilter(new PostFilterRule
             {
@@ -641,14 +556,12 @@ namespace OpenTween.Models
                 ScreenName = "foo",
                 Text = "hogehoge",
             };
-            Assert.True(this.tabinfo.IsMuted(post, isHomeTimeline: true));
+            Assert.True(this.tabinfo.IsMuted(post));
         }
 
         [Fact]
-        public void IsMuted_MuteTabRules_NotInHomeTimelineTest()
+        public void IsMuted_MuteTabRules_NotFilteredTest()
         {
-            this.tabinfo.MuteUserIds = new HashSet<PersonId> { };
-
             var muteTab = new MuteTabModel();
             muteTab.AddFilter(new PostFilterRule
             {
@@ -657,15 +570,14 @@ namespace OpenTween.Models
             });
             this.tabinfo.AddTab(muteTab);
 
-            // ミュートタブによるミュートはリプライも対象とする
+            // フィルタ条件に合致しない投稿
             var post = new PostClass
             {
-                UserId = new TwitterUserId("12345"),
-                ScreenName = "foo",
-                Text = "@hoge hogehoge",
-                IsReply = true,
+                UserId = new TwitterUserId("67890"),
+                ScreenName = "bar",
+                Text = "hogehoge",
             };
-            Assert.True(this.tabinfo.IsMuted(post, isHomeTimeline: false));
+            Assert.False(this.tabinfo.IsMuted(post));
         }
 
         [Fact]
