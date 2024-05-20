@@ -81,7 +81,10 @@ namespace OpenTween.SocialProtocol.Twitter
             var (cursorTop, cursorBottom) = GetCursorFromResponse(statuses);
             var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
 
-            var filter = new TimelineResponseFilter(this.account.AccountState);
+            var filter = new TimelineResponseFilter(this.account.AccountState)
+            {
+                IsHomeTimeline = true,
+            };
             posts = filter.Run(posts);
 
             return new(posts, cursorTop, cursorBottom);

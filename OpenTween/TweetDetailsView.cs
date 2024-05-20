@@ -42,6 +42,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTween.Models;
 using OpenTween.Setting;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {
@@ -369,6 +370,12 @@ namespace OpenTween
                 catch (WebApiException ex)
                 {
                     return FormatQuoteTweetHtml(statusId, WebUtility.HtmlEncode($"Err:{ex.Message}(GetStatus)"), isReply);
+                }
+
+                if (this.Owner.CurrentTabAccount is TwitterAccount twAccount)
+                {
+                    if (twAccount.AccountState.BlockedUserIds.Contains(post.UserId))
+                        return FormatQuoteTweetHtml(statusId, "This Tweet is unavailable.", isReply);
                 }
 
                 if (!TabInformations.GetInstance().AddQuoteTweet(post))

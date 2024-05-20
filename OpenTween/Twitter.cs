@@ -812,7 +812,7 @@ namespace OpenTween
             var blockIdsSet = newBlockIds.ToHashSet();
             blockIdsSet.Remove(this.UserId); // 元のソースにあったので一応残しておく
 
-            TabInformations.GetInstance().BlockIds = blockIdsSet;
+            this.AccountState.BlockedUserIds = blockIdsSet;
         }
 
         /// <summary>

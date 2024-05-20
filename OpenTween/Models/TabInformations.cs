@@ -54,8 +54,6 @@ namespace OpenTween.Models
 
         public Stack<TabModel> RemovedTab { get; } = new();
 
-        public ISet<PersonId> BlockIds { get; set; } = new HashSet<PersonId>();
-
         public ISet<PersonId> MuteUserIds { get; set; } = new HashSet<PersonId>();
 
         // 発言の追加
@@ -610,9 +608,6 @@ namespace OpenTween.Models
                             return;
                     }
 
-                    if (this.BlockIds.Contains(item.UserId))
-                        return;
-
                     this.Posts.TryAdd(item.StatusId, item);
                 }
                 if (item.IsFav && this.retweetsCount.ContainsKey(item.StatusId))
@@ -663,7 +658,7 @@ namespace OpenTween.Models
         {
             lock (this.lockObj)
             {
-                if (this.IsMuted(item, isHomeTimeline: false) || this.BlockIds.Contains(item.UserId))
+                if (this.IsMuted(item, isHomeTimeline: false))
                     return false;
 
                 this.quotes[item.StatusId] = item;

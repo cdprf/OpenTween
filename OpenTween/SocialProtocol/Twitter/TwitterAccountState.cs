@@ -41,6 +41,8 @@ namespace OpenTween.SocialProtocol.Twitter
 
         public ISet<PersonId> FollowerIds { get; set; } = new HashSet<PersonId>();
 
+        public ISet<PersonId> BlockedUserIds { get; set; } = new HashSet<PersonId>();
+
         public ISet<TwitterUserId> NoRetweetUserIds { get; set; } = new HashSet<TwitterUserId>();
 
         public bool HasUnrecoverableError { get; set; } = true;

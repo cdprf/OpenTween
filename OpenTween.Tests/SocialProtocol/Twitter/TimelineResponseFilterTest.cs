@@ -108,5 +108,91 @@ namespace OpenTween.SocialProtocol.Twitter
             Assert.Single(filteredPosts);
             Assert.Equal(new TwitterStatusId("100"), filteredPosts[0].StatusId);
         }
+
+        [Fact]
+        public void Run_FilterByBlockedUser_FilteredTest()
+        {
+            var accountState = new TwitterAccountState
+            {
+                BlockedUserIds = new HashSet<PersonId>
+                {
+                    new TwitterUserId("111"),
+                },
+            };
+            var posts = new[]
+            {
+                new PostClass
+                {
+                    StatusId = new TwitterStatusId("100"),
+                    UserId = new TwitterUserId("111"),
+                },
+            };
+
+            var filter = new TimelineResponseFilter(accountState)
+            {
+                IsHomeTimeline = true,
+            };
+            var filteredPosts = filter.Run(posts);
+
+            Assert.Empty(filteredPosts);
+        }
+
+        [Fact]
+        public void Run_FilterByBlockedUser_NotFilteredTest()
+        {
+            var accountState = new TwitterAccountState
+            {
+                BlockedUserIds = new HashSet<PersonId>
+                {
+                    new TwitterUserId("111"),
+                },
+            };
+            var posts = new[]
+            {
+                new PostClass
+                {
+                    StatusId = new TwitterStatusId("100"),
+                    UserId = new TwitterUserId("222"), // ブロックされたユーザーではない
+                },
+            };
+
+            var filter = new TimelineResponseFilter(accountState)
+            {
+                IsHomeTimeline = true,
+            };
+            var filteredPosts = filter.Run(posts);
+
+            Assert.Single(filteredPosts);
+            Assert.Equal(new TwitterStatusId("100"), filteredPosts[0].StatusId);
+        }
+
+        [Fact]
+        public void Run_FilterByBlockedUser_NotHomeTimelineTest()
+        {
+            var accountState = new TwitterAccountState
+            {
+                BlockedUserIds = new HashSet<PersonId>
+                {
+                    new TwitterUserId("111"),
+                },
+            };
+            var posts = new[]
+            {
+                new PostClass
+                {
+                    StatusId = new TwitterStatusId("100"),
+                    UserId = new TwitterUserId("111"),
+                },
+            };
+
+            var filter = new TimelineResponseFilter(accountState)
+            {
+                IsHomeTimeline = false, // ホームタイムライン以外では BlockedUserIds によるフィルタを行わない
+            };
+            var filteredPosts = filter.Run(posts);
+
+            Assert.Single(filteredPosts);
+            Assert.Equal(new TwitterStatusId("100"), filteredPosts[0].StatusId);
+        }
     }
 }
