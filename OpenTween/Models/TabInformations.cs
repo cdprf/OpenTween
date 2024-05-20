@@ -572,7 +572,7 @@ namespace OpenTween.Models
 
             lock (this.lockObj)
             {
-                if (this.IsMuted(item))
+                if (this.IsGlobalMuted(item))
                     return;
 
                 if (this.Posts.TryGetValue(item.StatusId, out var status))
@@ -616,7 +616,7 @@ namespace OpenTween.Models
             }
         }
 
-        public bool IsMuted(PostClass post)
+        public bool IsGlobalMuted(PostClass post)
         {
             var muteTab = this.MuteTab;
             if (muteTab != null && muteTab.AddFiltered(post) == MyCommon.HITRESULT.Move)
@@ -639,7 +639,7 @@ namespace OpenTween.Models
         {
             lock (this.lockObj)
             {
-                if (this.IsMuted(item))
+                if (this.IsGlobalMuted(item))
                     return false;
 
                 this.quotes[item.StatusId] = item;

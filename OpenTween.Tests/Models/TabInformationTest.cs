@@ -540,7 +540,7 @@ namespace OpenTween.Models
         }
 
         [Fact]
-        public void IsMuted_MuteTabRules_Test()
+        public void IsGlobalMuted_MuteTabRules_Test()
         {
             var muteTab = new MuteTabModel();
             muteTab.AddFilter(new PostFilterRule
@@ -556,11 +556,11 @@ namespace OpenTween.Models
                 ScreenName = "foo",
                 Text = "hogehoge",
             };
-            Assert.True(this.tabinfo.IsMuted(post));
+            Assert.True(this.tabinfo.IsGlobalMuted(post));
         }
 
         [Fact]
-        public void IsMuted_MuteTabRules_NotFilteredTest()
+        public void IsGlobalMuted_MuteTabRules_NotFilteredTest()
         {
             var muteTab = new MuteTabModel();
             muteTab.AddFilter(new PostFilterRule
@@ -577,7 +577,7 @@ namespace OpenTween.Models
                 ScreenName = "bar",
                 Text = "hogehoge",
             };
-            Assert.False(this.tabinfo.IsMuted(post));
+            Assert.False(this.tabinfo.IsGlobalMuted(post));
         }
 
         [Fact]
