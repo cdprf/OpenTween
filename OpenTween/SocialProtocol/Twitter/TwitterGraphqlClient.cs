@@ -149,6 +149,29 @@ namespace OpenTween.SocialProtocol.Twitter
             return new(posts, cursorTop, cursorBottom);
         }
 
+        public async Task<TimelineResponse> GetListTimeline(long listId, int count, IQueryCursor? cursor, bool firstLoad)
+        {
+            this.account.Legacy.CheckAccountState();
+
+            var request = new ListLatestTweetsTimelineRequest(listId.ToString())
+            {
+                Count = count,
+                Cursor = cursor?.As<TwitterGraphqlCursor>(),
+            };
+
+            var response = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            var statuses = response.ToTwitterStatuses();
+            var cursorTop = response.CursorTop;
+            var cursorBottom = response.CursorBottom;
+
+            var posts = this.account.Legacy.CreatePostsFromJson(statuses, firstLoad);
+            posts = this.account.Legacy.FilterNoRetweetUserPosts(posts);
+
+            return new(posts, cursorTop, cursorBottom);
+        }
+
         public async Task<TimelineResponse> GetSearchTimeline(string query, string lang, int count, IQueryCursor? cursor, bool firstLoad)
         {
             this.account.Legacy.CheckAccountState();

@@ -552,54 +552,6 @@ namespace OpenTween
         internal PostClass[] FilterNoRetweetUserPosts(PostClass[] posts)
             => posts.Where(x => x.RetweetedByUserId == null || !this.AccountState.NoRetweetUserIds.Contains(x.RetweetedByUserId)).ToArray();
 
-        public async Task GetListStatus(ListTimelineTabModel tab, bool more, bool firstLoad)
-        {
-            var count = GetApiResultCount(MyCommon.WORKERTYPE.List, more, firstLoad);
-
-            TwitterStatus[] statuses;
-            if (this.Api.AuthType == APIAuthType.TwitterComCookie)
-            {
-                var cursor = more ? tab.CursorBottom : tab.CursorTop;
-                var request = new ListLatestTweetsTimelineRequest(tab.ListInfo.Id.ToString())
-                {
-                    Count = count,
-                    Cursor = cursor?.As<TwitterGraphqlCursor>(),
-                };
-                var response = await request.Send(this.Api.Connection)
-                    .ConfigureAwait(false);
-
-                var convertedStatuses = response.ToTwitterStatuses();
-
-                if (!SettingManager.Instance.Common.IsListsIncludeRts)
-                    convertedStatuses = convertedStatuses.Where(x => x.RetweetedStatus == null).ToArray();
-
-                statuses = convertedStatuses.ToArray();
-                tab.CursorBottom = response.CursorBottom;
-
-                if (!more)
-                    tab.CursorTop = response.CursorTop;
-            }
-            else
-            {
-                var maxId = more ? tab.CursorBottom?.As<TwitterStatusId>() : null;
-
-                statuses = await this.Api.ListsStatuses(tab.ListInfo.Id, count, maxId, includeRTs: SettingManager.Instance.Common.IsListsIncludeRts)
-                    .ConfigureAwait(false);
-
-                if (statuses.Length > 0)
-                {
-                    var min = statuses.Select(x => new TwitterStatusId(x.IdStr)).Min();
-                    tab.CursorBottom = new QueryCursor<TwitterStatusId>(CursorType.Bottom, min);
-                }
-            }
-
-            var posts = this.CreatePostsFromJson(statuses, firstLoad);
-            posts = this.FilterNoRetweetUserPosts(posts);
-
-            foreach (var post in posts)
-                tab.AddPostQueue(post);
-        }
-
         public async Task GetDirectMessageEvents(DirectMessagesTabModel dmTab, bool backward, bool firstLoad)
         {
             this.CheckAccountState();
