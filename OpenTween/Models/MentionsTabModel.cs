@@ -28,13 +28,8 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using OpenTween.Setting;
 using OpenTween.SocialProtocol;
-using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Models
 {
@@ -55,17 +50,25 @@ namespace OpenTween.Models
 
         public override async Task RefreshAsync(ISocialAccount account, bool backward, IProgress<string> progress)
         {
-            if (account is not TwitterAccount twAccount)
-                throw new ArgumentException($"Invalid account type: {account.AccountType}", nameof(account));
-
             progress.Report(string.Format(Properties.Resources.GetTimelineWorker_RunWorkerCompletedText4, backward ? -1 : 1));
 
             var firstLoad = !this.IsFirstLoadCompleted;
+            var count = Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Reply, backward, firstLoad);
+            var cursor = backward ? this.CursorBottom : this.CursorTop;
 
-            await twAccount.Legacy.GetMentionsTimelineApi(this, backward, firstLoad)
+            var response = await account.Client.GetMentionsTimeline(count, cursor, firstLoad)
                 .ConfigureAwait(false);
 
+            foreach (var post in response.Posts)
+                TabInformations.GetInstance().AddPost(post);
+
             TabInformations.GetInstance().DistributePosts();
+
+            if (response.CursorTop != null && !backward)
+                this.CursorTop = response.CursorTop;
+
+            if (response.CursorBottom != null)
+                this.CursorBottom = response.CursorBottom;
 
             if (firstLoad)
                 this.IsFirstLoadCompleted = true;
