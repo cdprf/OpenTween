@@ -122,7 +122,7 @@ namespace OpenTween
             => this.accounts.Primary;
 
         public ISocialAccount CurrentTabAccount
-            => this.accounts.GetAccountForTab(this.CurrentTab) ?? throw new InvalidOperationException("Account not found");
+            => this.accounts.GetAccountForTab(this.CurrentTab);
 
         // Growl呼び出し部
         private readonly GrowlHelper gh = new(ApplicationSettings.ApplicationName);
@@ -509,7 +509,11 @@ namespace OpenTween
 
             // タイマー設定
 
-            this.timelineScheduler.UpdateFunc[TimelineSchedulerTaskType.Home] = () => this.InvokeAsync(() => this.RefreshTabAsync<HomeTabModel>());
+            this.timelineScheduler.UpdateFunc[TimelineSchedulerTaskType.Home] = () => this.InvokeAsync(() => Task.WhenAll(new[]
+            {
+                this.RefreshTabAsync<HomeTabModel>(),
+                this.RefreshTabAsync<HomeSpecifiedAccountTabModel>(),
+            }));
             this.timelineScheduler.UpdateFunc[TimelineSchedulerTaskType.Mention] = () => this.InvokeAsync(() => this.RefreshTabAsync<MentionsTabModel>());
             this.timelineScheduler.UpdateFunc[TimelineSchedulerTaskType.Dm] = () => this.InvokeAsync(() => this.RefreshTabAsync<DirectMessagesTabModel>());
             this.timelineScheduler.UpdateFunc[TimelineSchedulerTaskType.PublicSearch] = () => this.InvokeAsync(() => this.RefreshTabAsync<PublicSearchTabModel>());
@@ -1306,7 +1310,7 @@ namespace OpenTween
             try
             {
                 var accountForTab = this.accounts.GetAccountForTab(tab);
-                if (accountForTab == null)
+                if (accountForTab is InvalidAccount)
                     return;
 
                 this.RefreshTasktrayIcon();
@@ -2492,6 +2496,7 @@ namespace OpenTween
         {
             // 設定画面表示前のユーザー情報
             var previousAccountId = this.settings.Common.SelectedAccountKey;
+            var previousSecondaryAccounts = this.accounts.SecondaryAccounts;
             var oldIconCol = this.Use2ColumnsMode;
 
             if (this.ShowSettingDialog() == DialogResult.OK)
@@ -2685,6 +2690,28 @@ namespace OpenTween
 
             if (this.PrimaryAccount.UniqueKey != previousAccountId)
                 await this.DoGetFollowersMenu();
+
+            var currentSecondaryAccounts = this.accounts.SecondaryAccounts;
+            var newSecondaryAccounts = currentSecondaryAccounts
+                .Where(x => !previousSecondaryAccounts.Any(y => y.UniqueKey == x.UniqueKey));
+            this.AddSecondaryAccountTabs(newSecondaryAccounts);
+        }
+
+        private void AddSecondaryAccountTabs(IEnumerable<ISocialAccount> accounts)
+        {
+            foreach (var account in accounts)
+            {
+                var isPrimary = account.UniqueKey == this.accounts.Primary.UniqueKey;
+                var tabExists = this.statuses.GetTabsByType<HomeSpecifiedAccountTabModel>()
+                    .Any(x => x.SourceAccountId == account.UniqueKey);
+                if (tabExists)
+                    continue;
+
+                var tabName = this.statuses.MakeTabName($"@{account.UserName}");
+                var homeTab = new HomeSpecifiedAccountTabModel(tabName, account.UniqueKey);
+                this.statuses.AddTab(homeTab);
+                this.AddNewTab(homeTab, startup: false);
+            }
         }
 
         /// <summary>
@@ -2869,6 +2896,15 @@ namespace OpenTween
                         HeaderText = listTab.ListInfo.ToString(),
                     };
                 }
+                else if (tab is HomeSpecifiedAccountTabModel homeSecondaryTab)
+                {
+                    var account = this.accounts.GetAccountForTab(homeSecondaryTab);
+                    headerPanel = new GeneralTimelineHeaderPanel
+                    {
+                        Dock = DockStyle.Top,
+                        HeaderText = $"@{account.UserName}: Home",
+                    };
+                }
                 // 検索関連の準備
                 else if (tab is PublicSearchTabModel searchTab)
                 {
@@ -2994,7 +3030,8 @@ namespace OpenTween
 
                 // 後付けのコントロールを破棄
                 if (tabInfo.TabType == MyCommon.TabUsageType.UserTimeline ||
-                    tabInfo.TabType == MyCommon.TabUsageType.Lists)
+                    tabInfo.TabType == MyCommon.TabUsageType.Lists ||
+                    tabInfo is HomeSpecifiedAccountTabModel)
                 {
                     using var panel = tabPage.Controls.OfType<GeneralTimelineHeaderPanel>().First();
                     tabPage.Controls.Remove(panel);
@@ -7802,6 +7839,7 @@ namespace OpenTween
                     this.RefreshNoRetweetIdsAsync,
                     this.RefreshTwitterConfigurationAsync,
                     this.RefreshTabAsync<HomeTabModel>,
+                    this.RefreshTabAsync<HomeSpecifiedAccountTabModel>,
                     this.RefreshTabAsync<MentionsTabModel>,
                     this.RefreshTabAsync<DirectMessagesTabModel>,
                     this.RefreshTabAsync<PublicSearchTabModel>,
