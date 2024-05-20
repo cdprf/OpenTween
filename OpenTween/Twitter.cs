@@ -549,9 +549,6 @@ namespace OpenTween
             return posts;
         }
 
-        internal PostClass[] FilterNoRetweetUserPosts(PostClass[] posts)
-            => posts.Where(x => x.RetweetedByUserId == null || !this.AccountState.NoRetweetUserIds.Contains(x.RetweetedByUserId)).ToArray();
-
         public async Task GetDirectMessageEvents(DirectMessagesTabModel dmTab, bool backward, bool firstLoad)
         {
             this.CheckAccountState();
@@ -815,7 +812,7 @@ namespace OpenTween
             var blockIdsSet = newBlockIds.ToHashSet();
             blockIdsSet.Remove(this.UserId); // 元のソースにあったので一応残しておく
 
-            TabInformations.GetInstance().BlockIds = blockIdsSet;
+            this.AccountState.BlockedUserIds = blockIdsSet;
         }
 
         /// <summary>
@@ -829,7 +826,7 @@ namespace OpenTween
             var ids = await TwitterIds.GetAllItemsAsync(x => this.Api.MutesUsersIds(x))
                 .ConfigureAwait(false);
 
-            TabInformations.GetInstance().MuteUserIds = ids.ToHashSet<PersonId>();
+            this.AccountState.MutedUserIds = ids.ToHashSet<PersonId>();
         }
 
         public string[] GetHashList()
