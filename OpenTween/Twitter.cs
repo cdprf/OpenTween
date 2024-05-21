@@ -657,7 +657,6 @@ namespace OpenTween
             while (cursor != 0);
 
             this.AccountState.FollowerIds = newFollowerIds.ToHashSet();
-            TabInformations.GetInstance().RefreshOwl(this.AccountState.FollowerIds);
 
             this.GetFollowersSuccess = true;
         }

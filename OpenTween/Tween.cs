@@ -1804,12 +1804,18 @@ namespace OpenTween
                 var primaryAccount = this.accounts.Primary;
                 if (primaryAccount is TwitterAccount twAccount)
                 {
-                    this.statuses.RefreshOwl(twAccount.AccountState.FollowerIds);
+                    this.statuses.RefreshOwl(twAccount.UniqueKey, twAccount.AccountState.FollowerIds, isPrimary: true);
 
                     foreach (var (_, service) in this.ImageSelector.Model.MediaServices)
                     {
                         service.UpdateTwitterConfiguration(this.tw.Configuration);
                     }
+                }
+
+                foreach (var account in this.accounts.SecondaryAccounts)
+                {
+                    if (account is TwitterAccount twAccountSecondary)
+                        this.statuses.RefreshOwl(twAccountSecondary.UniqueKey, twAccountSecondary.AccountState.FollowerIds, isPrimary: false);
                 }
 
                 this.listCache?.PurgeCache();
