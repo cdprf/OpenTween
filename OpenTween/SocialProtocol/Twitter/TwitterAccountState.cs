@@ -47,6 +47,10 @@ namespace OpenTween.SocialProtocol.Twitter
 
         public ISet<TwitterUserId> NoRetweetUserIds { get; set; } = new HashSet<TwitterUserId>();
 
+        public TwitterConfiguration Configuration { get; } = TwitterConfiguration.DefaultConfiguration();
+
+        public TwitterTextConfiguration TextConfiguration { get; } = TwitterTextConfiguration.DefaultConfiguration();
+
         public bool HasUnrecoverableError { get; set; } = true;
 
         public TwitterAccountState()

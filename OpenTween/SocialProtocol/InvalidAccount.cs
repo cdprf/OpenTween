@@ -108,6 +108,9 @@ namespace OpenTween.SocialProtocol
             public Task UnretweetPost(PostId postId)
                 => throw this.CreateException();
 
+            public Task RefreshConfiguration()
+                => throw this.CreateException();
+
             private WebApiException CreateException()
                 => new("Invalid account");
         }

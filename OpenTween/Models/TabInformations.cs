@@ -866,34 +866,29 @@ namespace OpenTween.Models
             }
         }
 
-        public void RefreshOwl(ISet<PersonId> follower)
+        public void RefreshOwl(Guid accountId, ISet<PersonId> follower, bool isPrimary)
         {
             lock (this.lockObj)
             {
-                var allPosts = this.GetTabsByType<InternalStorageTabModel>()
-                    .SelectMany(x => x.Posts.Values)
-                    .Concat(this.Posts.Values);
+                static bool DetermineOwl(PostClass post, ISet<PersonId> followers)
+                    => !post.IsMe && followers.Count > 0 && !followers.Contains(post.UserId);
 
-                if (follower.Count > 0)
+                static bool SourceAccountIdMatched(TabModel tab, Guid accountId, bool isPrimary)
+                    => tab.SourceAccountId == accountId || (isPrimary && tab.SourceAccountId == null);
+
+                if (isPrimary)
                 {
-                    foreach (var post in allPosts)
-                    {
-                        if (post.IsMe)
-                        {
-                            post.IsOwl = false;
-                        }
-                        else
-                        {
-                            post.IsOwl = !follower.Contains(post.UserId);
-                        }
-                    }
+                    foreach (var post in this.Posts.Values)
+                        post.IsOwl = DetermineOwl(post, follower);
                 }
-                else
+
+                foreach (var tab in this.GetTabsByType<InternalStorageTabModel>())
                 {
-                    foreach (var post in allPosts)
-                    {
-                        post.IsOwl = false;
-                    }
+                    if (!SourceAccountIdMatched(tab, accountId, isPrimary))
+                        continue;
+
+                    foreach (var post in tab.Posts.Values)
+                        post.IsOwl = DetermineOwl(post, follower);
                 }
             }
         }

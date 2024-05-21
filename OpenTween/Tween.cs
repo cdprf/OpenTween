@@ -519,14 +519,7 @@ namespace OpenTween
             this.timelineScheduler.UpdateFunc[TimelineSchedulerTaskType.PublicSearch] = () => this.InvokeAsync(() => this.RefreshTabAsync<PublicSearchTabModel>());
             this.timelineScheduler.UpdateFunc[TimelineSchedulerTaskType.User] = () => this.InvokeAsync(() => this.RefreshTabAsync<UserTimelineTabModel>());
             this.timelineScheduler.UpdateFunc[TimelineSchedulerTaskType.List] = () => this.InvokeAsync(() => this.RefreshTabAsync<ListTimelineTabModel>());
-            this.timelineScheduler.UpdateFunc[TimelineSchedulerTaskType.Config] = () => this.InvokeAsync(() => Task.WhenAll(new[]
-            {
-                this.DoGetFollowersMenu(),
-                this.RefreshBlockIdsAsync(),
-                this.RefreshMuteUserIdsAsync(),
-                this.RefreshNoRetweetIdsAsync(),
-                this.RefreshTwitterConfigurationAsync(),
-            }));
+            this.timelineScheduler.UpdateFunc[TimelineSchedulerTaskType.Config] = () => this.InvokeAsync(() => this.RefreshConfigurationAsync());
             this.RefreshTimelineScheduler();
 
             this.selectionDebouncer = DebounceTimer.Create(() => this.InvokeAsync(() => this.UpdateSelectedPost()), TimeSpan.FromMilliseconds(100), leading: true);
@@ -1793,122 +1786,51 @@ namespace OpenTween
             }
         }
 
-        private async Task RefreshFollowerIdsAsync()
+        private async Task RefreshConfigurationAsync()
         {
             await this.workerSemaphore.WaitAsync();
 
             try
             {
                 this.RefreshTasktrayIcon();
-                this.StatusLabel.Text = Properties.Resources.UpdateFollowersMenuItem1_ClickText1;
+                this.StatusLabel.Text = Properties.Resources.RefreshConfiguration_Start;
 
-                await this.tw.RefreshFollowerIds();
+                var loadTasks =
+                    from account in this.accounts.Items
+                    select account.Client.RefreshConfiguration();
 
-                this.StatusLabel.Text = Properties.Resources.UpdateFollowersMenuItem1_ClickText3;
+                await Task.WhenAll(loadTasks);
 
-                this.RefreshTimeline();
-                this.listCache?.PurgeCache();
-                this.CurrentListView.Refresh();
-            }
-            catch (WebApiException ex)
-            {
-                this.StatusLabel.Text = $"Err:{ex.Message}(RefreshFollowersIds)";
-            }
-            finally
-            {
-                this.workerSemaphore.Release();
-            }
-        }
-
-        private async Task RefreshNoRetweetIdsAsync()
-        {
-            await this.workerSemaphore.WaitAsync();
-
-            try
-            {
-                this.RefreshTasktrayIcon();
-                await this.tw.RefreshNoRetweetIds();
-
-                this.StatusLabel.Text = "NoRetweetIds refreshed";
-            }
-            catch (WebApiException ex)
-            {
-                this.StatusLabel.Text = $"Err:{ex.Message}(RefreshNoRetweetIds)";
-            }
-            finally
-            {
-                this.workerSemaphore.Release();
-            }
-        }
-
-        private async Task RefreshBlockIdsAsync()
-        {
-            await this.workerSemaphore.WaitAsync();
-
-            try
-            {
-                this.RefreshTasktrayIcon();
-                this.StatusLabel.Text = Properties.Resources.UpdateBlockUserText1;
-
-                await this.tw.RefreshBlockIds();
-
-                this.StatusLabel.Text = Properties.Resources.UpdateBlockUserText3;
-            }
-            catch (WebApiException ex)
-            {
-                this.StatusLabel.Text = $"Err:{ex.Message}(RefreshBlockIds)";
-            }
-            finally
-            {
-                this.workerSemaphore.Release();
-            }
-        }
-
-        private async Task RefreshTwitterConfigurationAsync()
-        {
-            await this.workerSemaphore.WaitAsync();
-
-            try
-            {
-                this.RefreshTasktrayIcon();
-                await this.tw.RefreshConfiguration();
-
-                if (this.tw.Configuration.PhotoSizeLimit != 0)
+                var primaryAccount = this.accounts.Primary;
+                if (primaryAccount is TwitterAccount twAccount)
                 {
+                    this.statuses.RefreshOwl(twAccount.UniqueKey, twAccount.AccountState.FollowerIds, isPrimary: true);
+
                     foreach (var (_, service) in this.ImageSelector.Model.MediaServices)
                     {
                         service.UpdateTwitterConfiguration(this.tw.Configuration);
                     }
                 }
 
+                foreach (var account in this.accounts.SecondaryAccounts)
+                {
+                    if (account is TwitterAccount twAccountSecondary)
+                        this.statuses.RefreshOwl(twAccountSecondary.UniqueKey, twAccountSecondary.AccountState.FollowerIds, isPrimary: false);
+                }
+
                 this.listCache?.PurgeCache();
                 this.CurrentListView.Refresh();
+
+                this.StatusLabel.Text = Properties.Resources.RefreshConfiguration_Success;
             }
             catch (WebApiException ex)
             {
-                this.StatusLabel.Text = $"Err:{ex.Message}(RefreshConfiguration)";
+                this.StatusLabel.Text = Properties.Resources.RefreshConfiguration_Error + ex.Message;
             }
             finally
             {
                 this.workerSemaphore.Release();
             }
-        }
-
-        private async Task RefreshMuteUserIdsAsync()
-        {
-            this.StatusLabel.Text = Properties.Resources.UpdateMuteUserIds_Start;
-
-            try
-            {
-                await this.tw.RefreshMuteUserIdsAsync();
-            }
-            catch (WebApiException ex)
-            {
-                this.StatusLabel.Text = string.Format(Properties.Resources.UpdateMuteUserIds_Error, ex.Message);
-                return;
-            }
-
-            this.StatusLabel.Text = Properties.Resources.UpdateMuteUserIds_Finish;
         }
 
         private void NotifyIcon1_MouseClick(object sender, MouseEventArgs e)
@@ -2689,7 +2611,7 @@ namespace OpenTween
             this.SaveConfigsAll(false);
 
             if (this.PrimaryAccount.UniqueKey != previousAccountId)
-                await this.DoGetFollowersMenu();
+                await this.RefreshConfigurationAsync();
 
             var currentSecondaryAccounts = this.accounts.SecondaryAccounts;
             var newSecondaryAccounts = currentSecondaryAccounts
@@ -7832,12 +7754,8 @@ namespace OpenTween
             {
                 var loadTasks = new TaskCollection();
 
-                loadTasks.Add(new[]
+                loadTasks.Add(new Func<Task>[]
                 {
-                    this.RefreshMuteUserIdsAsync,
-                    this.RefreshBlockIdsAsync,
-                    this.RefreshNoRetweetIdsAsync,
-                    this.RefreshTwitterConfigurationAsync,
                     this.RefreshTabAsync<HomeTabModel>,
                     this.RefreshTabAsync<HomeSpecifiedAccountTabModel>,
                     this.RefreshTabAsync<MentionsTabModel>,
@@ -7848,7 +7766,7 @@ namespace OpenTween
                 });
 
                 if (this.settings.Common.StartupFollowers)
-                    loadTasks.Add(this.RefreshFollowerIdsAsync);
+                    loadTasks.Add(this.RefreshConfigurationAsync);
 
                 if (this.settings.Common.GetFav)
                     loadTasks.Add(this.RefreshTabAsync<FavoritesTabModel>);
@@ -7891,20 +7809,6 @@ namespace OpenTween
                     MessageBox.Show(Properties.Resources.ReAuthorizeText);
                     this.SettingStripMenuItem_Click(this.SettingStripMenuItem, EventArgs.Empty);
                 }
-
-                // 取得失敗の場合は再試行する
-                var reloadTasks = new TaskCollection();
-
-                if (!this.tw.GetFollowersSuccess && this.settings.Common.StartupFollowers)
-                    reloadTasks.Add(() => this.RefreshFollowerIdsAsync());
-
-                if (!this.tw.GetNoRetweetSuccess)
-                    reloadTasks.Add(() => this.RefreshNoRetweetIdsAsync());
-
-                if (this.tw.Configuration.PhotoSizeLimit == 0)
-                    reloadTasks.Add(() => this.RefreshTwitterConfigurationAsync());
-
-                await reloadTasks.RunAll();
             }
 
             this.initial = false;
@@ -7920,14 +7824,8 @@ namespace OpenTween
             this.thumbGenerator.ImgAzyobuziNet.AutoUpdate = true;
         }
 
-        private async Task DoGetFollowersMenu()
-        {
-            await this.RefreshFollowerIdsAsync();
-            this.DispSelectedPost(true);
-        }
-
         private async void GetFollowersAllToolStripMenuItem_Click(object sender, EventArgs e)
-            => await this.DoGetFollowersMenu();
+            => await this.RefreshConfigurationAsync();
 
         private void ReTweetUnofficialStripMenuItem_Click(object sender, EventArgs e)
             => this.DoReTweetUnofficial();

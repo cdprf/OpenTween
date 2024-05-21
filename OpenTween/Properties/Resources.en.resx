@@ -206,6 +206,9 @@ Available service: {1}</value></data>
 	<data name="PostWorker_RunWorkerCompletedText5"><value>Recent refreshing...</value></data>
 	<data name="QuoteStatus_AccessibleText"><value>[Quote @{0}: {1}]</value></data>
 	<data name="ReAuthorizeText"><value>Please do Authentication processing to get/send Direct Messages again.</value></data>
+	<data name="RefreshConfiguration_Error"><value>Failed to get configuration: </value></data>
+	<data name="RefreshConfiguration_Start"><value>Getting configuration...</value></data>
+	<data name="RefreshConfiguration_Success"><value>Done to get configuration</value></data>
 	<data name="RefreshStripMenuItem_ClickText1"><value>Recent refreshing...</value></data>
 	<data name="RefreshStripMenuItem_ClickText2"><value>Reply refreshing...</value></data>
 	<data name="RefreshStripMenuItem_ClickText3"><value>DMRcv refreshing...</value></data>
@@ -331,15 +334,6 @@ Do you retry to update status?</value></data>
 	<data name="UnhandledExceptionText7"><value>{0}.exe Version: {1}</value></data>
 	<data name="UnhandledExceptionText8"><value>Exception {0}: {1}</value></data>
 	<data name="UnhandledExceptionText9"><value>We are sorry but error was happened. A log text was created as {0} in same folder of %AppName%. Please send this to {1} or{3}tweet to {2} in Twitter.{3}[OK] to open log file. [Cancel] to continue.</value></data>
-	<data name="UpdateBlockUserText1"><value>Getting BlockIds...</value></data>
-	<data name="UpdateBlockUserText2"><value>Failed to get BlockIds: </value></data>
-	<data name="UpdateBlockUserText3"><value>Done to get BlockIds</value></data>
-	<data name="UpdateFollowersMenuItem1_ClickText1"><value>Followers refreshing...</value></data>
-	<data name="UpdateFollowersMenuItem1_ClickText2"><value>Followers refresh error: </value></data>
-	<data name="UpdateFollowersMenuItem1_ClickText3"><value>Followers refreshed</value></data>
-	<data name="UpdateMuteUserIds_Error"><value>Failed to get MuteUserIds: {0}</value></data>
-	<data name="UpdateMuteUserIds_Finish"><value>Done to get MuteUserIds</value></data>
-	<data name="UpdateMuteUserIds_Start"><value>Getting MuteUserIds...</value></data>
 	<data name="UrlConvert_BitlyAuthRequired"><value>To use Bitly, you must perform the Bitly authentication in settings dialog.</value></data>
 	<data name="UserInfoButtonEdit_ClickText1"><value>Accept</value></data>
 	<data name="UserInfoButtonEdit_ClickText2"><value>Updating Profile...</value></data>

@@ -162,9 +162,11 @@ namespace OpenTween
 
         public TwitterAccountState AccountState { get; private set; } = new();
 
-        public TwitterConfiguration Configuration { get; private set; }
+        public TwitterConfiguration Configuration
+            => this.AccountState.Configuration;
 
-        public TwitterTextConfiguration TextConfiguration { get; private set; }
+        public TwitterTextConfiguration TextConfiguration
+            => this.AccountState.TextConfiguration;
 
         public bool GetFollowersSuccess { get; private set; } = false;
 
@@ -185,8 +187,6 @@ namespace OpenTween
             this.urlExpander = new(ShortUrl.Instance);
 
             this.Api = api;
-            this.Configuration = TwitterConfiguration.DefaultConfiguration();
-            this.TextConfiguration = TwitterTextConfiguration.DefaultConfiguration();
         }
 
         public TwitterApiAccessLevel AccessLevel
@@ -657,7 +657,6 @@ namespace OpenTween
             while (cursor != 0);
 
             this.AccountState.FollowerIds = newFollowerIds.ToHashSet();
-            TabInformations.GetInstance().RefreshOwl(this.AccountState.FollowerIds);
 
             this.GetFollowersSuccess = true;
         }
@@ -675,19 +674,6 @@ namespace OpenTween
 
             this.AccountState.NoRetweetUserIds = new HashSet<TwitterUserId>(noRetweetUserIds);
             this.GetNoRetweetSuccess = true;
-        }
-
-        /// <summary>
-        /// t.co の文字列長などの設定情報を更新します
-        /// </summary>
-        /// <exception cref="WebApiException"/>
-        public async Task RefreshConfiguration()
-        {
-            this.Configuration = await this.Api.Configuration()
-                .ConfigureAwait(false);
-
-            // TextConfiguration 相当の JSON を得る API が存在しないため、TransformedURLLength のみ help/configuration.json に合わせて更新する
-            this.TextConfiguration.TransformedURLLength = this.Configuration.ShortUrlLengthHttps;
         }
 
         public async Task GetListsApi()

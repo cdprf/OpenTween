@@ -53,5 +53,7 @@ namespace OpenTween.SocialProtocol
         public Task<PostClass?> RetweetPost(PostId postId);
 
         public Task UnretweetPost(PostId postId);
+
+        public Task RefreshConfiguration();
     }
 }
