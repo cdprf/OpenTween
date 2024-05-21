@@ -196,6 +196,16 @@ namespace OpenTween.Api.GraphQL
         }
 
         [Fact]
+        public void ToStatus_MissingLegacy_Test()
+        {
+            // legacy プロパティが欠けておりツイートの表示に必要な情報が不足している場合
+            var rootElm = this.LoadResponseDocument("TimelineTweet_MissingLegacy.json");
+            var timelineTweet = new TimelineTweet(rootElm);
+
+            Assert.False(timelineTweet.IsAvailable);
+        }
+
+        [Fact]
         public void ToStatus_EmptyTweet_Test()
         {
             var rootElm = this.LoadResponseDocument("TimelineTweet_EmptyTweet.json");

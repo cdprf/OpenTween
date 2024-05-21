@@ -40,7 +40,7 @@ namespace OpenTween.Api.GraphQL
         public XElement Element { get; }
 
         public bool IsAvailable
-            => this.resultElm != null && !this.IsTombstoneResult(this.resultElm);
+            => this.resultElm != null && !this.IsTombstoneResult(this.resultElm) && this.HasLegacyProperty(this.resultElm);
 
         private readonly XElement? resultElm;
 
@@ -59,6 +59,9 @@ namespace OpenTween.Api.GraphQL
 
         private bool IsTombstoneResult([NotNullWhen(true)]XElement? resultElm)
             => resultElm?.Element("__typename")?.Value == "TweetTombstone";
+
+        private bool HasLegacyProperty(XElement? resultElm)
+            => resultElm?.XPathSelectElement("legacy|tweet/legacy") != null;
 
         public TwitterStatus ToTwitterStatus()
         {
