@@ -2106,6 +2106,33 @@ namespace OpenTween.Properties {
         }
         
         /// <summary>
+        ///   Configuration取得エラー : に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string RefreshConfiguration_Error {
+            get {
+                return ResourceManager.GetString("RefreshConfiguration_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Configuration取得中... に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string RefreshConfiguration_Start {
+            get {
+                return ResourceManager.GetString("RefreshConfiguration_Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Configuration取得完了 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string RefreshConfiguration_Success {
+            get {
+                return ResourceManager.GetString("RefreshConfiguration_Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recent更新中... に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string RefreshStripMenuItem_ClickText1 {
@@ -3178,87 +3205,6 @@ namespace OpenTween.Properties {
         internal static string UnhandledExceptionText9 {
             get {
                 return ResourceManager.GetString("UnhandledExceptionText9", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   BlockIds取得中... に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string UpdateBlockUserText1 {
-            get {
-                return ResourceManager.GetString("UpdateBlockUserText1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   BlockIds取得エラー : に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string UpdateBlockUserText2 {
-            get {
-                return ResourceManager.GetString("UpdateBlockUserText2", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   BlockIds取得完了 に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string UpdateBlockUserText3 {
-            get {
-                return ResourceManager.GetString("UpdateBlockUserText3", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Followers取得中... に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string UpdateFollowersMenuItem1_ClickText1 {
-            get {
-                return ResourceManager.GetString("UpdateFollowersMenuItem1_ClickText1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Followers取得エラー： に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string UpdateFollowersMenuItem1_ClickText2 {
-            get {
-                return ResourceManager.GetString("UpdateFollowersMenuItem1_ClickText2", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Followers取得完了 に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string UpdateFollowersMenuItem1_ClickText3 {
-            get {
-                return ResourceManager.GetString("UpdateFollowersMenuItem1_ClickText3", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   MuteUserIds取得エラー: {0} に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string UpdateMuteUserIds_Error {
-            get {
-                return ResourceManager.GetString("UpdateMuteUserIds_Error", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   MuteUserIds取得完了 に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string UpdateMuteUserIds_Finish {
-            get {
-                return ResourceManager.GetString("UpdateMuteUserIds_Finish", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   MuteUserIds取得中... に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string UpdateMuteUserIds_Start {
-            get {
-                return ResourceManager.GetString("UpdateMuteUserIds_Start", resourceCulture);
             }
         }
         

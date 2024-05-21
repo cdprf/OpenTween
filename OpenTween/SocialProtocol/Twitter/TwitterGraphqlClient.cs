@@ -282,6 +282,17 @@ namespace OpenTween.SocialProtocol.Twitter
                 .ConfigureAwait(false);
         }
 
+        public async Task RefreshConfiguration()
+        {
+            await Task.WhenAll(new[]
+            {
+                this.account.Legacy.RefreshFollowerIds(),
+                this.account.Legacy.RefreshBlockIds(),
+                this.account.Legacy.RefreshMuteUserIdsAsync(),
+                this.account.Legacy.RefreshNoRetweetIds(),
+            });
+        }
+
         private TwitterStatusId AssertTwitterStatusId(PostId postId)
         {
             return postId is TwitterStatusId statusId

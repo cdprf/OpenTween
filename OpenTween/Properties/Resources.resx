@@ -236,6 +236,9 @@
 	<data name="Refresh2" type="System.Resources.ResXFileRef, System.Windows.Forms"><value>..\Resources\re2.ico;System.Drawing.Icon, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value></data>
 	<data name="Refresh3" type="System.Resources.ResXFileRef, System.Windows.Forms"><value>..\Resources\re3.ico;System.Drawing.Icon, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value></data>
 	<data name="Refresh4" type="System.Resources.ResXFileRef, System.Windows.Forms"><value>..\Resources\re4.ico;System.Drawing.Icon, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value></data>
+	<data name="RefreshConfiguration_Error"><value>Configuration取得エラー :</value></data>
+	<data name="RefreshConfiguration_Start"><value>Configuration取得中...</value></data>
+	<data name="RefreshConfiguration_Success"><value>Configuration取得完了</value></data>
 	<data name="RefreshStripMenuItem_ClickText1"><value>Recent更新中...</value></data>
 	<data name="RefreshStripMenuItem_ClickText2"><value>Reply更新中...</value></data>
 	<data name="RefreshStripMenuItem_ClickText3"><value>DMRcv更新中...</value></data>
@@ -365,15 +368,6 @@
 	<data name="UnhandledExceptionText7"><value>   {0}.exeのバージョン: {1}</value></data>
 	<data name="UnhandledExceptionText8"><value>例外 {0}: {1}</value></data>
 	<data name="UnhandledExceptionText9"><value>エラーが発生しました。ごめんなさい。ログをexeファイルのある場所に {0} として作ったので、{1}まで送っていただけると助かります。{3}ご面倒なら{2}までお知らせ頂くだけでも助かります。{3}「はい」ボタンをクリックするとログを開きます。ログを開かない場合は「いいえ」、このまま終了する場合は「キャンセル」ボタンをクリックしてください。</value></data>
-	<data name="UpdateBlockUserText1"><value>BlockIds取得中...</value></data>
-	<data name="UpdateBlockUserText2"><value>BlockIds取得エラー :</value></data>
-	<data name="UpdateBlockUserText3"><value>BlockIds取得完了</value></data>
-	<data name="UpdateFollowersMenuItem1_ClickText1"><value>Followers取得中...</value></data>
-	<data name="UpdateFollowersMenuItem1_ClickText2"><value>Followers取得エラー：</value></data>
-	<data name="UpdateFollowersMenuItem1_ClickText3"><value>Followers取得完了</value></data>
-	<data name="UpdateMuteUserIds_Error"><value>MuteUserIds取得エラー: {0}</value></data>
-	<data name="UpdateMuteUserIds_Finish"><value>MuteUserIds取得完了</value></data>
-	<data name="UpdateMuteUserIds_Start"><value>MuteUserIds取得中...</value></data>
 	<data name="UrlConvert_BitlyAuthRequired"><value>Bitlyを使用するには設定画面で認証情報を入力する必要があります</value></data>
 	<data name="UserInfoButtonEdit_ClickText1"><value>適用</value></data>
 	<data name="UserInfoButtonEdit_ClickText2"><value>プロフィール更新中・・・</value></data>
