@@ -6868,13 +6868,10 @@ namespace OpenTween
                         authByCookie ? TweetDetailRequest.EndpointName : "/statuses/show/:id",
                     _ => null,
                 };
-                this.toolStripApiGauge.ApiEndpoint = endpointName;
             }
-            else
-            {
-                var currentEndpointName = this.toolStripApiGauge.ApiEndpoint;
-                this.toolStripApiGauge.ApiEndpoint = currentEndpointName;
-            }
+
+            this.toolStripApiGauge.ApiLimit = endpointName != null ? MyCommon.TwitterRateLimits[endpointName] : null;
+            this.toolStripApiGauge.ApiEndpoint = endpointName;
         }
 
         private void SetStatusLabelUrl()
