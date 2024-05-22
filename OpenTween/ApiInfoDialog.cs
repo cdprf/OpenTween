@@ -115,7 +115,7 @@ namespace OpenTween
                 }
                 else
                 {
-                    var endpoint = ((TwitterApiStatus.AccessLimitUpdatedEventArgs)e).EndpointName;
+                    var endpoint = ((RateLimitCollection.AccessLimitUpdatedEventArgs)e).EndpointName;
                     if (endpoint != null)
                         this.UpdateEndpointLimit(endpoint);
                 }

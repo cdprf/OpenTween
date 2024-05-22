@@ -38,20 +38,13 @@ namespace OpenTween.Api
 {
     public class TwitterApiStatus
     {
-        public EndpointLimits AccessLimit { get; }
+        public RateLimitCollection AccessLimit { get; } = new();
 
-        public class AccessLimitUpdatedEventArgs : EventArgs
+        public event EventHandler<RateLimitCollection.AccessLimitUpdatedEventArgs>? AccessLimitUpdated
         {
-            public string? EndpointName { get; }
-
-            public AccessLimitUpdatedEventArgs(string? endpointName)
-                => this.EndpointName = endpointName;
+            add => this.AccessLimit.AccessLimitUpdated += value;
+            remove => this.AccessLimit.AccessLimitUpdated -= value;
         }
-
-        public event EventHandler<AccessLimitUpdatedEventArgs>? AccessLimitUpdated;
-
-        public TwitterApiStatus()
-            => this.AccessLimit = new EndpointLimits(this);
 
         public void Reset()
         {
@@ -109,56 +102,6 @@ namespace OpenTween.Api
                 );
 
             this.AccessLimit.AddAll(rateLimits.ToDictionary(x => x.EndpointName, x => x.Limit));
-        }
-
-        protected virtual void OnAccessLimitUpdated(AccessLimitUpdatedEventArgs e)
-            => this.AccessLimitUpdated?.Invoke(this, e);
-
-        public class EndpointLimits : IEnumerable<KeyValuePair<string, ApiLimit>>
-        {
-            public TwitterApiStatus Owner { get; }
-
-            private readonly ConcurrentDictionary<string, ApiLimit> innerDict
-                = new();
-
-            public EndpointLimits(TwitterApiStatus owner)
-                => this.Owner = owner;
-
-            public ApiLimit? this[string endpoint]
-            {
-                get => this.innerDict.TryGetValue(endpoint, out var limit) ? limit : null;
-                set
-                {
-                    if (value == null)
-                        this.innerDict.TryRemove(endpoint, out var _);
-                    else
-                        this.innerDict[endpoint] = value;
-
-                    this.Owner.OnAccessLimitUpdated(new AccessLimitUpdatedEventArgs(endpoint));
-                }
-            }
-
-            public void Clear()
-            {
-                this.innerDict.Clear();
-                this.Owner.OnAccessLimitUpdated(new AccessLimitUpdatedEventArgs(null));
-            }
-
-            public void AddAll(IDictionary<string, ApiLimit> resources)
-            {
-                foreach (var (key, value) in resources)
-                {
-                    this.innerDict[key] = value;
-                }
-
-                this.Owner.OnAccessLimitUpdated(new AccessLimitUpdatedEventArgs(null));
-            }
-
-            public IEnumerator<KeyValuePair<string, ApiLimit>> GetEnumerator()
-                => this.innerDict.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator()
-                => this.GetEnumerator();
         }
     }
 }

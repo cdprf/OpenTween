@@ -6822,7 +6822,7 @@ namespace OpenTween
                 }
                 else
                 {
-                    var endpointName = ((TwitterApiStatus.AccessLimitUpdatedEventArgs)e).EndpointName;
+                    var endpointName = ((RateLimitCollection.AccessLimitUpdatedEventArgs)e).EndpointName;
                     this.SetApiStatusLabel(endpointName);
                 }
             }

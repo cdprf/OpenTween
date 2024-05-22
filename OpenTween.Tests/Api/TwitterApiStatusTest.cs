@@ -102,12 +102,7 @@ namespace OpenTween.Api
                 ["X-Rate-Limit-Remaining"] = "100",
                 ["X-Rate-Limit-Reset"] = "1356998400",
             };
-
-            Assert.Raises<TwitterApiStatus.AccessLimitUpdatedEventArgs>(
-                x => status.AccessLimitUpdated += x,
-                x => status.AccessLimitUpdated -= x,
-                () => status.UpdateFromHeader(header, "/statuses/home_timeline")
-            );
+            status.UpdateFromHeader(header, "/statuses/home_timeline");
 
             var rateLimit = status.AccessLimit["/statuses/home_timeline"]!;
             Assert.Equal(150, rateLimit.AccessLimitCount);
@@ -129,12 +124,7 @@ namespace OpenTween.Api
                     { "x-rate-limit-reset", "1356998400" },
                 },
             };
-
-            Assert.Raises<TwitterApiStatus.AccessLimitUpdatedEventArgs>(
-                x => status.AccessLimitUpdated += x,
-                x => status.AccessLimitUpdated -= x,
-                () => status.UpdateFromHeader(response.Headers, "/statuses/home_timeline")
-            );
+            status.UpdateFromHeader(response.Headers, "/statuses/home_timeline");
 
             var rateLimit = status.AccessLimit["/statuses/home_timeline"]!;
             Assert.Equal(150, rateLimit.AccessLimitCount);
@@ -148,35 +138,12 @@ namespace OpenTween.Api
             var status = new TwitterApiStatus();
 
             var json = """{"resources":{"statuses":{"/statuses/home_timeline":{"limit":150,"remaining":100,"reset":1356998400}}}}""";
-
-            Assert.Raises<TwitterApiStatus.AccessLimitUpdatedEventArgs>(
-                x => status.AccessLimitUpdated += x,
-                x => status.AccessLimitUpdated -= x,
-                () => status.UpdateFromJson(TwitterRateLimits.ParseJson(json))
-            );
+            status.UpdateFromJson(TwitterRateLimits.ParseJson(json));
 
             var rateLimit = status.AccessLimit["/statuses/home_timeline"]!;
             Assert.Equal(150, rateLimit.AccessLimitCount);
             Assert.Equal(100, rateLimit.AccessLimitRemain);
             Assert.Equal(new DateTimeUtc(2013, 1, 1, 0, 0, 0), rateLimit.AccessLimitResetDate);
-        }
-
-        [Fact]
-        public void AccessLimitUpdatedTest()
-        {
-            var apiStatus = new TwitterApiStatus();
-
-            Assert.Raises<TwitterApiStatus.AccessLimitUpdatedEventArgs>(
-                x => apiStatus.AccessLimitUpdated += x,
-                x => apiStatus.AccessLimitUpdated -= x,
-                () => apiStatus.AccessLimit["/statuses/home_timeline"] = new ApiLimit(150, 100, new DateTimeUtc(2013, 1, 1, 0, 0, 0))
-            );
-
-            Assert.Raises<TwitterApiStatus.AccessLimitUpdatedEventArgs>(
-                x => apiStatus.AccessLimitUpdated += x,
-                x => apiStatus.AccessLimitUpdated -= x,
-                () => apiStatus.Reset()
-            );
         }
     }
 }
