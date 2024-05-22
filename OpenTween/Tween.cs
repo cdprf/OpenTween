@@ -1263,13 +1263,13 @@ namespace OpenTween
 
         private bool CheckAccountValid()
         {
-            if (this.tw.AccountState.HasUnrecoverableError)
+            if (this.CurrentTabAccount.AccountState.HasUnrecoverableError)
             {
                 this.errorCount += 1;
                 if (this.errorCount > 5)
                 {
                     this.errorCount = 0;
-                    this.tw.AccountState.HasUnrecoverableError = false;
+                    this.CurrentTabAccount.AccountState.HasUnrecoverableError = false;
                     return true;
                 }
                 return false;
@@ -1805,21 +1805,18 @@ namespace OpenTween
                 await Task.WhenAll(loadTasks);
 
                 var primaryAccount = this.accounts.Primary;
+                this.statuses.RefreshOwl(primaryAccount.UniqueKey, primaryAccount.AccountState.FollowerIds, isPrimary: true);
+
                 if (primaryAccount is TwitterAccount twAccount)
                 {
-                    this.statuses.RefreshOwl(twAccount.UniqueKey, twAccount.AccountState.FollowerIds, isPrimary: true);
-
                     foreach (var (_, service) in this.ImageSelector.Model.MediaServices)
                     {
-                        service.UpdateTwitterConfiguration(this.tw.Configuration);
+                        service.UpdateTwitterConfiguration(twAccount.AccountState.Configuration);
                     }
                 }
 
                 foreach (var account in this.accounts.SecondaryAccounts)
-                {
-                    if (account is TwitterAccount twAccountSecondary)
-                        this.statuses.RefreshOwl(twAccountSecondary.UniqueKey, twAccountSecondary.AccountState.FollowerIds, isPrimary: false);
-                }
+                        this.statuses.RefreshOwl(account.UniqueKey, account.AccountState.FollowerIds, isPrimary: false);
 
                 this.listCache?.PurgeCache();
                 this.CurrentListView.Refresh();
@@ -2608,7 +2605,7 @@ namespace OpenTween
                 }
             }
 
-            this.tw.AccountState.HasUnrecoverableError = false;
+            this.PrimaryAccount.AccountState.HasUnrecoverableError = false;
 
             this.TopMost = this.settings.Common.AlwaysTop;
             this.SaveConfigsAll(false);
@@ -6746,13 +6743,14 @@ namespace OpenTween
                     ttl.AppendFormat(Properties.Resources.SetMainWindowTitleText4, ur, al);
                     break;
                 case MyCommon.DispTitleEnum.OwnStatus:
-                    if (followers == 0 && this.tw.FollowersCount != null) followers = this.tw.FollowersCount.Value;
+                    var accountState = this.CurrentTabAccount.AccountState;
+                    if (followers == 0 && accountState.FollowersCount != null) followers = accountState.FollowersCount.Value;
                     ttl.AppendFormat(
                         Properties.Resources.OwnStatusTitle,
-                        this.tw.StatusesCount?.ToString() ?? "-",
-                        this.tw.FriendsCount?.ToString() ?? "-",
-                        this.tw.FollowersCount?.ToString() ?? "-",
-                        this.tw.FollowersCount != null ? this.tw.FollowersCount.Value - followers : "-"
+                        accountState.StatusesCount?.ToString() ?? "-",
+                        accountState.FriendsCount?.ToString() ?? "-",
+                        accountState.FollowersCount?.ToString() ?? "-",
+                        accountState.FollowersCount != null ? accountState.FollowersCount.Value - followers : "-"
                     );
                     break;
             }
@@ -6821,14 +6819,12 @@ namespace OpenTween
         private void SubscribePrimaryAccountRatelimit()
         {
             this.unsubscribeRateLimitUpdate?.Dispose();
-            if (this.accounts.Primary is TwitterAccount twAccount)
-            {
-                var rateLimits = twAccount.AccountState.RateLimits;
-                this.unsubscribeRateLimitUpdate = rateLimits.SubscribeAccessLimitUpdated(this.TwitterApiStatus_AccessLimitUpdated);
 
-                // アカウントの切替を反映するため初回だけ空の更新通知を送る
-                this.TwitterApiStatus_AccessLimitUpdated(rateLimits, new(null));
-            }
+            var rateLimits = this.CurrentTabAccount.AccountState.RateLimits;
+            this.unsubscribeRateLimitUpdate = rateLimits.SubscribeAccessLimitUpdated(this.TwitterApiStatus_AccessLimitUpdated);
+
+            // アカウントの切替を反映するため初回だけ空の更新通知を送る
+            this.TwitterApiStatus_AccessLimitUpdated(rateLimits, new(null));
         }
 
         private async void TwitterApiStatus_AccessLimitUpdated(RateLimitCollection sender, RateLimitCollection.AccessLimitUpdatedEventArgs e)
@@ -8077,7 +8073,7 @@ namespace OpenTween
             }
 
             using var apiDlg = new ApiInfoDialog();
-            apiDlg.RateLimits = this.CurrentTabAccount is TwitterAccount twAccount ? twAccount.AccountState.RateLimits : null;
+            apiDlg.RateLimits = this.CurrentTabAccount.AccountState.RateLimits;
             apiDlg.ShowDialog(this);
         }
 

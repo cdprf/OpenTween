@@ -44,6 +44,9 @@ namespace OpenTween.SocialProtocol.Twitter
 
         public TwitterAccountState AccountState { get; private set; } = new();
 
+        ISocialAccountState ISocialAccount.AccountState
+            => this.AccountState;
+
         public OpenTween.Twitter Legacy
             => this.twLegacy;
 

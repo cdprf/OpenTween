@@ -21,30 +21,30 @@
 
 #nullable enable
 
-using System;
-using OpenTween.Connection;
+using System.Collections.Generic;
+using OpenTween.Api;
 using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol
 {
-    public interface ISocialAccount : IDisposable
+    public interface ISocialAccountState
     {
-        public string AccountType { get; }
-
-        public Guid UniqueKey { get; }
-
         public PersonId UserId { get; }
 
         public string UserName { get; }
 
-        public IApiConnection Connection { get; }
+        public int? FollowersCount { get; }
 
-        public ISocialProtocolClient Client { get; }
+        public int? FriendsCount { get; }
 
-        public ISocialAccountState AccountState { get; }
+        public int? StatusesCount { get; }
 
-        public bool IsDisposed { get; }
+        public ISet<PersonId> FollowerIds { get; }
 
-        public void Initialize(UserAccount accountSettings, SettingCommon settingCommon);
+        public ISet<PersonId> BlockedUserIds { get; }
+
+        public RateLimitCollection RateLimits { get; }
+
+        public bool HasUnrecoverableError { get; set; }
     }
 }

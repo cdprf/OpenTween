@@ -22,7 +22,9 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using OpenTween.Api;
 using OpenTween.Connection;
 using OpenTween.Models;
 
@@ -36,14 +38,16 @@ namespace OpenTween.SocialProtocol
         public Guid UniqueKey { get; }
 
         public PersonId UserId
-            => new TwitterUserId("0");
+            => this.AccountState.UserId;
 
         public string UserName
-            => "(Unknown account)";
+            => this.AccountState.UserName;
 
         public IApiConnection Connection { get; } = new InvalidAccountConnection();
 
         public ISocialProtocolClient Client { get; } = new InvalidAccountClient();
+
+        public ISocialAccountState AccountState { get; } = new InvalidAccountState();
 
         public bool IsDisposed { get; private set; }
 
@@ -113,6 +117,32 @@ namespace OpenTween.SocialProtocol
 
             private WebApiException CreateException()
                 => new("Invalid account");
+        }
+
+        private class InvalidAccountState : ISocialAccountState
+        {
+            public PersonId UserId
+                => new TwitterUserId("0");
+
+            public string UserName
+                => "(Unknown account)";
+
+            public int? FollowersCount
+                => null;
+
+            public int? FriendsCount
+                => null;
+
+            public int? StatusesCount
+                => null;
+
+            public ISet<PersonId> FollowerIds { get; } = new HashSet<PersonId>();
+
+            public ISet<PersonId> BlockedUserIds { get; } = new HashSet<PersonId>();
+
+            public RateLimitCollection RateLimits { get; } = new();
+
+            public bool HasUnrecoverableError { get; set; } = true;
         }
     }
 }

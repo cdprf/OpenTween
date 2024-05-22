@@ -22,14 +22,18 @@
 #nullable enable
 
 using System.Collections.Generic;
+using OpenTween.Api;
 using OpenTween.Api.DataModel;
 using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol.Twitter
 {
-    public class TwitterAccountState
+    public class TwitterAccountState : ISocialAccountState
     {
         public TwitterUserId UserId { get; private set; }
+
+        PersonId ISocialAccountState.UserId
+            => this.UserId;
 
         public string UserName { get; private set; }
 
@@ -52,6 +56,9 @@ namespace OpenTween.SocialProtocol.Twitter
         public TwitterTextConfiguration TextConfiguration { get; } = TwitterTextConfiguration.DefaultConfiguration();
 
         public TwitterRateLimitCollection RateLimits { get; } = new();
+
+        RateLimitCollection ISocialAccountState.RateLimits
+            => this.RateLimits;
 
         public bool HasUnrecoverableError { get; set; } = true;
 
