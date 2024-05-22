@@ -101,7 +101,7 @@ namespace OpenTween.Connection
                 );
 
                 if (endpointName != null)
-                    MyCommon.TwitterApiInfo.UpdateFromHeader(responseMessage.Headers, endpointName);
+                    this.accountState.RateLimits.UpdateFromHeader(responseMessage.Headers, endpointName);
 
                 await TwitterApiConnection.CheckStatusCode(responseMessage, this.accountState)
                     .ConfigureAwait(false);
@@ -130,7 +130,7 @@ namespace OpenTween.Connection
         /// </summary>
         private void ThrowIfRateLimitExceeded(string endpointName)
         {
-            var limit = MyCommon.TwitterApiInfo.AccessLimit[endpointName];
+            var limit = this.accountState.RateLimits[endpointName];
             if (limit == null)
                 return;
 

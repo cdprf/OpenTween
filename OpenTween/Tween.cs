@@ -124,6 +124,8 @@ namespace OpenTween
         public ISocialAccount CurrentTabAccount
             => this.accounts.GetAccountForTab(this.CurrentTab);
 
+        private IDisposable? unsubscribeRateLimitUpdate;
+
         // Growl呼び出し部
         private readonly GrowlHelper gh = new(ApplicationSettings.ApplicationName);
 
@@ -464,7 +466,8 @@ namespace OpenTween
             // タブの位置を調整する
             this.SetTabAlignment();
 
-            MyCommon.TwitterApiInfo.AccessLimitUpdated += this.TwitterApiStatus_AccessLimitUpdated;
+            this.SubscribePrimaryAccountRatelimit();
+
             Microsoft.Win32.SystemEvents.TimeChanged += this.SystemEvents_TimeChanged;
 
             if (this.settings.Common.TabIconDisp)
@@ -568,6 +571,7 @@ namespace OpenTween
                 this.timelineScheduler.Dispose();
                 this.workerCts.Cancel();
                 this.thumbnailTokenSource?.Dispose();
+                this.unsubscribeRateLimitUpdate?.Dispose();
 
                 this.hookGlobalHotkey.Dispose();
             }
@@ -576,7 +580,6 @@ namespace OpenTween
             // http://msdn.microsoft.com/ja-jp/library/microsoft.win32.systemevents.powermodechanged.aspx
             Microsoft.Win32.SystemEvents.PowerModeChanged -= this.SystemEvents_PowerModeChanged;
             Microsoft.Win32.SystemEvents.TimeChanged -= this.SystemEvents_TimeChanged;
-            MyCommon.TwitterApiInfo.AccessLimitUpdated -= this.TwitterApiStatus_AccessLimitUpdated;
 
             this.disposed = true;
         }
@@ -2611,7 +2614,10 @@ namespace OpenTween
             this.SaveConfigsAll(false);
 
             if (this.PrimaryAccount.UniqueKey != previousAccountId)
+            {
+                this.SubscribePrimaryAccountRatelimit();
                 await this.RefreshConfigurationAsync();
+            }
 
             var currentSecondaryAccounts = this.accounts.SecondaryAccounts;
             var newSecondaryAccounts = currentSecondaryAccounts
@@ -3053,7 +3059,7 @@ namespace OpenTween
         {
             this.SetMainWindowTitle();
             this.SetStatusLabelUrl();
-            this.SetApiStatusLabel();
+            this.SetApiStatusLabel(null);
             if (this.ListTab.Focused || ((Control)this.CurrentTabPage.Tag).Focused)
                 this.Tag = this.ListTab.Tag;
             this.TabMenuControl(this.CurrentTabName);
@@ -6812,7 +6818,20 @@ namespace OpenTween
             return slbl.ToString();
         }
 
-        private async void TwitterApiStatus_AccessLimitUpdated(object sender, EventArgs e)
+        private void SubscribePrimaryAccountRatelimit()
+        {
+            this.unsubscribeRateLimitUpdate?.Dispose();
+            if (this.accounts.Primary is TwitterAccount twAccount)
+            {
+                var rateLimits = twAccount.AccountState.RateLimits;
+                this.unsubscribeRateLimitUpdate = rateLimits.SubscribeAccessLimitUpdated(this.TwitterApiStatus_AccessLimitUpdated);
+
+                // アカウントの切替を反映するため初回だけ空の更新通知を送る
+                this.TwitterApiStatus_AccessLimitUpdated(rateLimits, new(null));
+            }
+        }
+
+        private async void TwitterApiStatus_AccessLimitUpdated(RateLimitCollection sender, RateLimitCollection.AccessLimitUpdatedEventArgs e)
         {
             try
             {
@@ -6822,8 +6841,7 @@ namespace OpenTween
                 }
                 else
                 {
-                    var endpointName = ((TwitterApiStatus.AccessLimitUpdatedEventArgs)e).EndpointName;
-                    this.SetApiStatusLabel(endpointName);
+                    this.SetApiStatusLabel(sender, e.EndpointName);
                 }
             }
             catch (ObjectDisposedException)
@@ -6836,8 +6854,15 @@ namespace OpenTween
             }
         }
 
-        private void SetApiStatusLabel(string? endpointName = null)
+        private void SetApiStatusLabel(RateLimitCollection? rateLimits, string? endpointName = null)
         {
+            if (rateLimits == null)
+            {
+                this.toolStripApiGauge.ApiLimit = null;
+                this.toolStripApiGauge.ApiEndpoint = endpointName;
+                return;
+            }
+
             var tabType = this.CurrentTab.TabType;
 
             if (endpointName == null)
@@ -6866,13 +6891,10 @@ namespace OpenTween
                         authByCookie ? TweetDetailRequest.EndpointName : "/statuses/show/:id",
                     _ => null,
                 };
-                this.toolStripApiGauge.ApiEndpoint = endpointName;
             }
-            else
-            {
-                var currentEndpointName = this.toolStripApiGauge.ApiEndpoint;
-                this.toolStripApiGauge.ApiEndpoint = currentEndpointName;
-            }
+
+            this.toolStripApiGauge.ApiLimit = endpointName != null ? rateLimits[endpointName] : null;
+            this.toolStripApiGauge.ApiEndpoint = endpointName;
         }
 
         private void SetStatusLabelUrl()
@@ -7802,13 +7824,6 @@ namespace OpenTween
                     this.VerUpMenuItem.Available = false;
                     this.ToolStripSeparator16.Available = false; // VerUpMenuItem の一つ上にあるセパレータ
                 }
-
-                // 権限チェック read/write権限(xAuthで取得したトークン)の場合は再認証を促す
-                if (MyCommon.TwitterApiInfo.AccessLevel == TwitterApiAccessLevel.ReadWrite)
-                {
-                    MessageBox.Show(Properties.Resources.ReAuthorizeText);
-                    this.SettingStripMenuItem_Click(this.SettingStripMenuItem, EventArgs.Empty);
-                }
             }
 
             this.initial = false;
@@ -8035,7 +8050,7 @@ namespace OpenTween
 
         private async void ApiUsageInfoMenuItem_Click(object sender, EventArgs e)
         {
-            TwitterApiStatus? apiStatus;
+            RateLimitCollection? rateLimits;
 
             using (var dialog = new WaitingDialog(Properties.Resources.ApiInfo6))
             {
@@ -8044,17 +8059,17 @@ namespace OpenTween
                 try
                 {
                     var task = this.tw.GetInfoApi();
-                    apiStatus = await dialog.WaitForAsync(this, task);
+                    rateLimits = await dialog.WaitForAsync(this, task);
                 }
                 catch (WebApiException)
                 {
-                    apiStatus = null;
+                    rateLimits = null;
                 }
 
                 if (cancellationToken.IsCancellationRequested)
                     return;
 
-                if (apiStatus == null)
+                if (rateLimits == null)
                 {
                     MessageBox.Show(Properties.Resources.ApiInfo5, Properties.Resources.ApiInfo4, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
@@ -8062,6 +8077,7 @@ namespace OpenTween
             }
 
             using var apiDlg = new ApiInfoDialog();
+            apiDlg.RateLimits = this.CurrentTabAccount is TwitterAccount twAccount ? twAccount.AccountState.RateLimits : null;
             apiDlg.ShowDialog(this);
         }
 

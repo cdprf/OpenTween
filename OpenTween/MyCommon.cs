@@ -51,7 +51,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
-using OpenTween.Api;
 using OpenTween.Models;
 using OpenTween.Setting;
 using OpenTween.SocialProtocol.Twitter;
@@ -662,8 +661,6 @@ namespace OpenTween
             Mute = 2048,
             SearchResults = 4096,
         }
-
-        public static TwitterApiStatus TwitterApiInfo = new();
 
         public static bool IsAnimatedGif(string filename)
         {
