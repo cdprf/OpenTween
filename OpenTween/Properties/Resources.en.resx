@@ -205,7 +205,6 @@ Available service: {1}</value></data>
 	<data name="PostWorker_RunWorkerCompletedText4"><value>POST completed</value></data>
 	<data name="PostWorker_RunWorkerCompletedText5"><value>Recent refreshing...</value></data>
 	<data name="QuoteStatus_AccessibleText"><value>[Quote @{0}: {1}]</value></data>
-	<data name="ReAuthorizeText"><value>Please do Authentication processing to get/send Direct Messages again.</value></data>
 	<data name="RefreshConfiguration_Error"><value>Failed to get configuration: </value></data>
 	<data name="RefreshConfiguration_Start"><value>Getting configuration...</value></data>
 	<data name="RefreshConfiguration_Success"><value>Done to get configuration</value></data>

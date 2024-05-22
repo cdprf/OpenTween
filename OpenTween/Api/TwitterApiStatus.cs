@@ -38,8 +38,6 @@ namespace OpenTween.Api
 {
     public class TwitterApiStatus
     {
-        public TwitterApiAccessLevel AccessLevel { get; set; }
-
         public EndpointLimits AccessLimit { get; }
 
         public ApiLimit? MediaUploadLimit { get; set; }
@@ -59,7 +57,6 @@ namespace OpenTween.Api
 
         public void Reset()
         {
-            this.AccessLevel = TwitterApiAccessLevel.Anonymous;
             this.AccessLimit.Clear();
             this.MediaUploadLimit = null;
         }
@@ -75,30 +72,6 @@ namespace OpenTween.Api
 
             var limitResetDate = DateTimeUtc.FromUnixTime(limitReset.Value);
             return new ApiLimit(limitCount.Value, limitRemain.Value, limitResetDate);
-        }
-
-        internal static TwitterApiAccessLevel? ParseAccessLevel(IDictionary<string, string> header, string headerName)
-        {
-            if (!header.ContainsKey(headerName))
-                return null;
-
-            // たまに出てくる空文字列は無視する
-            if (MyCommon.IsNullOrEmpty(header[headerName]))
-                return null;
-
-            switch (header[headerName])
-            {
-                case "read-write-directmessages":
-                case "read-write-privatemessages":
-                    return TwitterApiAccessLevel.ReadWriteAndDirectMessage;
-                case "read-write":
-                    return TwitterApiAccessLevel.ReadWrite;
-                case "read":
-                    return TwitterApiAccessLevel.Read;
-                default:
-                    MyCommon.TraceOut("Unknown ApiAccessLevel:" + header[headerName]);
-                    return TwitterApiAccessLevel.ReadWriteAndDirectMessage;
-            }
         }
 
         internal static long? ParseHeaderValue(IDictionary<string, string> dict, params string[] keys)
@@ -126,10 +99,6 @@ namespace OpenTween.Api
             var mediaLimit = TwitterApiStatus.ParseRateLimit(header, "X-MediaRateLimit-");
             if (mediaLimit != null)
                 this.MediaUploadLimit = mediaLimit;
-
-            var accessLevel = TwitterApiStatus.ParseAccessLevel(header, "X-Access-Level");
-            if (accessLevel.HasValue)
-                this.AccessLevel = accessLevel.Value;
         }
 
         public void UpdateFromJson(TwitterRateLimits json)

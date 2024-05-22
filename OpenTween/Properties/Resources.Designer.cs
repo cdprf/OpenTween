@@ -2057,15 +2057,6 @@ namespace OpenTween.Properties {
         }
         
         /// <summary>
-        ///   Direct Messageの送受信をするため、もう一度認証処理をして下さい。 に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string ReAuthorizeText {
-            get {
-                return ResourceManager.GetString("ReAuthorizeText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   (アイコン) に類似した型 System.Drawing.Icon のローカライズされたリソースを検索します。
         /// </summary>
         internal static System.Drawing.Icon Refresh {

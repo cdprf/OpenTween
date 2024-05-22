@@ -116,7 +116,6 @@ namespace OpenTween.Connection
                         { "X-Rate-Limit-Limit", "150" },
                         { "X-Rate-Limit-Remaining", "100" },
                         { "X-Rate-Limit-Reset", "1356998400" },
-                        { "X-Access-Level", "read-write-directmessages" },
                     },
                     Content = new StringContent("\"hogehoge\""),
                 };
@@ -133,7 +132,6 @@ namespace OpenTween.Connection
 
             using var response = await apiConnection.SendAsync(request);
 
-            Assert.Equal(TwitterApiAccessLevel.ReadWriteAndDirectMessage, apiStatus.AccessLevel);
             Assert.Equal(new ApiLimit(150, 100, new DateTimeUtc(2013, 1, 1, 0, 0, 0)), apiStatus.AccessLimit["/hoge/tetete"]);
 
             Assert.Equal(0, mockHandler.QueueCount);

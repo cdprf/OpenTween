@@ -189,9 +189,6 @@ namespace OpenTween
             this.Api = api;
         }
 
-        public TwitterApiAccessLevel AccessLevel
-            => MyCommon.TwitterApiInfo.AccessLevel;
-
         protected void ResetApiStatus()
             => MyCommon.TwitterApiInfo.Reset();
 
@@ -327,7 +324,6 @@ namespace OpenTween
         public async Task SendDirectMessage(string postStr, long? mediaId = null)
         {
             this.CheckAccountState();
-            this.CheckAccessLevel(TwitterApiAccessLevel.ReadWriteAndDirectMessage);
 
             var mc = Twitter.DMSendTextRegex.Match(postStr);
 
@@ -552,7 +548,6 @@ namespace OpenTween
         public async Task GetDirectMessageEvents(DirectMessagesTabModel dmTab, bool backward, bool firstLoad)
         {
             this.CheckAccountState();
-            this.CheckAccessLevel(TwitterApiAccessLevel.ReadWriteAndDirectMessage);
 
             var count = 50;
 
@@ -822,12 +817,6 @@ namespace OpenTween
         {
             if (this.AccountState.HasUnrecoverableError)
                 throw new WebApiException("Auth error. Check your account");
-        }
-
-        private void CheckAccessLevel(TwitterApiAccessLevel accessLevelFlags)
-        {
-            if (!this.AccessLevel.HasFlag(accessLevelFlags))
-                throw new WebApiException("Auth Err:try to re-authorization.");
         }
 
         public int GetTextLengthRemain(string postText)

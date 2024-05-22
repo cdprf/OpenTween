@@ -40,13 +40,11 @@ namespace OpenTween.Api
 
             apiStatus.AccessLimit["/statuses/home_timeline"] = new ApiLimit(150, 100, new DateTimeUtc(2013, 1, 1, 0, 0, 0));
             apiStatus.MediaUploadLimit = new ApiLimit(150, 100, new DateTimeUtc(2013, 1, 1, 0, 0, 0));
-            apiStatus.AccessLevel = TwitterApiAccessLevel.ReadWriteAndDirectMessage;
 
             apiStatus.Reset();
 
             Assert.Null(apiStatus.AccessLimit["/statuses/home_timeline"]);
             Assert.Null(apiStatus.MediaUploadLimit);
-            Assert.Equal(TwitterApiAccessLevel.Anonymous, apiStatus.AccessLevel);
         }
 
         public static readonly TheoryData<Dictionary<string, string>, ApiLimit?> ParseRateLimitTestCase = new()
@@ -134,38 +132,6 @@ namespace OpenTween.Api
             Assert.Equal(expected, limit);
         }
 
-        public static readonly TheoryData<Dictionary<string, string>, TwitterApiAccessLevel?> ParseAccessLevelTestCase = new()
-        {
-            {
-                new Dictionary<string, string> { { "X-Access-Level", "read" } },
-                TwitterApiAccessLevel.Read
-            },
-            {
-                new Dictionary<string, string> { { "X-Access-Level", "read-write" } },
-                TwitterApiAccessLevel.ReadWrite
-            },
-            {
-                new Dictionary<string, string> { { "X-Access-Level", "read-write-directmessages" } },
-                TwitterApiAccessLevel.ReadWriteAndDirectMessage
-            },
-            {
-                new Dictionary<string, string> { { "X-Access-Level", "" } }, // 何故かたまに出てくるやつ
-                null
-            },
-            {
-                new Dictionary<string, string> { },
-                null
-            },
-        };
-
-        [Theory]
-        [MemberData(nameof(ParseAccessLevelTestCase))]
-        public void ParseAccessLevelTest(IDictionary<string, string> header, TwitterApiAccessLevel? expected)
-        {
-            var accessLevel = TwitterApiStatus.ParseAccessLevel(header, "X-Access-Level");
-            Assert.Equal(expected, accessLevel);
-        }
-
         [Fact]
         public void UpdateFromHeader_DictionaryTest()
         {
@@ -179,7 +145,6 @@ namespace OpenTween.Api
                 ["X-MediaRateLimit-Limit"] = "30",
                 ["X-MediaRateLimit-Remaining"] = "20",
                 ["X-MediaRateLimit-Reset"] = "1357084800",
-                ["X-Access-Level"] = "read-write-directmessages",
             };
 
             Assert.Raises<TwitterApiStatus.AccessLimitUpdatedEventArgs>(
@@ -197,8 +162,6 @@ namespace OpenTween.Api
             Assert.Equal(30, mediaLimit.AccessLimitCount);
             Assert.Equal(20, mediaLimit.AccessLimitRemain);
             Assert.Equal(new DateTimeUtc(2013, 1, 2, 0, 0, 0), mediaLimit.AccessLimitResetDate);
-
-            Assert.Equal(TwitterApiAccessLevel.ReadWriteAndDirectMessage, status.AccessLevel);
         }
 
         [Fact]
@@ -216,7 +179,6 @@ namespace OpenTween.Api
                     { "x-mediaratelimit-limit", "30" },
                     { "x-mediaratelimit-remaining", "20" },
                     { "x-mediaratelimit-reset", "1357084800" },
-                    { "x-access-level", "read-write-directmessages" },
                 },
             };
 
@@ -235,8 +197,6 @@ namespace OpenTween.Api
             Assert.Equal(30, mediaLimit.AccessLimitCount);
             Assert.Equal(20, mediaLimit.AccessLimitRemain);
             Assert.Equal(new DateTimeUtc(2013, 1, 2, 0, 0, 0), mediaLimit.AccessLimitResetDate);
-
-            Assert.Equal(TwitterApiAccessLevel.ReadWriteAndDirectMessage, status.AccessLevel);
         }
 
         [Fact]

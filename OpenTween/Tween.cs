@@ -7802,13 +7802,6 @@ namespace OpenTween
                     this.VerUpMenuItem.Available = false;
                     this.ToolStripSeparator16.Available = false; // VerUpMenuItem の一つ上にあるセパレータ
                 }
-
-                // 権限チェック read/write権限(xAuthで取得したトークン)の場合は再認証を促す
-                if (MyCommon.TwitterApiInfo.AccessLevel == TwitterApiAccessLevel.ReadWrite)
-                {
-                    MessageBox.Show(Properties.Resources.ReAuthorizeText);
-                    this.SettingStripMenuItem_Click(this.SettingStripMenuItem, EventArgs.Empty);
-                }
             }
 
             this.initial = false;
