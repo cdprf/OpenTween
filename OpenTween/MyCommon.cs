@@ -662,8 +662,6 @@ namespace OpenTween
             SearchResults = 4096,
         }
 
-        public static TwitterRateLimitCollection TwitterRateLimits = new();
-
         public static bool IsAnimatedGif(string filename)
         {
             Image? img = null;

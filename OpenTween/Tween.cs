@@ -466,7 +466,7 @@ namespace OpenTween
             // タブの位置を調整する
             this.SetTabAlignment();
 
-            this.unsubscribeRateLimitUpdate = MyCommon.TwitterRateLimits.SubscribeAccessLimitUpdated(this.TwitterApiStatus_AccessLimitUpdated);
+            this.SubscribePrimaryAccountRatelimit();
 
             Microsoft.Win32.SystemEvents.TimeChanged += this.SystemEvents_TimeChanged;
 
@@ -2614,7 +2614,10 @@ namespace OpenTween
             this.SaveConfigsAll(false);
 
             if (this.PrimaryAccount.UniqueKey != previousAccountId)
+            {
+                this.SubscribePrimaryAccountRatelimit();
                 await this.RefreshConfigurationAsync();
+            }
 
             var currentSecondaryAccounts = this.accounts.SecondaryAccounts;
             var newSecondaryAccounts = currentSecondaryAccounts
@@ -3056,7 +3059,7 @@ namespace OpenTween
         {
             this.SetMainWindowTitle();
             this.SetStatusLabelUrl();
-            this.SetApiStatusLabel();
+            this.SetApiStatusLabel(null);
             if (this.ListTab.Focused || ((Control)this.CurrentTabPage.Tag).Focused)
                 this.Tag = this.ListTab.Tag;
             this.TabMenuControl(this.CurrentTabName);
@@ -6815,6 +6818,19 @@ namespace OpenTween
             return slbl.ToString();
         }
 
+        private void SubscribePrimaryAccountRatelimit()
+        {
+            this.unsubscribeRateLimitUpdate?.Dispose();
+            if (this.accounts.Primary is TwitterAccount twAccount)
+            {
+                var rateLimits = twAccount.AccountState.RateLimits;
+                this.unsubscribeRateLimitUpdate = rateLimits.SubscribeAccessLimitUpdated(this.TwitterApiStatus_AccessLimitUpdated);
+
+                // アカウントの切替を反映するため初回だけ空の更新通知を送る
+                this.TwitterApiStatus_AccessLimitUpdated(rateLimits, new(null));
+            }
+        }
+
         private async void TwitterApiStatus_AccessLimitUpdated(RateLimitCollection sender, RateLimitCollection.AccessLimitUpdatedEventArgs e)
         {
             try
@@ -6825,7 +6841,7 @@ namespace OpenTween
                 }
                 else
                 {
-                    this.SetApiStatusLabel(e.EndpointName);
+                    this.SetApiStatusLabel(sender, e.EndpointName);
                 }
             }
             catch (ObjectDisposedException)
@@ -6838,8 +6854,15 @@ namespace OpenTween
             }
         }
 
-        private void SetApiStatusLabel(string? endpointName = null)
+        private void SetApiStatusLabel(RateLimitCollection? rateLimits, string? endpointName = null)
         {
+            if (rateLimits == null)
+            {
+                this.toolStripApiGauge.ApiLimit = null;
+                this.toolStripApiGauge.ApiEndpoint = endpointName;
+                return;
+            }
+
             var tabType = this.CurrentTab.TabType;
 
             if (endpointName == null)
@@ -6870,7 +6893,7 @@ namespace OpenTween
                 };
             }
 
-            this.toolStripApiGauge.ApiLimit = endpointName != null ? MyCommon.TwitterRateLimits[endpointName] : null;
+            this.toolStripApiGauge.ApiLimit = endpointName != null ? rateLimits[endpointName] : null;
             this.toolStripApiGauge.ApiEndpoint = endpointName;
         }
 
@@ -8054,6 +8077,7 @@ namespace OpenTween
             }
 
             using var apiDlg = new ApiInfoDialog();
+            apiDlg.RateLimits = this.CurrentTabAccount is TwitterAccount twAccount ? twAccount.AccountState.RateLimits : null;
             apiDlg.ShowDialog(this);
         }
 

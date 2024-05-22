@@ -99,9 +99,10 @@ namespace OpenTween.Connection
         [Fact]
         public async Task SendAsync_UpdateRateLimitTest()
         {
+            var accountState = new TwitterAccountState();
             using var mockHandler = new HttpMessageHandlerMock();
             using var http = new HttpClient(mockHandler);
-            using var apiConnection = new TwitterApiConnection();
+            using var apiConnection = new TwitterApiConnection(new TwitterCredentialNone(), accountState);
             apiConnection.Http = http;
 
             mockHandler.Enqueue(x =>
@@ -122,9 +123,6 @@ namespace OpenTween.Connection
                 };
             });
 
-            var rateLimits = new TwitterRateLimitCollection();
-            MyCommon.TwitterRateLimits = rateLimits;
-
             var request = new GetRequest
             {
                 RequestUri = new("hoge/tetete.json", UriKind.Relative),
@@ -133,7 +131,7 @@ namespace OpenTween.Connection
 
             using var response = await apiConnection.SendAsync(request);
 
-            Assert.Equal(new(150, 100, new DateTimeUtc(2013, 1, 1, 0, 0, 0)), rateLimits["/hoge/tetete"]);
+            Assert.Equal(new(150, 100, new DateTimeUtc(2013, 1, 1, 0, 0, 0)), accountState.RateLimits["/hoge/tetete"]);
 
             Assert.Equal(0, mockHandler.QueueCount);
         }

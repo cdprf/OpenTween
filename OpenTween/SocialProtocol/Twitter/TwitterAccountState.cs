@@ -51,6 +51,8 @@ namespace OpenTween.SocialProtocol.Twitter
 
         public TwitterTextConfiguration TextConfiguration { get; } = TwitterTextConfiguration.DefaultConfiguration();
 
+        public TwitterRateLimitCollection RateLimits { get; } = new();
+
         public bool HasUnrecoverableError { get; set; } = true;
 
         public TwitterAccountState()

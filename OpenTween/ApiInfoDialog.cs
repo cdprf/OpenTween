@@ -37,7 +37,21 @@ namespace OpenTween
 {
     public partial class ApiInfoDialog : OTBaseForm
     {
+        private RateLimitCollection? rateLimits;
         private IDisposable? unsubscribeRateLimitUpdate;
+
+        public RateLimitCollection? RateLimits
+        {
+            get => this.rateLimits;
+            set
+            {
+                if (this.rateLimits == value)
+                    return;
+
+                this.rateLimits = value;
+                this.InitializeRateLimits(value);
+            }
+        }
 
         public ApiInfoDialog()
             => this.InitializeComponent();
@@ -56,13 +70,19 @@ namespace OpenTween
             "/search/tweets",
         };
 
-        private void ApiInfoDialog_Shown(object sender, EventArgs e)
+        private void InitializeRateLimits(RateLimitCollection? rateLimits)
         {
+            this.ListViewApi.Items.Clear();
+            this.unsubscribeRateLimitUpdate?.Dispose();
+
+            if (rateLimits == null)
+                return;
+
             // TL更新用エンドポイントの追加
             var group = this.ListViewApi.Groups[0];
             foreach (var endpoint in this.tlEndpoints)
             {
-                var apiLimit = MyCommon.TwitterRateLimits[endpoint];
+                var apiLimit = rateLimits[endpoint];
                 if (apiLimit == null)
                     continue;
 
@@ -71,13 +91,13 @@ namespace OpenTween
 
             // その他
             group = this.ListViewApi.Groups[1];
-            var apiStatuses = MyCommon.TwitterRateLimits.Where(x => !this.tlEndpoints.Contains(x.Key)).OrderBy(x => x.Key);
+            var apiStatuses = rateLimits.Where(x => !this.tlEndpoints.Contains(x.Key)).OrderBy(x => x.Key);
             foreach (var (endpoint, apiLimit) in apiStatuses)
             {
                 this.AddListViewItem(endpoint, apiLimit, group);
             }
 
-            this.unsubscribeRateLimitUpdate = MyCommon.TwitterRateLimits.SubscribeAccessLimitUpdated(this.TwitterApiStatus_AccessLimitUpdated);
+            this.unsubscribeRateLimitUpdate = rateLimits.SubscribeAccessLimitUpdated(this.TwitterApiStatus_AccessLimitUpdated);
         }
 
         private void AddListViewItem(string endpoint, ApiLimit apiLimit, ListViewGroup group)
@@ -98,7 +118,7 @@ namespace OpenTween
 
         private void UpdateEndpointLimit(string endpoint)
         {
-            var apiLimit = MyCommon.TwitterRateLimits[endpoint];
+            var apiLimit = this.RateLimits?[endpoint];
             if (apiLimit != null)
             {
                 var item = this.ListViewApi.Items.Cast<ListViewItem>().Single(x => x.SubItems[0].Text == endpoint);

@@ -91,7 +91,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "ApiInfoDialog";
             this.TopMost = true;
-            this.Shown += new System.EventHandler(this.ApiInfoDialog_Shown);
             this.ResumeLayout(false);
 
         }
