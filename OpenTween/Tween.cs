@@ -124,6 +124,8 @@ namespace OpenTween
         public ISocialAccount CurrentTabAccount
             => this.accounts.GetAccountForTab(this.CurrentTab);
 
+        private IDisposable? unsubscribeRateLimitUpdate;
+
         // Growl呼び出し部
         private readonly GrowlHelper gh = new(ApplicationSettings.ApplicationName);
 
@@ -464,7 +466,8 @@ namespace OpenTween
             // タブの位置を調整する
             this.SetTabAlignment();
 
-            MyCommon.TwitterRateLimits.AccessLimitUpdated += this.TwitterApiStatus_AccessLimitUpdated;
+            this.unsubscribeRateLimitUpdate = MyCommon.TwitterRateLimits.SubscribeAccessLimitUpdated(this.TwitterApiStatus_AccessLimitUpdated);
+
             Microsoft.Win32.SystemEvents.TimeChanged += this.SystemEvents_TimeChanged;
 
             if (this.settings.Common.TabIconDisp)
@@ -568,6 +571,7 @@ namespace OpenTween
                 this.timelineScheduler.Dispose();
                 this.workerCts.Cancel();
                 this.thumbnailTokenSource?.Dispose();
+                this.unsubscribeRateLimitUpdate?.Dispose();
 
                 this.hookGlobalHotkey.Dispose();
             }
@@ -576,7 +580,6 @@ namespace OpenTween
             // http://msdn.microsoft.com/ja-jp/library/microsoft.win32.systemevents.powermodechanged.aspx
             Microsoft.Win32.SystemEvents.PowerModeChanged -= this.SystemEvents_PowerModeChanged;
             Microsoft.Win32.SystemEvents.TimeChanged -= this.SystemEvents_TimeChanged;
-            MyCommon.TwitterRateLimits.AccessLimitUpdated -= this.TwitterApiStatus_AccessLimitUpdated;
 
             this.disposed = true;
         }
@@ -6812,7 +6815,7 @@ namespace OpenTween
             return slbl.ToString();
         }
 
-        private async void TwitterApiStatus_AccessLimitUpdated(object sender, EventArgs e)
+        private async void TwitterApiStatus_AccessLimitUpdated(RateLimitCollection sender, RateLimitCollection.AccessLimitUpdatedEventArgs e)
         {
             try
             {
@@ -6822,8 +6825,7 @@ namespace OpenTween
                 }
                 else
                 {
-                    var endpointName = ((RateLimitCollection.AccessLimitUpdatedEventArgs)e).EndpointName;
-                    this.SetApiStatusLabel(endpointName);
+                    this.SetApiStatusLabel(e.EndpointName);
                 }
             }
             catch (ObjectDisposedException)

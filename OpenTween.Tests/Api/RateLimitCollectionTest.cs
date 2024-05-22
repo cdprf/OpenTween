@@ -26,21 +26,48 @@ namespace OpenTween.Api
     public class RateLimitCollectionTest
     {
         [Fact]
-        public void AccessLimitUpdatedTest()
+        public void SubscribeAccessLimitUpdated_Test()
         {
             var collection = new RateLimitCollection();
+            var count = 0;
 
-            Assert.Raises<RateLimitCollection.AccessLimitUpdatedEventArgs>(
-                x => collection.AccessLimitUpdated += x,
-                x => collection.AccessLimitUpdated -= x,
-                () => collection["/statuses/home_timeline"] = new ApiLimit(150, 100, new DateTimeUtc(2013, 1, 1, 0, 0, 0))
-            );
+            void Handler(RateLimitCollection sender, RateLimitCollection.AccessLimitUpdatedEventArgs e)
+            {
+                Assert.Same(collection, sender);
+                Assert.Equal("/statuses/home_timeline", e.EndpointName);
+                count++;
+            }
 
-            Assert.Raises<RateLimitCollection.AccessLimitUpdatedEventArgs>(
-                x => collection.AccessLimitUpdated += x,
-                x => collection.AccessLimitUpdated -= x,
-                () => collection.Clear()
-            );
+            using (collection.SubscribeAccessLimitUpdated(Handler))
+            {
+                collection["/statuses/home_timeline"] = new(150, 100, new(2013, 1, 1, 0, 0, 0));
+                Assert.Equal(1, count);
+            }
+
+            collection["/statuses/home_timeline"] = new(150, 99, new(2013, 1, 1, 0, 0, 0));
+            Assert.Equal(1, count); // 変化しない
+        }
+
+        [Fact]
+        public void SubscribeAccessLimitUpdated_ClearTest()
+        {
+            var collection = new RateLimitCollection();
+            collection["/statuses/home_timeline"] = new(150, 100, new(2013, 1, 1, 0, 0, 0));
+
+            var count = 0;
+
+            void Handler(RateLimitCollection sender, RateLimitCollection.AccessLimitUpdatedEventArgs e)
+            {
+                Assert.Same(collection, sender);
+                Assert.Null(e.EndpointName);
+                count++;
+            }
+
+            using (collection.SubscribeAccessLimitUpdated(Handler))
+            {
+                collection.Clear();
+                Assert.Equal(1, count);
+            }
         }
     }
 }

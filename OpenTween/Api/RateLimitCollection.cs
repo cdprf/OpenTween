@@ -38,7 +38,7 @@ namespace OpenTween.Api
                 => this.EndpointName = endpointName;
         }
 
-        public event EventHandler<AccessLimitUpdatedEventArgs>? AccessLimitUpdated;
+        private event EventHandler<AccessLimitUpdatedEventArgs>? AccessLimitUpdated;
 
         private readonly ConcurrentDictionary<string, ApiLimit> innerDict = new();
 
@@ -70,6 +70,30 @@ namespace OpenTween.Api
             }
 
             this.OnAccessLimitUpdated(new(null));
+        }
+
+        public IDisposable SubscribeAccessLimitUpdated(Action<RateLimitCollection, AccessLimitUpdatedEventArgs> action)
+        {
+            void Handler(object sender, AccessLimitUpdatedEventArgs e)
+                => action((RateLimitCollection)sender, e);
+
+            this.AccessLimitUpdated += Handler;
+
+            void Unsubscribe()
+                => this.AccessLimitUpdated -= Handler;
+
+            return new Unsubscriber(Unsubscribe);
+        }
+
+        private sealed class Unsubscriber : IDisposable
+        {
+            private readonly Action action;
+
+            public Unsubscriber(Action action)
+                => this.action = action;
+
+            public void Dispose()
+                => this.action();
         }
 
         protected virtual void OnAccessLimitUpdated(AccessLimitUpdatedEventArgs e)

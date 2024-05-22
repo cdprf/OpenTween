@@ -37,6 +37,8 @@ namespace OpenTween
 {
     public partial class ApiInfoDialog : OTBaseForm
     {
+        private IDisposable? unsubscribeRateLimitUpdate;
+
         public ApiInfoDialog()
             => this.InitializeComponent();
 
@@ -75,7 +77,7 @@ namespace OpenTween
                 this.AddListViewItem(endpoint, apiLimit, group);
             }
 
-            MyCommon.TwitterRateLimits.AccessLimitUpdated += this.TwitterApiStatus_AccessLimitUpdated;
+            this.unsubscribeRateLimitUpdate = MyCommon.TwitterRateLimits.SubscribeAccessLimitUpdated(this.TwitterApiStatus_AccessLimitUpdated);
         }
 
         private void AddListViewItem(string endpoint, ApiLimit apiLimit, ListViewGroup group)
@@ -105,7 +107,7 @@ namespace OpenTween
             }
         }
 
-        private async void TwitterApiStatus_AccessLimitUpdated(object sender, EventArgs e)
+        private async void TwitterApiStatus_AccessLimitUpdated(RateLimitCollection sender, RateLimitCollection.AccessLimitUpdatedEventArgs e)
         {
             try
             {
@@ -115,7 +117,7 @@ namespace OpenTween
                 }
                 else
                 {
-                    var endpoint = ((RateLimitCollection.AccessLimitUpdatedEventArgs)e).EndpointName;
+                    var endpoint = e.EndpointName;
                     if (endpoint != null)
                         this.UpdateEndpointLimit(endpoint);
                 }
@@ -130,13 +132,21 @@ namespace OpenTween
             }
         }
 
-        private void ApiInfoDialog_FormClosing(object sender, FormClosingEventArgs e)
-            => MyCommon.TwitterRateLimits.AccessLimitUpdated -= this.TwitterApiStatus_AccessLimitUpdated;
-
         protected override void ScaleControl(SizeF factor, BoundsSpecified specified)
         {
             base.ScaleControl(factor, specified);
             ScaleChildControl(this.ListViewApi, factor);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.unsubscribeRateLimitUpdate?.Dispose();
+                this.components?.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 
