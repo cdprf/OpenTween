@@ -464,7 +464,7 @@ namespace OpenTween
             // タブの位置を調整する
             this.SetTabAlignment();
 
-            MyCommon.TwitterApiInfo.AccessLimitUpdated += this.TwitterApiStatus_AccessLimitUpdated;
+            MyCommon.TwitterRateLimits.AccessLimitUpdated += this.TwitterApiStatus_AccessLimitUpdated;
             Microsoft.Win32.SystemEvents.TimeChanged += this.SystemEvents_TimeChanged;
 
             if (this.settings.Common.TabIconDisp)
@@ -576,7 +576,7 @@ namespace OpenTween
             // http://msdn.microsoft.com/ja-jp/library/microsoft.win32.systemevents.powermodechanged.aspx
             Microsoft.Win32.SystemEvents.PowerModeChanged -= this.SystemEvents_PowerModeChanged;
             Microsoft.Win32.SystemEvents.TimeChanged -= this.SystemEvents_TimeChanged;
-            MyCommon.TwitterApiInfo.AccessLimitUpdated -= this.TwitterApiStatus_AccessLimitUpdated;
+            MyCommon.TwitterRateLimits.AccessLimitUpdated -= this.TwitterApiStatus_AccessLimitUpdated;
 
             this.disposed = true;
         }
@@ -8028,7 +8028,7 @@ namespace OpenTween
 
         private async void ApiUsageInfoMenuItem_Click(object sender, EventArgs e)
         {
-            TwitterApiStatus? apiStatus;
+            RateLimitCollection? rateLimits;
 
             using (var dialog = new WaitingDialog(Properties.Resources.ApiInfo6))
             {
@@ -8037,17 +8037,17 @@ namespace OpenTween
                 try
                 {
                     var task = this.tw.GetInfoApi();
-                    apiStatus = await dialog.WaitForAsync(this, task);
+                    rateLimits = await dialog.WaitForAsync(this, task);
                 }
                 catch (WebApiException)
                 {
-                    apiStatus = null;
+                    rateLimits = null;
                 }
 
                 if (cancellationToken.IsCancellationRequested)
                     return;
 
-                if (apiStatus == null)
+                if (rateLimits == null)
                 {
                     MessageBox.Show(Properties.Resources.ApiInfo5, Properties.Resources.ApiInfo4, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;

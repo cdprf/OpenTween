@@ -22,33 +22,41 @@
 #nullable enable
 
 using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
-using System.Runtime.Serialization.Json;
-using System.Text;
-using System.Xml;
-using System.Xml.Linq;
-using System.Xml.XPath;
+using OpenTween.Api;
 using OpenTween.Api.DataModel;
 
-namespace OpenTween.Api
+namespace OpenTween.SocialProtocol.Twitter
 {
-    public class TwitterApiStatus
+    public class TwitterRateLimitCollection : RateLimitCollection
     {
-        public RateLimitCollection AccessLimit { get; } = new();
+        public void UpdateFromHeader(HttpResponseHeaders header, string endpointName)
+            => this.UpdateFromHeader(header.ToDictionary(x => x.Key, x => string.Join(",", x.Value), StringComparer.OrdinalIgnoreCase), endpointName);
 
-        public event EventHandler<RateLimitCollection.AccessLimitUpdatedEventArgs>? AccessLimitUpdated
+        public void UpdateFromHeader(IDictionary<string, string> header, string endpointName)
         {
-            add => this.AccessLimit.AccessLimitUpdated += value;
-            remove => this.AccessLimit.AccessLimitUpdated -= value;
+            var rateLimit = ParseRateLimit(header, "X-Rate-Limit-");
+            if (rateLimit != null)
+                this[endpointName] = rateLimit;
         }
 
-        public void Reset()
+        public void UpdateFromJson(TwitterRateLimits json)
         {
-            this.AccessLimit.Clear();
+            var rateLimits =
+                from res in json.Resources
+                from item in res.Value
+                select (
+                    EndpointName: item.Key,
+                    Limit: new ApiLimit(
+                        item.Value.Limit,
+                        item.Value.Remaining,
+                        DateTimeUtc.FromUnixTime(item.Value.Reset)
+                    )
+                );
+
+            this.AddAll(rateLimits.ToDictionary(x => x.EndpointName, x => x.Limit));
         }
 
         internal static ApiLimit? ParseRateLimit(IDictionary<string, string> header, string prefix)
@@ -75,33 +83,6 @@ namespace OpenTween.Api
             }
 
             return null;
-        }
-
-        public void UpdateFromHeader(HttpResponseHeaders header, string endpointName)
-            => this.UpdateFromHeader(header.ToDictionary(x => x.Key, x => string.Join(",", x.Value), StringComparer.OrdinalIgnoreCase), endpointName);
-
-        public void UpdateFromHeader(IDictionary<string, string> header, string endpointName)
-        {
-            var rateLimit = TwitterApiStatus.ParseRateLimit(header, "X-Rate-Limit-");
-            if (rateLimit != null)
-                this.AccessLimit[endpointName] = rateLimit;
-        }
-
-        public void UpdateFromJson(TwitterRateLimits json)
-        {
-            var rateLimits =
-                from res in json.Resources
-                from item in res.Value
-                select (
-                    EndpointName: item.Key,
-                    Limit: new ApiLimit(
-                        item.Value.Limit,
-                        item.Value.Remaining,
-                        DateTimeUtc.FromUnixTime(item.Value.Reset)
-                    )
-                );
-
-            this.AccessLimit.AddAll(rateLimits.ToDictionary(x => x.EndpointName, x => x.Limit));
         }
     }
 }

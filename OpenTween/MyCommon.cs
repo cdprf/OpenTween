@@ -51,7 +51,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
-using OpenTween.Api;
 using OpenTween.Models;
 using OpenTween.Setting;
 using OpenTween.SocialProtocol.Twitter;
@@ -663,7 +662,7 @@ namespace OpenTween
             SearchResults = 4096,
         }
 
-        public static TwitterApiStatus TwitterApiInfo = new();
+        public static TwitterRateLimitCollection TwitterRateLimits = new();
 
         public static bool IsAnimatedGif(string filename)
         {

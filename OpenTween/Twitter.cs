@@ -190,7 +190,7 @@ namespace OpenTween
         }
 
         protected void ResetApiStatus()
-            => MyCommon.TwitterApiInfo.Reset();
+            => MyCommon.TwitterRateLimits.Clear();
 
         public void ClearAuthInfo()
         {
@@ -755,7 +755,7 @@ namespace OpenTween
             }
         }
 
-        public async Task<TwitterApiStatus?> GetInfoApi()
+        public async Task<TwitterRateLimitCollection?> GetInfoApi()
         {
             if (this.AccountState.HasUnrecoverableError)
                 return null;
@@ -765,9 +765,9 @@ namespace OpenTween
             var limits = await this.Api.ApplicationRateLimitStatus()
                 .ConfigureAwait(false);
 
-            MyCommon.TwitterApiInfo.UpdateFromJson(limits);
+            MyCommon.TwitterRateLimits.UpdateFromJson(limits);
 
-            return MyCommon.TwitterApiInfo;
+            return MyCommon.TwitterRateLimits;
         }
 
         /// <summary>

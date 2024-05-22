@@ -60,7 +60,7 @@ namespace OpenTween
             var group = this.ListViewApi.Groups[0];
             foreach (var endpoint in this.tlEndpoints)
             {
-                var apiLimit = MyCommon.TwitterApiInfo.AccessLimit[endpoint];
+                var apiLimit = MyCommon.TwitterRateLimits[endpoint];
                 if (apiLimit == null)
                     continue;
 
@@ -69,13 +69,13 @@ namespace OpenTween
 
             // その他
             group = this.ListViewApi.Groups[1];
-            var apiStatuses = MyCommon.TwitterApiInfo.AccessLimit.Where(x => !this.tlEndpoints.Contains(x.Key)).OrderBy(x => x.Key);
+            var apiStatuses = MyCommon.TwitterRateLimits.Where(x => !this.tlEndpoints.Contains(x.Key)).OrderBy(x => x.Key);
             foreach (var (endpoint, apiLimit) in apiStatuses)
             {
                 this.AddListViewItem(endpoint, apiLimit, group);
             }
 
-            MyCommon.TwitterApiInfo.AccessLimitUpdated += this.TwitterApiStatus_AccessLimitUpdated;
+            MyCommon.TwitterRateLimits.AccessLimitUpdated += this.TwitterApiStatus_AccessLimitUpdated;
         }
 
         private void AddListViewItem(string endpoint, ApiLimit apiLimit, ListViewGroup group)
@@ -96,7 +96,7 @@ namespace OpenTween
 
         private void UpdateEndpointLimit(string endpoint)
         {
-            var apiLimit = MyCommon.TwitterApiInfo.AccessLimit[endpoint];
+            var apiLimit = MyCommon.TwitterRateLimits[endpoint];
             if (apiLimit != null)
             {
                 var item = this.ListViewApi.Items.Cast<ListViewItem>().Single(x => x.SubItems[0].Text == endpoint);
@@ -131,7 +131,7 @@ namespace OpenTween
         }
 
         private void ApiInfoDialog_FormClosing(object sender, FormClosingEventArgs e)
-            => MyCommon.TwitterApiInfo.AccessLimitUpdated -= this.TwitterApiStatus_AccessLimitUpdated;
+            => MyCommon.TwitterRateLimits.AccessLimitUpdated -= this.TwitterApiStatus_AccessLimitUpdated;
 
         protected override void ScaleControl(SizeF factor, BoundsSpecified specified)
         {

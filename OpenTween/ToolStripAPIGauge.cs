@@ -103,7 +103,7 @@ namespace OpenTween
                     return;
                 }
 
-                var apiLimit = MyCommon.TwitterApiInfo.AccessLimit[value];
+                var apiLimit = MyCommon.TwitterRateLimits[value];
 
                 if (this.apiEndpoint != value)
                 {

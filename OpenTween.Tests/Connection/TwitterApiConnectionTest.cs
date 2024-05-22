@@ -35,6 +35,7 @@ using System.Web;
 using Moq;
 using OpenTween.Api;
 using OpenTween.Api.DataModel;
+using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 
 namespace OpenTween.Connection
@@ -121,8 +122,8 @@ namespace OpenTween.Connection
                 };
             });
 
-            var apiStatus = new TwitterApiStatus();
-            MyCommon.TwitterApiInfo = apiStatus;
+            var rateLimits = new TwitterRateLimitCollection();
+            MyCommon.TwitterRateLimits = rateLimits;
 
             var request = new GetRequest
             {
@@ -132,7 +133,7 @@ namespace OpenTween.Connection
 
             using var response = await apiConnection.SendAsync(request);
 
-            Assert.Equal(new ApiLimit(150, 100, new DateTimeUtc(2013, 1, 1, 0, 0, 0)), apiStatus.AccessLimit["/hoge/tetete"]);
+            Assert.Equal(new(150, 100, new DateTimeUtc(2013, 1, 1, 0, 0, 0)), rateLimits["/hoge/tetete"]);
 
             Assert.Equal(0, mockHandler.QueueCount);
         }
