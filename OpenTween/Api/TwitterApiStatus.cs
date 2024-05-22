@@ -40,8 +40,6 @@ namespace OpenTween.Api
     {
         public EndpointLimits AccessLimit { get; }
 
-        public ApiLimit? MediaUploadLimit { get; set; }
-
         public class AccessLimitUpdatedEventArgs : EventArgs
         {
             public string? EndpointName { get; }
@@ -58,7 +56,6 @@ namespace OpenTween.Api
         public void Reset()
         {
             this.AccessLimit.Clear();
-            this.MediaUploadLimit = null;
         }
 
         internal static ApiLimit? ParseRateLimit(IDictionary<string, string> header, string prefix)
@@ -95,10 +92,6 @@ namespace OpenTween.Api
             var rateLimit = TwitterApiStatus.ParseRateLimit(header, "X-Rate-Limit-");
             if (rateLimit != null)
                 this.AccessLimit[endpointName] = rateLimit;
-
-            var mediaLimit = TwitterApiStatus.ParseRateLimit(header, "X-MediaRateLimit-");
-            if (mediaLimit != null)
-                this.MediaUploadLimit = mediaLimit;
         }
 
         public void UpdateFromJson(TwitterRateLimits json)

@@ -39,12 +39,9 @@ namespace OpenTween.Api
             var apiStatus = new TwitterApiStatus();
 
             apiStatus.AccessLimit["/statuses/home_timeline"] = new ApiLimit(150, 100, new DateTimeUtc(2013, 1, 1, 0, 0, 0));
-            apiStatus.MediaUploadLimit = new ApiLimit(150, 100, new DateTimeUtc(2013, 1, 1, 0, 0, 0));
-
             apiStatus.Reset();
 
             Assert.Null(apiStatus.AccessLimit["/statuses/home_timeline"]);
-            Assert.Null(apiStatus.MediaUploadLimit);
         }
 
         public static readonly TheoryData<Dictionary<string, string>, ApiLimit?> ParseRateLimitTestCase = new()
@@ -94,44 +91,6 @@ namespace OpenTween.Api
             Assert.Equal(expected, limit);
         }
 
-        public static readonly TheoryData<Dictionary<string, string>, ApiLimit?> ParseMediaRateLimitTestCase = new()
-        {
-            {
-                new Dictionary<string, string>
-                {
-                    ["X-MediaRateLimit-Limit"] = "30",
-                    ["X-MediaRateLimit-Remaining"] = "20",
-                    ["X-MediaRateLimit-Reset"] = "1234567890",
-                },
-                new ApiLimit(30, 20, new DateTimeUtc(2009, 2, 13, 23, 31, 30))
-            },
-            {
-                new Dictionary<string, string>
-                {
-                    ["X-MediaRateLimit-Limit"] = "30",
-                    ["X-MediaRateLimit-Remaining"] = "20",
-                    ["X-MediaRateLimit-Reset"] = "hogehoge",
-                },
-                null
-            },
-            {
-                new Dictionary<string, string>
-                {
-                    ["X-MediaRateLimit-Limit"] = "30",
-                    ["X-MediaRateLimit-Remaining"] = "20",
-                },
-                null
-            },
-        };
-
-        [Theory]
-        [MemberData(nameof(ParseMediaRateLimitTestCase))]
-        public void ParseMediaRateLimitTest(IDictionary<string, string> header, ApiLimit? expected)
-        {
-            var limit = TwitterApiStatus.ParseRateLimit(header, "X-MediaRateLimit-");
-            Assert.Equal(expected, limit);
-        }
-
         [Fact]
         public void UpdateFromHeader_DictionaryTest()
         {
@@ -142,9 +101,6 @@ namespace OpenTween.Api
                 ["X-Rate-Limit-Limit"] = "150",
                 ["X-Rate-Limit-Remaining"] = "100",
                 ["X-Rate-Limit-Reset"] = "1356998400",
-                ["X-MediaRateLimit-Limit"] = "30",
-                ["X-MediaRateLimit-Remaining"] = "20",
-                ["X-MediaRateLimit-Reset"] = "1357084800",
             };
 
             Assert.Raises<TwitterApiStatus.AccessLimitUpdatedEventArgs>(
@@ -157,11 +113,6 @@ namespace OpenTween.Api
             Assert.Equal(150, rateLimit.AccessLimitCount);
             Assert.Equal(100, rateLimit.AccessLimitRemain);
             Assert.Equal(new DateTimeUtc(2013, 1, 1, 0, 0, 0), rateLimit.AccessLimitResetDate);
-
-            var mediaLimit = status.MediaUploadLimit!;
-            Assert.Equal(30, mediaLimit.AccessLimitCount);
-            Assert.Equal(20, mediaLimit.AccessLimitRemain);
-            Assert.Equal(new DateTimeUtc(2013, 1, 2, 0, 0, 0), mediaLimit.AccessLimitResetDate);
         }
 
         [Fact]
@@ -176,9 +127,6 @@ namespace OpenTween.Api
                     { "x-rate-limit-limit", "150" },
                     { "x-rate-limit-remaining", "100" },
                     { "x-rate-limit-reset", "1356998400" },
-                    { "x-mediaratelimit-limit", "30" },
-                    { "x-mediaratelimit-remaining", "20" },
-                    { "x-mediaratelimit-reset", "1357084800" },
                 },
             };
 
@@ -192,11 +140,6 @@ namespace OpenTween.Api
             Assert.Equal(150, rateLimit.AccessLimitCount);
             Assert.Equal(100, rateLimit.AccessLimitRemain);
             Assert.Equal(new DateTimeUtc(2013, 1, 1, 0, 0, 0), rateLimit.AccessLimitResetDate);
-
-            var mediaLimit = status.MediaUploadLimit!;
-            Assert.Equal(30, mediaLimit.AccessLimitCount);
-            Assert.Equal(20, mediaLimit.AccessLimitRemain);
-            Assert.Equal(new DateTimeUtc(2013, 1, 2, 0, 0, 0), mediaLimit.AccessLimitResetDate);
         }
 
         [Fact]
