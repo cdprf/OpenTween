@@ -3056,7 +3056,7 @@ namespace OpenTween
         {
             this.SetMainWindowTitle();
             this.SetStatusLabelUrl();
-            this.SetApiStatusLabel(null);
+            this.SetApiStatusLabel(this.CurrentTabAccount.AccountState.RateLimits);
             if (this.ListTab.Focused || ((Control)this.CurrentTabPage.Tag).Focused)
                 this.Tag = this.ListTab.Tag;
             this.TabMenuControl(this.CurrentTabName);
@@ -6850,15 +6850,8 @@ namespace OpenTween
             }
         }
 
-        private void SetApiStatusLabel(RateLimitCollection? rateLimits, string? endpointName = null)
+        private void SetApiStatusLabel(RateLimitCollection rateLimits, string? endpointName = null)
         {
-            if (rateLimits == null)
-            {
-                this.toolStripApiGauge.ApiLimit = null;
-                this.toolStripApiGauge.ApiEndpoint = endpointName;
-                return;
-            }
-
             var tabType = this.CurrentTab.TabType;
 
             if (endpointName == null)
