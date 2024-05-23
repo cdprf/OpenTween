@@ -372,11 +372,8 @@ namespace OpenTween
                     return FormatQuoteTweetHtml(statusId, WebUtility.HtmlEncode($"Err:{ex.Message}(GetStatus)"), isReply);
                 }
 
-                if (this.Owner.CurrentTabAccount is TwitterAccount twAccount)
-                {
-                    if (twAccount.AccountState.BlockedUserIds.Contains(post.UserId))
-                        return FormatQuoteTweetHtml(statusId, "This Tweet is unavailable.", isReply);
-                }
+                if (this.Owner.CurrentTabAccount.AccountState.BlockedUserIds.Contains(post.UserId))
+                    return FormatQuoteTweetHtml(statusId, "This Tweet is unavailable.", isReply);
 
                 if (!TabInformations.GetInstance().AddQuoteTweet(post))
                     return FormatQuoteTweetHtml(statusId, "This Tweet is unavailable.", isReply);
