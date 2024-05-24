@@ -1590,11 +1590,7 @@ namespace OpenTween
                             .ConfigureAwait(false);
                     }
 
-                    var twAccount = (TwitterAccount)this.CurrentTabAccount;
-                    var formatter = new CreateTweetFormatter(twAccount);
-                    var createTweetParams = formatter.CreateParams(postParamsWithMedia);
-
-                    post = await twAccount.Legacy.PostStatus(createTweetParams)
+                    post = await this.CurrentTabAccount.Client.CreatePost(postParamsWithMedia)
                         .ConfigureAwait(false);
                 });
 

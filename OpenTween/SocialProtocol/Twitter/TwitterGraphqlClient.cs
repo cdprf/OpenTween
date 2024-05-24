@@ -219,6 +219,15 @@ namespace OpenTween.SocialProtocol.Twitter
             return await fetcher.Run(targetPost, firstLoad);
         }
 
+        public async Task<PostClass?> CreatePost(PostStatusParams postParams)
+        {
+            var formatter = new CreateTweetFormatter(this.account);
+            var createTweetParams = formatter.CreateParams(postParams);
+
+            return await this.account.Legacy.PostStatus(createTweetParams)
+                .ConfigureAwait(false);
+        }
+
         public async Task DeletePost(PostId postId)
         {
             var statusId = this.AssertTwitterStatusId(postId);
