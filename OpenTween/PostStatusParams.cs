@@ -34,14 +34,9 @@ namespace OpenTween
     public record PostStatusParams(
         string Text,
         PostClass? InReplyTo = null,
-        IReadOnlyList<long>? MediaIds = null,
-        bool AutoPopulateReplyMetadata = false,
-        IReadOnlyList<PersonId>? ExcludeReplyUserIds = null,
-        string? AttachmentUrl = null
+        IReadOnlyList<long>? MediaIds = null
     )
     {
         public IReadOnlyList<long> MediaIds { get; init; } = MediaIds ?? Array.Empty<long>();
-
-        public IReadOnlyList<PersonId> ExcludeReplyUserIds { get; init; } = ExcludeReplyUserIds ?? Array.Empty<PersonId>();
     }
 }

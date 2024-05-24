@@ -424,7 +424,7 @@ namespace OpenTween
             this.StatusLabel.AutoToolTip = false;
             this.StatusLabel.ToolTipText = "";
             // 文字カウンタ初期化
-            this.lblLen.Text = this.GetRestStatusCount(this.FormatStatusTextExtended(new("")).Text).ToString();
+            this.lblLen.Text = this.GetRestStatusCount().ToString();
 
             this.JumpReadOpMenuItem.ShortcutKeyDisplayString = "Space";
             this.CopySTOTMenuItem.ShortcutKeyDisplayString = "Ctrl+C";
@@ -1155,43 +1155,15 @@ namespace OpenTween
             this.StatusText.SelectionStart = this.StatusText.Text.Length;
             this.CheckReplyTo(this.StatusText.Text);
 
-            var statusText = this.StatusText.Text;
-            var replyToPost = this.inReplyTo is (var inReplyToStatusId, _) ? this.statuses[inReplyToStatusId] : null;
-            var status = new PostStatusParams(statusText, replyToPost);
-
-            var statusTextCompat = this.FormatStatusText(status);
-            if (this.GetRestStatusCount(statusTextCompat.Text) >= 0 && this.tw.Api.AuthType == APIAuthType.OAuth1)
-            {
-                // auto_populate_reply_metadata や attachment_url を使用しなくても 140 字以内に
-                // 収まる場合はこれらのオプションを使用せずに投稿する
-                status = statusTextCompat;
-            }
-            else
-            {
-                status = this.FormatStatusTextExtended(status, out var autoPopulatedUserIds);
-
-                // リプライ先がセットされていても autoPopulatedUserIds が空の場合は auto_populate_reply_metadata を有効にしない
-                //  (非公式 RT の場合など)
-                if (status.InReplyTo != null && autoPopulatedUserIds.Length != 0)
-                {
-                    status = status with
-                    {
-                        AutoPopulateReplyMetadata = true,
-
-                        // ReplyToList のうち autoPopulatedUserIds に含まれていないユーザー ID を抽出
-                        ExcludeReplyUserIds = status.InReplyTo.ReplyToList.Select(x => x.UserId).Except(autoPopulatedUserIds)
-                            .ToArray(),
-                    };
-                }
-            }
-
-            if (this.GetRestStatusCount(status.Text) < 0)
+            if (this.GetRestStatusCount() < 0)
             {
                 // 文字数制限を超えているが強制的に投稿するか
                 var ret = MessageBox.Show(Properties.Resources.PostLengthOverMessage1, Properties.Resources.PostLengthOverMessage2, MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
                 if (ret != DialogResult.OK)
                     return;
             }
+
+            var status = this.CreatePostStatusParams();
 
             IMediaUploadService? uploadService = null;
             IMediaItem[]? uploadItems = null;
@@ -1618,7 +1590,11 @@ namespace OpenTween
                             .ConfigureAwait(false);
                     }
 
-                    post = await this.tw.PostStatus(postParamsWithMedia)
+                    var twAccount = (TwitterAccount)this.CurrentTabAccount;
+                    var formatter = new CreateTweetFormatter(twAccount);
+                    var createTweetParams = formatter.CreateParams(postParamsWithMedia);
+
+                    post = await twAccount.Legacy.PostStatus(createTweetParams)
                         .ConfigureAwait(false);
                 });
 
@@ -3206,10 +3182,7 @@ namespace OpenTween
         private void StatusText_TextChanged(object sender, EventArgs e)
         {
             // 文字数カウント
-            var statusText = this.StatusText.Text;
-            var replyToPost = this.inReplyTo is (var inReplyToStatusId, _) ? this.statuses[inReplyToStatusId] : null;
-            var statusParams = new PostStatusParams(statusText, replyToPost);
-            var pLen = this.GetRestStatusCount(this.FormatStatusTextExtended(statusParams).Text);
+            var pLen = this.GetRestStatusCount();
             this.lblLen.Text = pLen.ToString();
             if (pLen < 0)
             {
@@ -3254,78 +3227,6 @@ namespace OpenTween
             return true;
         }
 
-        /// <summary>
-        /// 投稿時に auto_populate_reply_metadata オプションによって自動で追加されるメンションを除去します
-        /// </summary>
-        private PostStatusParams RemoveAutoPopuratedMentions(PostStatusParams statusParams, out PersonId[] autoPopulatedUserIds)
-        {
-            var statusText = statusParams.Text;
-            var autoPopulatedUserIdList = new List<PersonId>();
-
-            var replyToPost = statusParams.InReplyTo;
-            if (replyToPost != null)
-            {
-                if (statusText.StartsWith($"@{replyToPost.ScreenName} ", StringComparison.Ordinal))
-                {
-                    statusText = statusText.Substring(replyToPost.ScreenName.Length + 2);
-                    autoPopulatedUserIdList.Add(replyToPost.UserId);
-
-                    foreach (var (userId, screenName) in replyToPost.ReplyToList)
-                    {
-                        if (statusText.StartsWith($"@{screenName} ", StringComparison.Ordinal))
-                        {
-                            statusText = statusText.Substring(screenName.Length + 2);
-                            autoPopulatedUserIdList.Add(userId);
-                        }
-                    }
-                }
-            }
-
-            autoPopulatedUserIds = autoPopulatedUserIdList.ToArray();
-
-            return statusParams with { Text = statusText };
-        }
-
-        /// <summary>
-        /// attachment_url に指定可能な URL が含まれていれば除去
-        /// </summary>
-        private PostStatusParams RemoveAttachmentUrl(PostStatusParams statusParams)
-        {
-            // attachment_url は media_id と同時に使用できない
-            if (this.ImageSelector.Visible && this.ImageSelector.Model.SelectedMediaService is { IsNativeUploadService: true })
-                return statusParams;
-
-            var statusText = statusParams.Text;
-            var match = Twitter.AttachmentUrlRegex.Match(statusText);
-            if (!match.Success)
-                return statusParams;
-
-            var attachmentUrl = match.Value;
-
-            // マッチした URL を空白に置換
-            statusText = statusText.Substring(0, match.Index);
-
-            // テキストと URL の間にスペースが含まれていれば除去
-            statusText = statusText.TrimEnd(' ');
-
-            return statusParams with { Text = statusText, AttachmentUrl = attachmentUrl };
-        }
-
-        private PostStatusParams FormatStatusTextExtended(PostStatusParams statusParams)
-            => this.FormatStatusTextExtended(statusParams, out _);
-
-        /// <summary>
-        /// <see cref="FormatStatusText"/> に加えて、拡張モードで140字にカウントされない文字列の除去を行います
-        /// </summary>
-        private PostStatusParams FormatStatusTextExtended(PostStatusParams statusParams, out PersonId[] autoPopulatedUserIds)
-        {
-            statusParams = this.RemoveAutoPopuratedMentions(statusParams, out autoPopulatedUserIds);
-
-            statusParams = this.RemoveAttachmentUrl(statusParams);
-
-            return this.FormatStatusText(statusParams);
-        }
-
         internal PostStatusParams FormatStatusText(PostStatusParams statusParams)
             => this.FormatStatusText(statusParams, Control.ModifierKeys);
 
@@ -3367,18 +3268,6 @@ namespace OpenTween
 
             if (statusText.Contains("RT @"))
                 disableFooter = true;
-
-            // 自分宛のリプライの場合は先頭の「@screen_name 」の部分を除去する (in_reply_to_status_id は維持される)
-            var primaryUserName = this.CurrentTabAccount.UserName;
-            if (statusParams.InReplyTo != null && statusParams.InReplyTo.ScreenName == primaryUserName)
-            {
-                var mentionSelf = $"@{primaryUserName} ";
-                if (statusText.StartsWith(mentionSelf, StringComparison.OrdinalIgnoreCase))
-                {
-                    if (statusText.Length > mentionSelf.Length || this.GetSelectedImageService() != null)
-                        statusText = statusText.Substring(mentionSelf.Length);
-                }
-            }
 
             var header = "";
             var footer = "";
@@ -3424,12 +3313,40 @@ namespace OpenTween
             return statusParams with { Text = statusText };
         }
 
+        private PostStatusParams CreatePostStatusParams(bool setFakeMediaIds = false)
+        {
+            var statusText = this.StatusText.Text;
+            var replyToPost = this.inReplyTo is (var inReplyToStatusId, _) ? this.statuses[inReplyToStatusId] : null;
+            var mediaIds = Array.Empty<long>();
+            if (setFakeMediaIds)
+            {
+                // 文字数計算のために仮の mediaId を設定する
+                var useNativeUpload = this.ImageSelector.Visible && this.ImageSelector.Model.SelectedMediaService is { IsNativeUploadService: true };
+                if (useNativeUpload)
+                    mediaIds = new[] { -1L };
+            }
+            var statusParams = new PostStatusParams(statusText, replyToPost, mediaIds);
+
+            return this.FormatStatusText(statusParams);
+        }
+
         /// <summary>
         /// 投稿欄に表示する入力可能な文字数を計算します
         /// </summary>
-        private int GetRestStatusCount(string statusText)
+        private int GetRestStatusCount()
         {
-            var remainCount = this.tw.GetTextLengthRemain(statusText);
+            var statusParams = this.CreatePostStatusParams(setFakeMediaIds: true);
+
+            int remainCount;
+            if (this.CurrentTabAccount is TwitterAccount twAccount)
+            {
+                var formatter = new CreateTweetFormatter(twAccount);
+                remainCount = formatter.GetTextLengthRemain(statusParams);
+            }
+            else
+            {
+                remainCount = 140 - statusParams.Text.Length;
+            }
 
             var uploadService = this.GetSelectedImageService();
             if (uploadService != null)

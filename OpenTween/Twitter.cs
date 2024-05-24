@@ -206,7 +206,7 @@ namespace OpenTween
             this.Api.Initialize(apiConnection);
         }
 
-        public async Task<PostClass?> PostStatus(PostStatusParams param)
+        public async Task<PostClass?> PostStatus(CreateTweetParams param)
         {
             this.CheckAccountState();
 
