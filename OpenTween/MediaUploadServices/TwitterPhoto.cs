@@ -96,9 +96,7 @@ namespace OpenTween.MediaUploadServices
             else
                 mediaIds = await this.UploadMediaForTweet(mediaItems).ConfigureAwait(false);
 
-            postParams.MediaIds = mediaIds;
-
-            return postParams;
+            return postParams with { MediaIds = mediaIds };
         }
 
         // pic.twitter.com の URL は文字数にカウントされない

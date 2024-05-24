@@ -135,9 +135,9 @@ namespace OpenTween.MediaUploadServices
                 var imageUrl = await this.mobypictureApi.UploadFileAsync(item, postParams.Text)
                     .ConfigureAwait(false);
 
-                postParams.Text += " " + imageUrl;
+                var statusText = postParams.Text + " " + imageUrl;
 
-                return postParams;
+                return postParams with { Text = statusText };
             }
             catch (OperationCanceledException ex)
             {
