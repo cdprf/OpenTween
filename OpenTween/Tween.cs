@@ -3332,17 +3332,7 @@ namespace OpenTween
         private int GetRestStatusCount()
         {
             var statusParams = this.CreatePostStatusParams(setFakeMediaIds: true);
-
-            int remainCount;
-            if (this.CurrentTabAccount is TwitterAccount twAccount)
-            {
-                var formatter = new CreateTweetFormatter(twAccount);
-                remainCount = formatter.GetTextLengthRemain(statusParams);
-            }
-            else
-            {
-                remainCount = 140 - statusParams.Text.Length;
-            }
+            var remainCount = this.CurrentTabAccount.Client.GetTextLengthRemain(statusParams);
 
             var uploadService = this.GetSelectedImageService();
             if (uploadService != null)

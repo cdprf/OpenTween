@@ -100,6 +100,9 @@ namespace OpenTween.SocialProtocol
             public Task<PostClass?> CreatePost(PostStatusParams postParams)
                 => throw this.CreateException();
 
+            public int GetTextLengthRemain(PostStatusParams postParams)
+                => 0;
+
             public Task DeletePost(PostId postId)
                 => throw this.CreateException();
 

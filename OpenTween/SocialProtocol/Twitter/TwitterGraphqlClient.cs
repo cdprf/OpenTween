@@ -228,6 +228,12 @@ namespace OpenTween.SocialProtocol.Twitter
                 .ConfigureAwait(false);
         }
 
+        public int GetTextLengthRemain(PostStatusParams postParams)
+        {
+            var formatter = new CreateTweetFormatter(this.account);
+            return formatter.GetTextLengthRemain(postParams);
+        }
+
         public async Task DeletePost(PostId postId)
         {
             var statusId = this.AssertTwitterStatusId(postId);
