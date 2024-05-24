@@ -58,6 +58,8 @@ namespace OpenTween.MediaUploadServices
 
         public bool CanUseAltText => true;
 
+        public bool IsNativeUploadService => true;
+
         public bool CheckFileExtension(string fileExtension)
             => this.pictureExt.Contains(fileExtension, StringComparer.InvariantCultureIgnoreCase);
 

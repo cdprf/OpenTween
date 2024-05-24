@@ -3297,7 +3297,7 @@ namespace OpenTween
             attachmentUrl = null;
 
             // attachment_url は media_id と同時に使用できない
-            if (this.ImageSelector.Visible && this.ImageSelector.Model.SelectedMediaService is TwitterPhoto)
+            if (this.ImageSelector.Visible && this.ImageSelector.Model.SelectedMediaService is { IsNativeUploadService: true })
                 return statusText;
 
             var match = Twitter.AttachmentUrlRegex.Match(statusText);
