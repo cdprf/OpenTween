@@ -321,7 +321,7 @@ namespace OpenTween
             Thumbnail.Services.TonTwitterCom.GetApiConnection = () => this.PrimaryAccount.Connection;
 
             // 画像投稿サービス
-            this.ImageSelector.Model.InitializeServices(this.tw, this.tw.Configuration);
+            this.ImageSelector.Model.InitializeServices(this.CurrentTabAccount);
             this.ImageSelector.Model.SelectMediaService(this.settings.Common.UseImageServiceName, this.settings.Common.UseImageService);
 
             this.tweetThumbnail1.Model.Initialize(this.thumbGenerator);
@@ -1807,16 +1807,8 @@ namespace OpenTween
                 var primaryAccount = this.accounts.Primary;
                 this.statuses.RefreshOwl(primaryAccount.UniqueKey, primaryAccount.AccountState.FollowerIds, isPrimary: true);
 
-                if (primaryAccount is TwitterAccount twAccount)
-                {
-                    foreach (var (_, service) in this.ImageSelector.Model.MediaServices)
-                    {
-                        service.UpdateTwitterConfiguration(twAccount.AccountState.Configuration);
-                    }
-                }
-
                 foreach (var account in this.accounts.SecondaryAccounts)
-                        this.statuses.RefreshOwl(account.UniqueKey, account.AccountState.FollowerIds, isPrimary: false);
+                    this.statuses.RefreshOwl(account.UniqueKey, account.AccountState.FollowerIds, isPrimary: false);
 
                 this.listCache?.PurgeCache();
                 this.CurrentListView.Refresh();
@@ -2428,7 +2420,7 @@ namespace OpenTween
                     this.settings.ApplySettings();
 
                     this.accounts.LoadFromSettings(this.settings.Common);
-                    this.ImageSelector.Model.InitializeServices(this.tw, this.tw.Configuration);
+                    this.ImageSelector.Model.InitializeServices(this.CurrentTabAccount);
 
                     try
                     {
@@ -3062,6 +3054,7 @@ namespace OpenTween
             this.TabMenuControl(this.CurrentTabName);
             this.PushSelectPostChain();
             this.DispSelectedPost();
+            this.ImageSelector.Model.InitializeServices(this.CurrentTabAccount);
         }
 
         private void SetListProperty()
