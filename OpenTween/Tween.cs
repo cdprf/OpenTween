@@ -2197,9 +2197,9 @@ namespace OpenTween
 
                     try
                     {
-                        if (post.StatusId is TwitterDirectMessageId dmId)
+                        if (post.IsDm)
                         {
-                            await this.tw.Api.DirectMessagesEventsDestroy(dmId);
+                            await this.CurrentTabAccount.Client.DeletePost(post.StatusId);
                         }
                         else
                         {

@@ -189,6 +189,13 @@ namespace OpenTween.SocialProtocol.Twitter
 
         public async Task DeletePost(PostId postId)
         {
+            if (postId is TwitterDirectMessageId dmId)
+            {
+                await this.account.Legacy.Api.DirectMessagesEventsDestroy(dmId)
+                    .ConfigureAwait(false);
+                return;
+            }
+
             var statusId = this.AssertTwitterStatusId(postId);
 
             await this.account.Legacy.Api.StatusesDestroy(statusId)
