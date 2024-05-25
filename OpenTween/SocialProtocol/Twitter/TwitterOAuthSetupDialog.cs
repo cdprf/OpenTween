@@ -29,7 +29,7 @@ using OpenTween.Api;
 
 namespace OpenTween.SocialProtocol.Twitter
 {
-    public partial class TwitterOAuthSetupDialog : OTBaseForm, IAccountFactory
+    public partial class TwitterOAuthSetupDialog : OTBaseForm, IAccountSetup
     {
         public TwitterOAuthSetup Model { get; } = new();
 

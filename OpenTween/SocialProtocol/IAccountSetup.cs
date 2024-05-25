@@ -27,7 +27,7 @@ using System.Windows.Forms;
 
 namespace OpenTween.SocialProtocol
 {
-    public interface IAccountFactory : IDisposable
+    public interface IAccountSetup : IDisposable
     {
         public Func<IWin32Window?, Uri, Task>? OpenInBrowser { get; set; }
 

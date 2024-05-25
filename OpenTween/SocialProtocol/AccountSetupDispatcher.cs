@@ -35,7 +35,7 @@ namespace OpenTween.SocialProtocol
         public record AccountSetupItem(
             Guid Id,
             string Caption,
-            Func<IAccountFactory> CreateInstance
+            Func<IAccountSetup> CreateInstance
         );
 
         private readonly List<AccountSetupItem> setupList;
