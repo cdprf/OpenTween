@@ -48,16 +48,19 @@ namespace OpenTween.SocialProtocol
 
         public void LoadFromSettings(SettingCommon settingCommon)
         {
+            var factory = new AccountFactory();
             var oldAccounts = this.accounts;
             var newAccounts = new Dictionary<Guid, ISocialAccount>();
 
             foreach (var accountSettings in settingCommon.UserAccounts)
             {
                 var accountKey = accountSettings.UniqueKey;
-                if (!oldAccounts.TryGetValue(accountKey, out var account))
-                    account = new TwitterAccount(accountKey);
 
-                account.Initialize(accountSettings, settingCommon);
+                if (oldAccounts.TryGetValue(accountKey, out var account))
+                    account.Initialize(accountSettings, settingCommon);
+                else
+                    account = factory.Create(accountSettings, settingCommon);
+
                 newAccounts[accountKey] = account;
             }
 

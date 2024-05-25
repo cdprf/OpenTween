@@ -51,6 +51,7 @@ namespace OpenTween.SocialProtocol.Twitter
             var twitterUser = graphqlUser.ToTwitterUser();
             var authorizedUser = new UserAccount
             {
+                AccountType = "Twitter",
                 TwitterAuthType = APIAuthType.TwitterComCookie,
                 TwitterComCookie = this.TwitterComCookie,
                 UserId = twitterUser.IdStr,
