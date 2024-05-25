@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using OpenTween.Connection;
@@ -351,16 +352,21 @@ namespace OpenTween
     {
         public Guid UniqueKey { get; set; } = Guid.NewGuid();
 
-        public string Username = "";
-        public string UserId = "";
+        [DefaultValue("")]
+        public string Username { get; set; } = "";
+
+        [DefaultValue("")]
+        public string UserId { get; set; } = "";
 
         public APIAuthType TwitterAuthType { get; set; } = APIAuthType.OAuth1;
 
+        [DefaultValue("")]
         public string TwitterOAuth1ConsumerKey { get; set; } = "";
 
         [XmlIgnore]
         public string TwitterOAuth1ConsumerSecret { get; set; } = "";
 
+        [DefaultValue("")]
         public string TwitterOAuth1ConsumerSecretEncrypted
         {
             get => this.Encrypt(this.TwitterOAuth1ConsumerSecret);
@@ -370,17 +376,20 @@ namespace OpenTween
         [XmlIgnore]
         public string TwitterComCookie { get; set; } = "";
 
+        [DefaultValue("")]
         public string TwitterComCookieEncrypted
         {
             get => this.Encrypt(this.TwitterComCookie);
             set => this.TwitterComCookie = this.Decrypt(value);
         }
 
-        public string Token = "";
+        [DefaultValue("")]
+        public string Token { get; set; } = "";
 
         [XmlIgnore]
-        public string TokenSecret = "";
+        public string TokenSecret { get; set; } = "";
 
+        [DefaultValue("")]
         public string EncryptTokenSecret
         {
             get => this.Encrypt(this.TokenSecret);
