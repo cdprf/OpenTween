@@ -114,10 +114,6 @@ namespace OpenTween
         // ユーザーアカウント
         private readonly AccountCollection accounts;
 
-#pragma warning disable SA1300
-        private Twitter tw => ((TwitterAccount)this.CurrentTabAccount).Legacy; // AccountCollection への移行用
-#pragma warning restore SA1300
-
         private ISocialAccount PrimaryAccount
             => this.accounts.Primary;
 
@@ -871,7 +867,8 @@ namespace OpenTween
             this.SetMainWindowTitle();
             if (!this.StatusLabelUrl.Text.StartsWith("http", StringComparison.Ordinal)) this.SetStatusLabelUrl();
 
-            this.HashSupl.AddRangeItem(this.tw.GetHashList());
+            if (this.CurrentTabAccount is TwitterAccount twAccount)
+                this.HashSupl.AddRangeItem(twAccount.Legacy.GetHashList());
         }
 
         private bool BalloonRequired()
@@ -1353,15 +1350,16 @@ namespace OpenTween
 
                 try
                 {
+                    var account = this.CurrentTabAccount;
                     var originalPostId = post.RetweetedId ?? post.StatusId;
 
-                    await this.CurrentTabAccount.Client.FavoritePost(originalPostId)
+                    await account.Client.FavoritePost(originalPostId)
                         .ConfigureAwait(false);
 
-                    if (this.settings.Common.RestrictFavCheck)
+                    if (this.settings.Common.RestrictFavCheck && account is TwitterAccount twAccount)
                     {
                         var twitterStatusId = originalPostId.ToTwitterStatusId();
-                        var status = await this.tw.Api.StatusesShow(twitterStatusId)
+                        var status = await twAccount.Legacy.Api.StatusesShow(twitterStatusId)
                             .ConfigureAwait(false);
 
                         if (status.Favorited != true)
@@ -2197,9 +2195,9 @@ namespace OpenTween
 
                     try
                     {
-                        if (post.StatusId is TwitterDirectMessageId dmId)
+                        if (post.IsDm)
                         {
-                            await this.tw.Api.DirectMessagesEventsDestroy(dmId);
+                            await this.CurrentTabAccount.Client.DeletePost(post.StatusId);
                         }
                         else
                         {
@@ -6757,7 +6755,7 @@ namespace OpenTween
 
             if (endpointName == null)
             {
-                var authByCookie = this.tw.Api.AuthType == APIAuthType.TwitterComCookie;
+                var authByCookie = this.CurrentTabAccount is TwitterAccount twAccount && twAccount.AuthType == APIAuthType.TwitterComCookie;
 
                 // 表示中のタブに応じて更新
                 endpointName = tabType switch
@@ -7940,6 +7938,12 @@ namespace OpenTween
 
         private async void ApiUsageInfoMenuItem_Click(object sender, EventArgs e)
         {
+            if (this.CurrentTabAccount is not TwitterAccount twAccount)
+            {
+                this.ShowAccountTypeError();
+                return;
+            }
+
             RateLimitCollection? rateLimits;
 
             using (var dialog = new WaitingDialog(Properties.Resources.ApiInfo6))
@@ -7948,7 +7952,7 @@ namespace OpenTween
 
                 try
                 {
-                    var task = this.tw.GetInfoApi();
+                    var task = twAccount.Legacy.GetInfoApi();
                     rateLimits = await dialog.WaitForAsync(this, task);
                 }
                 catch (WebApiException)
@@ -7967,7 +7971,7 @@ namespace OpenTween
             }
 
             using var apiDlg = new ApiInfoDialog();
-            apiDlg.RateLimits = this.CurrentTabAccount.AccountState.RateLimits;
+            apiDlg.RateLimits = twAccount.AccountState.RateLimits;
             apiDlg.ShowDialog(this);
         }
 
@@ -7980,6 +7984,12 @@ namespace OpenTween
 
         internal async Task FollowCommand(string id)
         {
+            if (this.CurrentTabAccount is not TwitterAccount twAccount)
+            {
+                this.ShowAccountTypeError();
+                return;
+            }
+
             using (var inputName = new InputTabName())
             {
                 inputName.FormTitle = "Follow";
@@ -7998,7 +8008,7 @@ namespace OpenTween
             {
                 try
                 {
-                    var task = this.tw.Api.FriendshipsCreate(id).IgnoreResponse();
+                    var task = twAccount.Legacy.Api.FriendshipsCreate(id).IgnoreResponse();
                     await dialog.WaitForAsync(this, task);
                 }
                 catch (WebApiException ex)
@@ -8020,6 +8030,12 @@ namespace OpenTween
 
         internal async Task RemoveCommand(string id, bool skipInput)
         {
+            if (this.CurrentTabAccount is not TwitterAccount twAccount)
+            {
+                this.ShowAccountTypeError();
+                return;
+            }
+
             if (!skipInput)
             {
                 using var inputName = new InputTabName();
@@ -8039,7 +8055,7 @@ namespace OpenTween
             {
                 try
                 {
-                    var task = this.tw.Api.FriendshipsDestroy(id).IgnoreResponse();
+                    var task = twAccount.Legacy.Api.FriendshipsDestroy(id).IgnoreResponse();
                     await dialog.WaitForAsync(this, task);
                 }
                 catch (WebApiException ex)
@@ -8061,6 +8077,12 @@ namespace OpenTween
 
         internal async Task ShowFriendship(string id)
         {
+            if (this.CurrentTabAccount is not TwitterAccount twAccount)
+            {
+                this.ShowAccountTypeError();
+                return;
+            }
+
             using (var inputName = new InputTabName())
             {
                 inputName.FormTitle = "Show Friendships";
@@ -8083,7 +8105,7 @@ namespace OpenTween
 
                 try
                 {
-                    var task = this.tw.Api.FriendshipsShow(this.CurrentTabAccount.UserName, id);
+                    var task = twAccount.Legacy.Api.FriendshipsShow(twAccount.UserName, id);
                     var friendship = await dialog.WaitForAsync(this, task);
 
                     isFollowing = friendship.Relationship.Source.Following;
@@ -8123,6 +8145,12 @@ namespace OpenTween
 
         internal async Task ShowFriendship(string[] ids)
         {
+            if (this.CurrentTabAccount is not TwitterAccount twAccount)
+            {
+                this.ShowAccountTypeError();
+                return;
+            }
+
             foreach (var id in ids)
             {
                 bool isFollowing, isFollowed;
@@ -8133,7 +8161,7 @@ namespace OpenTween
 
                     try
                     {
-                        var task = this.tw.Api.FriendshipsShow(this.CurrentTabAccount.UserName, id);
+                        var task = twAccount.Legacy.Api.FriendshipsShow(twAccount.UserName, id);
                         var friendship = await dialog.WaitForAsync(this, task);
 
                         isFollowing = friendship.Relationship.Source.Following;
@@ -8199,12 +8227,7 @@ namespace OpenTween
         // URLから切り出した文字列を渡す
 
         public bool IsTwitterId(string name)
-        {
-            if (this.tw.Configuration.NonUsernamePaths == null || this.tw.Configuration.NonUsernamePaths.Length == 0)
-                return !Regex.Match(name, @"^(about|jobs|tos|privacy|who_to_follow|download|messages)$", RegexOptions.IgnoreCase).Success;
-            else
-                return !this.tw.Configuration.NonUsernamePaths.Contains(name, StringComparer.InvariantCultureIgnoreCase);
-        }
+            => !Regex.Match(name, @"^(about|jobs|tos|privacy|who_to_follow|download|messages)$", RegexOptions.IgnoreCase).Success;
 
         private void DoQuoteOfficial()
         {
@@ -8380,7 +8403,13 @@ namespace OpenTween
 
         public void ListManageUserContext(string screenName)
         {
-            using var listSelectForm = new MyLists(screenName, this.tw);
+            if (this.CurrentTabAccount is not TwitterAccount twAccount)
+            {
+                this.ShowAccountTypeError();
+                return;
+            }
+
+            using var listSelectForm = new MyLists(screenName, twAccount.Legacy);
             listSelectForm.ShowDialog(this);
         }
 
@@ -8614,6 +8643,12 @@ namespace OpenTween
 
         private async Task DoShowUserStatus(string id, bool showInputDialog)
         {
+            if (this.CurrentTabAccount is not TwitterAccount twAccount)
+            {
+                this.ShowAccountTypeError();
+                return;
+            }
+
             TwitterUser? user = null;
 
             if (showInputDialog)
@@ -8637,7 +8672,7 @@ namespace OpenTween
 
                 try
                 {
-                    var task = this.tw.GetUserInfo(id);
+                    var task = twAccount.Legacy.GetUserInfo(id);
                     user = await dialog.WaitForAsync(this, task);
                 }
                 catch (WebApiException ex)
@@ -8651,12 +8686,12 @@ namespace OpenTween
                     return;
             }
 
-            await this.DoShowUserStatus(user);
+            await this.DoShowUserStatus(twAccount, user);
         }
 
-        private async Task DoShowUserStatus(TwitterUser user)
+        private async Task DoShowUserStatus(TwitterAccount twAccount, TwitterUser user)
         {
-            using var userDialog = new UserInfoDialog(this, this.tw, this.detailsHtmlBuilder);
+            using var userDialog = new UserInfoDialog(this, twAccount.Legacy, this.detailsHtmlBuilder);
             var showUserTask = userDialog.ShowUserAsync(user);
             userDialog.ShowDialog(this);
 
@@ -8693,6 +8728,12 @@ namespace OpenTween
 
         private async void RtCountMenuItem_Click(object sender, EventArgs e)
         {
+            if (this.CurrentTabAccount is not TwitterAccount twAccount)
+            {
+                this.ShowAccountTypeError();
+                return;
+            }
+
             var post = this.CurrentPost;
             if (!this.ExistCurrentPost || post == null)
                 return;
@@ -8706,7 +8747,7 @@ namespace OpenTween
 
                 try
                 {
-                    var task = this.tw.Api.StatusesShow(statusId.ToTwitterStatusId());
+                    var task = twAccount.Legacy.Api.StatusesShow(statusId.ToTwitterStatusId());
                     status = await dialog.WaitForAsync(this, task);
                 }
                 catch (WebApiException ex)
@@ -8839,9 +8880,18 @@ namespace OpenTween
 
         private void ListManageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using var form = new ListManage(this.tw);
+            if (this.CurrentTabAccount is not TwitterAccount twAccount)
+            {
+                this.ShowAccountTypeError();
+                return;
+            }
+
+            using var form = new ListManage(twAccount.Legacy);
             form.ShowDialog(this);
         }
+
+        private void ShowAccountTypeError()
+            => MessageBox.Show(this, Properties.Resources.AccountTypeErrorText, ApplicationSettings.ApplicationName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
         private bool ModifySettingCommon { get; set; }
 

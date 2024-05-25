@@ -70,6 +70,15 @@ namespace OpenTween.Properties {
         }
         
         /// <summary>
+        ///   この機能は現在のアカウントでは使用できません に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string AccountTypeErrorText {
+            get {
+                return ResourceManager.GetString("AccountTypeErrorText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   発言一覧 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string AddNewTab_ListView_AccessibleName {
