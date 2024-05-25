@@ -23,43 +23,33 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.SocialProtocol
 {
-    public class AccountSetupDispatcher
+    public class AccountFactory
     {
-        public record AccountSetupItem(
-            Guid Id,
-            string Caption,
-            Func<IAccountSetup> CreateInstance
-        );
+        private readonly Dictionary<string, Func<Guid, ISocialAccount>> factories;
 
-        private readonly List<AccountSetupItem> setupList;
-
-        public AccountSetupDispatcher()
+        public AccountFactory()
         {
-            this.setupList = new()
+            this.factories = new()
             {
-                new(Guid.NewGuid(), "Twitter (OAuth)", () => new TwitterOAuthSetupDialog()),
-                new(Guid.NewGuid(), "Twitter (Cookie)", () => new TwitterCookieSetupDialog()),
+                ["Twitter"] = x => new TwitterAccount(x),
             };
         }
 
-        public (Guid Id, string Caption)[] GetCaptions()
-            => this.setupList.Select(x => (x.Id, x.Caption)).ToArray();
-
-        public UserAccount? Dispatch(IWin32Window? owner, Guid setupId, Func<IWin32Window?, Uri, Task>? openInBrowser)
+        public ISocialAccount Create(UserAccount accountSettings, SettingCommon settingCommon)
         {
-            var setupItem = this.setupList.First(x => x.Id == setupId);
+            var accountId = accountSettings.UniqueKey;
 
-            using var setup = setupItem.CreateInstance();
-            setup.OpenInBrowser = openInBrowser;
+            var account = this.factories.TryGetValue(accountSettings.AccountType, out var createAccount)
+                ? createAccount(accountId)
+                : new InvalidAccount(accountId);
 
-            return setup.ShowAccountSetupDialog(owner);
+            account.Initialize(accountSettings, settingCommon);
+
+            return account;
         }
     }
 }

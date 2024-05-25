@@ -119,6 +119,7 @@ namespace OpenTween.SocialProtocol.Twitter
             var accessTokenResponse = await TwitterApiConnection.GetAccessTokenAsync(this.requestToken, this.PinCode);
             var authorizedAccount = new UserAccount
             {
+                AccountType = "Twitter",
                 TwitterAuthType = APIAuthType.OAuth1,
                 TwitterOAuth1ConsumerKey = this.CustomConsumerKey,
                 TwitterOAuth1ConsumerSecret = this.CustomConsumerSecret,

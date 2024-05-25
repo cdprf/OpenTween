@@ -28,7 +28,7 @@ using OpenTween.Api;
 
 namespace OpenTween.SocialProtocol.Twitter
 {
-    public partial class TwitterCookieSetupDialog : OTBaseForm, IAccountFactory
+    public partial class TwitterCookieSetupDialog : OTBaseForm, IAccountSetup
     {
         public TwitterCookieSetup Model { get; } = new();
 
