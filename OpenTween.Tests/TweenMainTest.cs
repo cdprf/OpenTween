@@ -239,7 +239,9 @@ namespace OpenTween
         {
             this.UsingTweenMain((tweenMain, _) =>
             {
-                Assert.Equal("aaa\nbbb", tweenMain.FormatStatusText("aaa\r\nbbb"));
+                var param = new PostStatusParams(Text: "aaa\r\nbbb");
+                var expected = new PostStatusParams(Text: "aaa\nbbb");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param));
             });
         }
 
@@ -249,7 +251,9 @@ namespace OpenTween
             this.UsingTweenMain((tweenMain, _) =>
             {
                 // DM にも適用する
-                Assert.Equal("D opentween aaa\nbbb", tweenMain.FormatStatusText("D opentween aaa\r\nbbb"));
+                var param = new PostStatusParams(Text: "D opentween aaa\r\nbbb");
+                var expected = new PostStatusParams(Text: "D opentween aaa\nbbb");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param));
             });
         }
 
@@ -259,7 +263,10 @@ namespace OpenTween
             this.UsingTweenMain((tweenMain, context) =>
             {
                 tweenMain.SeparateUrlAndFullwidthCharacter = true;
-                Assert.Equal("https://example.com/ あああ", tweenMain.FormatStatusText("https://example.com/あああ"));
+
+                var param = new PostStatusParams(Text: "https://example.com/あああ");
+                var expected = new PostStatusParams(Text: "https://example.com/ あああ");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param));
             });
         }
 
@@ -269,7 +276,10 @@ namespace OpenTween
             this.UsingTweenMain((tweenMain, context) =>
             {
                 tweenMain.SeparateUrlAndFullwidthCharacter = false;
-                Assert.Equal("https://example.com/あああ", tweenMain.FormatStatusText("https://example.com/あああ"));
+
+                var param = new PostStatusParams(Text: "https://example.com/あああ");
+                var expected = new PostStatusParams(Text: "https://example.com/あああ");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param));
             });
         }
 
@@ -279,7 +289,10 @@ namespace OpenTween
             this.UsingTweenMain((tweenMain, context) =>
             {
                 context.Settings.Common.WideSpaceConvert = true;
-                Assert.Equal("aaa bbb", tweenMain.FormatStatusText("aaa　bbb"));
+
+                var param = new PostStatusParams(Text: "aaa　bbb");
+                var expected = new PostStatusParams(Text: "aaa bbb");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param));
             });
         }
 
@@ -291,7 +304,9 @@ namespace OpenTween
                 context.Settings.Common.WideSpaceConvert = true;
 
                 // DM にも適用する
-                Assert.Equal("D opentween aaa bbb", tweenMain.FormatStatusText("D opentween aaa　bbb"));
+                var param = new PostStatusParams(Text: "D opentween aaa　bbb");
+                var expected = new PostStatusParams(Text: "D opentween aaa bbb");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param));
             });
         }
 
@@ -301,7 +316,10 @@ namespace OpenTween
             this.UsingTweenMain((tweenMain, context) =>
             {
                 context.Settings.Common.WideSpaceConvert = false;
-                Assert.Equal("aaa　bbb", tweenMain.FormatStatusText("aaa　bbb"));
+
+                var param = new PostStatusParams(Text: "aaa　bbb");
+                var expected = new PostStatusParams(Text: "aaa　bbb");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param));
             });
         }
 
@@ -311,7 +329,9 @@ namespace OpenTween
             this.UsingTweenMain((tweenMain, context) =>
             {
                 context.Settings.Local.UseRecommendStatus = true;
-                Assert.Matches(new Regex(@"^aaa \[TWNv\d+\]$"), tweenMain.FormatStatusText("aaa"));
+
+                var param = new PostStatusParams(Text: "aaa");
+                Assert.Matches(new Regex(@"^aaa \[TWNv\d+\]$"), tweenMain.FormatStatusText(param).Text);
             });
         }
 
@@ -321,7 +341,10 @@ namespace OpenTween
             this.UsingTweenMain((tweenMain, context) =>
             {
                 context.Settings.Local.StatusText = "foo";
-                Assert.Equal("aaa foo", tweenMain.FormatStatusText("aaa"));
+
+                var param = new PostStatusParams(Text: "aaa");
+                var expected = new PostStatusParams(Text: "aaa foo");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param));
             });
         }
 
@@ -333,7 +356,9 @@ namespace OpenTween
                 context.Settings.Local.StatusText = "foo";
 
                 // DM の場合はフッターを無効化する
-                Assert.Equal("D opentween aaa", tweenMain.FormatStatusText("D opentween aaa"));
+                var param = new PostStatusParams(Text: "D opentween aaa");
+                var expected = new PostStatusParams(Text: "D opentween aaa");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param));
             });
         }
 
@@ -345,7 +370,9 @@ namespace OpenTween
                 context.Settings.Local.StatusText = "foo";
 
                 // 非公式 RT を含む場合はフッターを無効化する
-                Assert.Equal("aaa RT @foo: bbb", tweenMain.FormatStatusText("aaa RT @foo: bbb"));
+                var param = new PostStatusParams(Text: "aaa RT @foo: bbb");
+                var expected = new PostStatusParams(Text: "aaa RT @foo: bbb");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param));
             });
         }
 
@@ -360,7 +387,9 @@ namespace OpenTween
                 context.Settings.Local.StatusMultiline = false; // 単一行モード
 
                 // Shift キーが押されている場合はフッターを無効化する
-                Assert.Equal("aaa", tweenMain.FormatStatusText("aaa", modifierKeys: Keys.Shift));
+                var param = new PostStatusParams(Text: "aaa");
+                var expected = new PostStatusParams(Text: "aaa");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param, modifierKeys: Keys.Shift));
             });
         }
 
@@ -375,7 +404,9 @@ namespace OpenTween
                 context.Settings.Local.StatusMultiline = true; // 複数行モード
 
                 // Ctrl キーが押されている場合はフッターを無効化する
-                Assert.Equal("aaa", tweenMain.FormatStatusText("aaa", modifierKeys: Keys.Control));
+                var param = new PostStatusParams(Text: "aaa");
+                var expected = new PostStatusParams(Text: "aaa");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param, modifierKeys: Keys.Control));
             });
         }
 
@@ -389,7 +420,9 @@ namespace OpenTween
                 context.Settings.Local.StatusText = "foo";
 
                 // Ctrl キーが押されている場合はフッターを無効化する
-                Assert.Equal("aaa", tweenMain.FormatStatusText("aaa", modifierKeys: Keys.Control));
+                var param = new PostStatusParams(Text: "aaa");
+                var expected = new PostStatusParams(Text: "aaa");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param, modifierKeys: Keys.Control));
             });
         }
 
@@ -403,7 +436,9 @@ namespace OpenTween
                 context.Settings.Local.StatusText = "foo";
 
                 // Shift+Enter で投稿する場合、Ctrl キーが押されていなければフッターを付ける
-                Assert.Equal("aaa foo", tweenMain.FormatStatusText("aaa", modifierKeys: Keys.Shift));
+                var param = new PostStatusParams(Text: "aaa");
+                var expected = new PostStatusParams(Text: "aaa foo");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param, modifierKeys: Keys.Shift));
             });
         }
 
@@ -417,7 +452,9 @@ namespace OpenTween
                 context.Settings.Local.StatusText = "foo";
 
                 // Shift キーが押されている場合はフッターを無効化する
-                Assert.Equal("aaa", tweenMain.FormatStatusText("aaa", modifierKeys: Keys.Shift));
+                var param = new PostStatusParams(Text: "aaa");
+                var expected = new PostStatusParams(Text: "aaa");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param, modifierKeys: Keys.Shift));
             });
         }
 
@@ -431,7 +468,9 @@ namespace OpenTween
                 context.Settings.Local.StatusText = "foo";
 
                 // Ctrl+Enter で投稿する場合、Shift キーが押されていなければフッターを付ける
-                Assert.Equal("aaa foo", tweenMain.FormatStatusText("aaa", modifierKeys: Keys.Control));
+                var param = new PostStatusParams(Text: "aaa");
+                var expected = new PostStatusParams(Text: "aaa foo");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param, modifierKeys: Keys.Control));
             });
         }
 
@@ -441,7 +480,9 @@ namespace OpenTween
             this.UsingTweenMain((tweenMain, context) =>
             {
                 // 「D+」などから始まる文字列をツイートしようとすると SMS コマンドと誤認されてエラーが返される問題の回避策
-                Assert.Equal("\u200bd+aaaa", tweenMain.FormatStatusText("d+aaaa"));
+                var param = new PostStatusParams(Text: "d+aaaa");
+                var expected = new PostStatusParams(Text: "\u200bd+aaaa");
+                Assert.Equal(expected, tweenMain.FormatStatusText(param));
             });
         }
 

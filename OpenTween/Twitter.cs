@@ -206,7 +206,7 @@ namespace OpenTween
             this.Api.Initialize(apiConnection);
         }
 
-        public async Task<PostClass?> PostStatus(PostStatusParams param)
+        public async Task<PostClass?> PostStatus(CreateTweetParams param)
         {
             this.CheckAccountState();
 
@@ -226,7 +226,7 @@ namespace OpenTween
                 var request = new CreateTweetRequest
                 {
                     TweetText = param.Text,
-                    InReplyToTweetId = param.InReplyToStatusId?.ToTwitterStatusId(),
+                    InReplyToTweetId = param.InReplyTo?.StatusId.ToTwitterStatusId(),
                     ExcludeReplyUserIds = param.ExcludeReplyUserIds.OfType<TwitterUserId>().ToArray(),
                     MediaIds = param.MediaIds.Select(x => x.ToString()).ToArray(),
                     AttachmentUrl = param.AttachmentUrl,
@@ -239,7 +239,7 @@ namespace OpenTween
             {
                 using var response = await this.Api.StatusesUpdate(
                         param.Text,
-                        param.InReplyToStatusId?.ToTwitterStatusId(),
+                        param.InReplyTo?.StatusId.ToTwitterStatusId(),
                         param.MediaIds,
                         param.AutoPopulateReplyMetadata,
                         param.ExcludeReplyUserIds.OfType<TwitterUserId>().ToArray(),

@@ -44,6 +44,10 @@ namespace OpenTween.SocialProtocol
 
         public Task<PostClass[]> GetRelatedPosts(PostClass targetPost, bool firstLoad);
 
+        public Task<PostClass?> CreatePost(PostStatusParams postParams);
+
+        public int GetTextLengthRemain(PostStatusParams postParams);
+
         public Task DeletePost(PostId postId);
 
         public Task FavoritePost(PostId postId);
