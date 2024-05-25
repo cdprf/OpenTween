@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using OpenTween.SocialProtocol.Misskey;
 using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.SocialProtocol
@@ -48,6 +49,7 @@ namespace OpenTween.SocialProtocol
             {
                 new("Twitter (OAuth)", () => new TwitterOAuthSetupDialog()),
                 new("Twitter (Cookie)", () => new TwitterCookieSetupDialog()),
+                new("Misskey", () => new MisskeySetupDialog()),
             };
         }
 
