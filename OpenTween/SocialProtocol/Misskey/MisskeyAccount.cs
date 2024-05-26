@@ -35,7 +35,7 @@ namespace OpenTween.SocialProtocol.Misskey
 
         public AccountKey UniqueKey { get; }
 
-        public MisskeyClient Client { get; private set; } = new();
+        public MisskeyClient Client { get; private set; }
 
         ISocialProtocolClient ISocialAccount.Client
             => this.Client;
@@ -62,7 +62,10 @@ namespace OpenTween.SocialProtocol.Misskey
         private MisskeyApiConnection? connection;
 
         public MisskeyAccount(AccountKey accountKey)
-            => this.UniqueKey = accountKey;
+        {
+            this.UniqueKey = accountKey;
+            this.Client = new(this);
+        }
 
         public void Initialize(UserAccount accountSettings, SettingCommon settingCommon)
         {

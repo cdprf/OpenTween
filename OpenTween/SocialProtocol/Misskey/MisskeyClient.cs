@@ -22,14 +22,28 @@
 #nullable enable
 
 using System.Threading.Tasks;
+using OpenTween.Api.Misskey;
 using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol.Misskey
 {
     public class MisskeyClient : ISocialProtocolClient
     {
-        public Task<UserInfo> VerifyCredentials()
-            => throw this.CreateException();
+        private readonly MisskeyAccount account;
+
+        public MisskeyClient(MisskeyAccount account)
+            => this.account = account;
+
+        public async Task<UserInfo> VerifyCredentials()
+        {
+            var request = new MeRequest();
+            var user = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            this.account.AccountState.UpdateFromUser(user);
+
+            return new();
+        }
 
         public Task<PostClass> GetPostById(PostId postId, bool firstLoad)
             => throw this.CreateException();

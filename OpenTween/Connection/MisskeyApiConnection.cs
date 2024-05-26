@@ -25,8 +25,10 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Cache;
 using System.Net.Http;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenTween.Api.Misskey;
 
 namespace OpenTween.Connection
 {
@@ -57,8 +59,42 @@ namespace OpenTween.Connection
             this.Http.Timeout = Timeout.InfiniteTimeSpan;
         }
 
-        public Task<ApiResponse> SendAsync(IHttpRequest request)
-            => throw new WebApiException("Not implemented");
+        public async Task<ApiResponse> SendAsync(IHttpRequest request)
+        {
+            using var requestMessage = request.CreateMessage(this.apiBaseUri);
+
+            if (!MyCommon.IsNullOrEmpty(this.accessToken))
+                requestMessage.Headers.Authorization = new("Bearer", this.accessToken);
+
+            HttpResponseMessage? responseMessage = null;
+            try
+            {
+                responseMessage = await TwitterApiConnection.HandleTimeout(
+                    (token) => this.Http.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, token),
+                    request.Timeout
+                );
+
+                await CheckStatusCode(responseMessage)
+                    .ConfigureAwait(false);
+
+                var response = new ApiResponse(responseMessage);
+                responseMessage = null; // responseMessage は ApiResponse で使用するため破棄されないようにする
+
+                return response;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw MisskeyApiException.CreateFromException(ex);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw MisskeyApiException.CreateFromException(ex);
+            }
+            finally
+            {
+                responseMessage?.Dispose();
+            }
+        }
 
         public void Dispose()
         {
@@ -73,6 +109,35 @@ namespace OpenTween.Connection
 
         private void Networking_WebProxyChanged(object sender, EventArgs e)
             => this.InitializeHttpClients();
+
+        private static async Task CheckStatusCode(HttpResponseMessage response)
+        {
+            var statusCode = response.StatusCode;
+
+            if ((int)statusCode >= 200 && (int)statusCode <= 299)
+                return;
+
+            string responseText;
+            using (var content = response.Content)
+            {
+                responseText = await content.ReadAsStringAsync()
+                    .ConfigureAwait(false);
+            }
+
+            if (string.IsNullOrWhiteSpace(responseText))
+                throw new MisskeyApiException(statusCode, responseText);
+
+            try
+            {
+                var error = MisskeyError.ParseJson(responseText);
+
+                throw new MisskeyApiException(statusCode, error, responseText);
+            }
+            catch (SerializationException)
+            {
+                throw new MisskeyApiException(statusCode, responseText);
+            }
+        }
 
         private static HttpClient InitializeHttpClient()
         {

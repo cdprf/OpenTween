@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using OpenTween.Api;
+using OpenTween.Api.Misskey;
 using OpenTween.Models;
 
 namespace OpenTween.SocialProtocol.Misskey
@@ -63,6 +64,16 @@ namespace OpenTween.SocialProtocol.Misskey
             this.ServerUri = serverUri;
             this.UserId = userId;
             this.UserName = userName;
+        }
+
+        /// <summary>ユーザー情報を更新します</summary>
+        public void UpdateFromUser(MisskeyUser self)
+        {
+            this.UserId = new(self.Id);
+            this.UserName = self.Username;
+            this.FollowersCount = self.FollowersCount;
+            this.FriendsCount = self.FollowingCount;
+            this.StatusesCount = self.NotesCount;
         }
     }
 }
