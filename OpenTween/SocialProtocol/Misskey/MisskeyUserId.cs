@@ -22,36 +22,17 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
-using OpenTween.SocialProtocol.Misskey;
-using OpenTween.SocialProtocol.Twitter;
+using OpenTween.Models;
 
-namespace OpenTween.SocialProtocol
+namespace OpenTween.SocialProtocol.Misskey
 {
-    public class AccountFactory
+    public class MisskeyUserId : PersonId
     {
-        private readonly Dictionary<string, Func<AccountKey, ISocialAccount>> factories;
+        public override string IdType => "misskey_user";
 
-        public AccountFactory()
-        {
-            this.factories = new()
-            {
-                ["Twitter"] = x => new TwitterAccount(x),
-                ["Misskey"] = x => new MisskeyAccount(x),
-            };
-        }
+        public override string Id { get; }
 
-        public ISocialAccount Create(UserAccount accountSettings, SettingCommon settingCommon)
-        {
-            var accountKey = new AccountKey(accountSettings.UniqueKey);
-
-            var account = this.factories.TryGetValue(accountSettings.AccountType, out var createAccount)
-                ? createAccount(accountKey)
-                : new InvalidAccount(accountKey);
-
-            account.Initialize(accountSettings, settingCommon);
-
-            return account;
-        }
+        public MisskeyUserId(string id)
+            => this.Id = id ?? throw new ArgumentNullException(nameof(id));
     }
 }

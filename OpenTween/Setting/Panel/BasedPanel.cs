@@ -53,20 +53,19 @@ namespace OpenTween.Setting.Panel
 
             private string ComposeDisplayText()
             {
-                var authTypeText = this.AccountSettings.TwitterAuthType switch
-                {
-                    APIAuthType.OAuth1 => "Twitter / OAuth",
-                    APIAuthType.TwitterComCookie => "Twitter / Cookie",
-                    _ => "Twitter / unknown",
-                };
+                var accountTypeText = this.AccountSettings.AccountType;
+
                 var accountName = $"@{this.AccountSettings.Username}";
+                if (!MyCommon.IsNullOrEmpty(this.AccountSettings.ServerHostname))
+                    accountName += $"@{this.AccountSettings.ServerHostname}";
+
                 var suffix = "";
                 if (this.IsPrimary)
                     suffix += " " + Properties.Resources.AccountListBoxItem_Primary;
                 if (this.AccountSettings.Disabled)
                     suffix += " " + Properties.Resources.AccountListBoxItem_Disabled;
 
-                return $"[{authTypeText}] {accountName}{suffix}";
+                return $"[{accountTypeText}] {accountName}{suffix}";
             }
         }
 

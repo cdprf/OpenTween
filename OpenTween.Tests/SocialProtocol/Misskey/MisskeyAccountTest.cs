@@ -19,39 +19,33 @@
 // the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
 // Boston, MA 02110-1301, USA.
 
-#nullable enable
-
 using System;
-using System.Collections.Generic;
-using OpenTween.SocialProtocol.Misskey;
-using OpenTween.SocialProtocol.Twitter;
+using Xunit;
 
-namespace OpenTween.SocialProtocol
+namespace OpenTween.SocialProtocol.Misskey
 {
-    public class AccountFactory
+    public class MisskeyAccountTest
     {
-        private readonly Dictionary<string, Func<AccountKey, ISocialAccount>> factories;
-
-        public AccountFactory()
+        [Fact]
+        public void Initialize_Test()
         {
-            this.factories = new()
+            var accountKey = AccountKey.New();
+            using var account = new MisskeyAccount(accountKey);
+
+            var accountSettings = new UserAccount
             {
-                ["Twitter"] = x => new TwitterAccount(x),
-                ["Misskey"] = x => new MisskeyAccount(x),
+                UniqueKey = accountKey.Id,
+                AccountType = "Misskey",
+                ServerHostname = "example.com",
+                TokenSecret = "aaaaa",
+                UserId = "abcdef",
+                Username = "tetete",
             };
-        }
+            account.Initialize(accountSettings, new());
 
-        public ISocialAccount Create(UserAccount accountSettings, SettingCommon settingCommon)
-        {
-            var accountKey = new AccountKey(accountSettings.UniqueKey);
-
-            var account = this.factories.TryGetValue(accountSettings.AccountType, out var createAccount)
-                ? createAccount(accountKey)
-                : new InvalidAccount(accountKey);
-
-            account.Initialize(accountSettings, settingCommon);
-
-            return account;
+            Assert.Equal(new("https://example.com/"), account.AccountState.ServerUri);
+            Assert.Equal(new MisskeyUserId("abcdef"), account.UserId);
+            Assert.Equal("tetete", account.UserName);
         }
     }
 }

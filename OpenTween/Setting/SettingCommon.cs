@@ -359,11 +359,15 @@ namespace OpenTween
         public string AccountType { get; set; } = "Twitter";
 
         [DefaultValue("")]
+        public string ServerHostname { get; set; } = "";
+
+        [DefaultValue("")]
         public string Username { get; set; } = "";
 
         [DefaultValue("")]
         public string UserId { get; set; } = "";
 
+        [DefaultValue(APIAuthType.OAuth1)]
         public APIAuthType TwitterAuthType { get; set; } = APIAuthType.OAuth1;
 
         [DefaultValue("")]
