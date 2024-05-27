@@ -154,8 +154,16 @@ namespace OpenTween.SocialProtocol.Misskey
             return post;
         }
 
-        public Task UnretweetPost(PostId postId)
-            => throw this.CreateException();
+        public async Task UnretweetPost(PostId postId)
+        {
+            var request = new NoteUnrenoteRequest
+            {
+                NoteId = this.AssertMisskeyNoteId(postId),
+            };
+
+            await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+        }
 
         public Task RefreshConfiguration()
             => Task.CompletedTask;
