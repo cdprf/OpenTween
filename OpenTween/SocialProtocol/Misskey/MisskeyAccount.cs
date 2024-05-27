@@ -85,7 +85,7 @@ namespace OpenTween.SocialProtocol.Misskey
         }
 
         public bool CanUsePostId(PostId postId)
-            => throw new NotImplementedException();
+            => postId is MisskeyNoteId;
 
         public void Dispose()
         {

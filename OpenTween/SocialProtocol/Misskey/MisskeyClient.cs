@@ -30,6 +30,7 @@ namespace OpenTween.SocialProtocol.Misskey
     public class MisskeyClient : ISocialProtocolClient
     {
         private readonly MisskeyAccount account;
+        private readonly MisskeyPostFactory postFactory = new();
 
         public MisskeyClient(MisskeyAccount account)
             => this.account = account;
@@ -45,8 +46,20 @@ namespace OpenTween.SocialProtocol.Misskey
             return new();
         }
 
-        public Task<PostClass> GetPostById(PostId postId, bool firstLoad)
-            => throw this.CreateException();
+        public async Task<PostClass> GetPostById(PostId postId, bool firstLoad)
+        {
+            var request = new NoteShowRequest
+            {
+                NoteId = this.AssertMisskeyNoteId(postId),
+            };
+
+            var note = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            var post = this.CreatePostFromNote(note, firstLoad);
+
+            return post;
+        }
 
         public Task<TimelineResponse> GetHomeTimeline(int count, IQueryCursor? cursor, bool firstLoad)
             => throw this.CreateException();
@@ -92,5 +105,15 @@ namespace OpenTween.SocialProtocol.Misskey
 
         private WebApiException CreateException()
             => new("Not implemented");
+
+        private MisskeyNoteId AssertMisskeyNoteId(PostId postId)
+        {
+            return postId is MisskeyNoteId noteId
+                ? noteId
+                : throw new WebApiException($"Not supported type: {postId.GetType()}");
+        }
+
+        private PostClass CreatePostFromNote(MisskeyNote note, bool firstLoad)
+            => this.postFactory.CreateFromNote(note, this.account.AccountState, firstLoad);
     }
 }
