@@ -122,8 +122,16 @@ namespace OpenTween.SocialProtocol.Misskey
         public int GetTextLengthRemain(PostStatusParams postParams)
             => MaxNoteTextLength - postParams.Text.ToCodepoints().Count();
 
-        public Task DeletePost(PostId postId)
-            => throw this.CreateException();
+        public async Task DeletePost(PostId postId)
+        {
+            var request = new NoteDeleteRequest
+            {
+                NoteId = (MisskeyNoteId)postId,
+            };
+
+            await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+        }
 
         public Task FavoritePost(PostId postId)
             => throw this.CreateException();
