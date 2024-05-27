@@ -133,8 +133,17 @@ namespace OpenTween.SocialProtocol.Misskey
                 .ConfigureAwait(false);
         }
 
-        public Task FavoritePost(PostId postId)
-            => throw this.CreateException();
+        public async Task FavoritePost(PostId postId)
+        {
+            var request = new NoteReactionCreateRequest
+            {
+                NoteId = this.AssertMisskeyNoteId(postId),
+                Reaction = "❤",
+            };
+
+            await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+        }
 
         public Task UnfavoritePost(PostId postId)
             => throw this.CreateException();
