@@ -21,6 +21,7 @@
 
 #nullable enable
 
+using System.Linq;
 using System.Threading.Tasks;
 using OpenTween.Api.Misskey;
 using OpenTween.Models;
@@ -61,8 +62,24 @@ namespace OpenTween.SocialProtocol.Misskey
             return post;
         }
 
-        public Task<TimelineResponse> GetHomeTimeline(int count, IQueryCursor? cursor, bool firstLoad)
-            => throw this.CreateException();
+        public async Task<TimelineResponse> GetHomeTimeline(int count, IQueryCursor? cursor, bool firstLoad)
+        {
+            var (sinceId, untilId) = GetCursorParams(cursor);
+            var request = new NoteTimelineRequest
+            {
+                Limit = 100,
+                SinceId = sinceId,
+                UntilId = untilId,
+            };
+
+            var notes = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            var (cursorTop, cursorBottom) = GetCursorFromResponse(notes);
+            var posts = this.CreatePostFromNote(notes, firstLoad);
+
+            return new(posts, cursorTop, cursorBottom);
+        }
 
         public Task<TimelineResponse> GetMentionsTimeline(int count, IQueryCursor? cursor, bool firstLoad)
             => throw this.CreateException();
@@ -115,5 +132,37 @@ namespace OpenTween.SocialProtocol.Misskey
 
         private PostClass CreatePostFromNote(MisskeyNote note, bool firstLoad)
             => this.postFactory.CreateFromNote(note, this.account.AccountState, firstLoad);
+
+        private PostClass[] CreatePostFromNote(MisskeyNote[] notes, bool firstLoad)
+            => notes.Select(x => this.postFactory.CreateFromNote(x, this.account.AccountState, firstLoad)).ToArray();
+
+        public static (MisskeyNoteId? SinceId, MisskeyNoteId? UntilId) GetCursorParams(IQueryCursor? cursor)
+        {
+            MisskeyNoteId? sinceId = null, untilId = null;
+
+            if (cursor is QueryCursor<MisskeyNoteId> noteIdCursor)
+            {
+                if (noteIdCursor.Type == CursorType.Top)
+                    sinceId = noteIdCursor.Value;
+                else if (noteIdCursor.Type == CursorType.Bottom)
+                    untilId = noteIdCursor.Value;
+            }
+
+            return (sinceId, untilId);
+        }
+
+        public static (IQueryCursor? CursorTop, IQueryCursor? CursorBottom) GetCursorFromResponse(MisskeyNote[] notes)
+        {
+            IQueryCursor? cursorTop = null, cursorBottom = null;
+
+            if (notes.Length > 0)
+            {
+                var (min, max) = notes.Select(x => new MisskeyNoteId(x.Id)).MinMax();
+                cursorTop = new QueryCursor<MisskeyNoteId>(CursorType.Top, max);
+                cursorBottom = new QueryCursor<MisskeyNoteId>(CursorType.Bottom, min);
+            }
+
+            return (cursorTop, cursorBottom);
+        }
     }
 }
