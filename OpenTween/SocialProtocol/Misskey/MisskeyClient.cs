@@ -139,8 +139,20 @@ namespace OpenTween.SocialProtocol.Misskey
         public Task UnfavoritePost(PostId postId)
             => throw this.CreateException();
 
-        public Task<PostClass?> RetweetPost(PostId postId)
-            => throw this.CreateException();
+        public async Task<PostClass?> RetweetPost(PostId postId)
+        {
+            var request = new NoteCreateRequest
+            {
+                RenoteId = this.AssertMisskeyNoteId(postId),
+            };
+
+            var note = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            var post = this.CreatePostFromNote(note, firstLoad: false);
+
+            return post;
+        }
 
         public Task UnretweetPost(PostId postId)
             => throw this.CreateException();
