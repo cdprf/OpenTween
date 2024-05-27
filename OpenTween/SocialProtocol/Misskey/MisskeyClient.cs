@@ -30,6 +30,8 @@ namespace OpenTween.SocialProtocol.Misskey
 {
     public class MisskeyClient : ISocialProtocolClient
     {
+        public static int MaxNoteTextLength { get; } = 3_000;
+
         private readonly MisskeyAccount account;
         private readonly MisskeyPostFactory postFactory = new();
 
@@ -96,11 +98,29 @@ namespace OpenTween.SocialProtocol.Misskey
         public Task<PostClass[]> GetRelatedPosts(PostClass targetPost, bool firstLoad)
             => throw this.CreateException();
 
-        public Task<PostClass?> CreatePost(PostStatusParams postParams)
-            => throw this.CreateException();
+        public async Task<PostClass?> CreatePost(PostStatusParams postParams)
+        {
+            if (postParams.Text.StartsWith("D "))
+                throw this.CreateException(); // DM の送信は非対応
+
+            var request = new NoteCreateRequest
+            {
+                Text = postParams.Text,
+                ReplyId = postParams.InReplyTo is { } replyTo
+                    ? this.AssertMisskeyNoteId(replyTo.StatusId)
+                    : null,
+            };
+
+            var note = await request.Send(this.account.Connection)
+                .ConfigureAwait(false);
+
+            var post = this.CreatePostFromNote(note, firstLoad: false);
+
+            return post;
+        }
 
         public int GetTextLengthRemain(PostStatusParams postParams)
-            => 0;
+            => MaxNoteTextLength - postParams.Text.ToCodepoints().Count();
 
         public Task DeletePost(PostId postId)
             => throw this.CreateException();
