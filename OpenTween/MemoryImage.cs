@@ -244,6 +244,12 @@ namespace OpenTween
             var ret = memstream.TryGetBuffer(out var buffer);
             Debug.Assert(ret, "TryGetBuffer() == true");
 
+            if (WebpDecoder.IsWebpImage(buffer))
+            {
+                var transcoded = await WebpDecoder.ConvertFromWebp(buffer);
+                return new(transcoded);
+            }
+
             return new(buffer);
         }
 
