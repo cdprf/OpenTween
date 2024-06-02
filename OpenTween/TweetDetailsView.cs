@@ -279,18 +279,21 @@ namespace OpenTween
             this.ClearUserPicture();
 
             var imageSize = Twitter.DecideProfileImageSize(this.UserPicture.Width);
-            var cachedImage = this.IconCache.TryGetLargerOrSameSizeFromCache(normalImageUrl, imageSize);
-            if (cachedImage != null)
+            if (!force)
             {
-                // 既にキャッシュされていればそれを表示して終了
-                this.UserPicture.Image = cachedImage.Clone();
-                return;
-            }
+                var cachedImage = this.IconCache.TryGetLargerOrSameSizeFromCache(normalImageUrl, imageSize);
+                if (cachedImage != null)
+                {
+                    // 既にキャッシュされていればそれを表示して終了
+                    this.UserPicture.Image = cachedImage.Clone();
+                    return;
+                }
 
-            // 小さいサイズの画像がキャッシュにある場合は高解像度の画像が取得できるまでの間表示する
-            var fallbackImage = this.IconCache.TryGetLargerOrSameSizeFromCache(normalImageUrl, "mini");
-            if (fallbackImage != null)
-                this.UserPicture.Image = fallbackImage.Clone();
+                // 小さいサイズの画像がキャッシュにある場合は高解像度の画像が取得できるまでの間表示する
+                var fallbackImage = this.IconCache.TryGetLargerOrSameSizeFromCache(normalImageUrl, "mini");
+                if (fallbackImage != null)
+                    this.UserPicture.Image = fallbackImage.Clone();
+            }
 
             await this.UserPicture.SetImageFromTask(
                 async () =>
