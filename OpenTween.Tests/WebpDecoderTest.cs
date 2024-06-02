@@ -50,8 +50,14 @@ namespace OpenTween
             Assert.True(WebpDecoder.IsWebpImage(buffer));
         }
 
+#if CI_BUILD
+#pragma warning disable xUnit1004
+        [Fact(Skip = "WebP画像拡張機能がインストールされている環境でしか動作しない")]
+#pragma warning restore xUnit1004
+#else
         [Fact]
-        public async Task ConvertFromWebp_Test()
+#endif
+        public async Task ConvertFromWebp_SuccessTest()
         {
             using var imgStream = File.OpenRead("Resources/re1.webp");
             using var memstream = new MemoryStream();
@@ -61,6 +67,25 @@ namespace OpenTween
             var converted = await WebpDecoder.ConvertFromWebp(buffer);
             using var memoryImage = new MemoryImage(converted);
             Assert.Equal(ImageFormat.Png, memoryImage.ImageFormat);
+        }
+
+#if CI_BUILD
+        [Fact]
+#else
+#pragma warning disable xUnit1004
+        [Fact(Skip = "WebP画像拡張機能がインストールされていない環境に対するテスト")]
+#pragma warning restore xUnit1004
+#endif
+        public async Task ConvertFromWebp_FailTest()
+        {
+            using var imgStream = File.OpenRead("Resources/re1.webp");
+            using var memstream = new MemoryStream();
+            await imgStream.CopyToAsync(memstream);
+            memstream.TryGetBuffer(out var buffer);
+
+            await Assert.ThrowsAsync<InvalidImageException>(
+                () => WebpDecoder.ConvertFromWebp(buffer)
+            );
         }
     }
 }
