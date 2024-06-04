@@ -22,10 +22,12 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using OpenTween.Api.Misskey;
 using OpenTween.Models;
 using OpenTween.Setting;
+using OpenTween.Thumbnail;
 
 namespace OpenTween.SocialProtocol.Misskey
 {
@@ -78,6 +80,7 @@ namespace OpenTween.SocialProtocol.Misskey
                 Text = textHtml,
                 TextFromApi = originalText,
                 AccessibleText = originalText,
+                PreloadedThumbnails = this.CreateThumbnailInfoList(originalNote.Files),
                 IsFav = reactionSent,
                 IsReply = renotedNote == null && originalNote.Mentions?.Any(x => x == accountState.UserId.Id) == true,
                 InReplyToStatusId = replyToNote?.Id is { } replyToIdStr ? new MisskeyNoteId(replyToIdStr) : null,
@@ -104,6 +107,27 @@ namespace OpenTween.SocialProtocol.Misskey
 
         public static Uri CreateLocalPostUri(Uri serverUri, MisskeyNoteId noteId)
             => new(serverUri, $"/notes/{noteId.Id}");
+
+        private ThumbnailInfo[] CreateThumbnailInfoList(MisskeyDriveFile[] files)
+        {
+            var thumbnails = new List<ThumbnailInfo>(capacity: files.Length);
+
+            foreach (var file in files)
+            {
+                if (MyCommon.IsNullOrEmpty(file.ThumbnailUrl))
+                    continue;
+
+                var thumb = new ThumbnailInfo(file.Url, file.ThumbnailUrl)
+                {
+                    TooltipText = file.Comment ?? "",
+                    IsPlayable = file.Type.StartsWith("video/"),
+                };
+
+                thumbnails.Add(thumb);
+            }
+
+            return thumbnails.ToArray();
+        }
 
         private bool DetermineUnreadState(bool isMe, bool firstLoad)
         {

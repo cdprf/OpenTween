@@ -62,6 +62,9 @@ namespace OpenTween.Api.Misskey
         [DataMember(Name = "mentions", IsRequired = false)]
         public string[] Mentions { get; set; } = Array.Empty<string>();
 
+        [DataMember(Name = "files")]
+        public MisskeyDriveFile[] Files { get; set; } = Array.Empty<MisskeyDriveFile>();
+
         [DataMember(Name = "myReaction", IsRequired = false)]
         public string? MyReaction { get; set; }
     }
