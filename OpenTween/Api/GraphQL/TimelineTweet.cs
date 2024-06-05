@@ -147,6 +147,7 @@ namespace OpenTween.Api.GraphQL
                         .Select(x => new TwitterEntityMention()
                         {
                             Indices = x.XPathSelectElements("indices/item").Select(x => int.Parse(x.Value)).ToArray(),
+                            IdStr = GetText(x, "id_str"),
                             ScreenName = GetText(x, "screen_name"),
                         })
                         .ToArray(),
