@@ -1182,7 +1182,7 @@ namespace OpenTween.Api
                 },
                 JsonUtils.SerializeJsonByDataContract(new TwitterUser
                 {
-                    Id = 100L,
+                    IdStr = "100",
                     ScreenName = "opentween",
                 })
             );

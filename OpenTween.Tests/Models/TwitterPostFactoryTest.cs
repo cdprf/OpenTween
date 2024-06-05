@@ -45,7 +45,6 @@ namespace OpenTween.Models
 
             return new()
             {
-                Id = statusId,
                 IdStr = statusId.ToString(),
                 CreatedAt = "Sat Jan 01 00:00:00 +0000 2022",
                 FullText = "hoge",
@@ -61,7 +60,6 @@ namespace OpenTween.Models
 
             return new()
             {
-                Id = userId,
                 IdStr = userId.ToString(),
                 ScreenName = "tetete",
                 Name = "ててて",
@@ -212,7 +210,7 @@ namespace OpenTween.Models
 
             var factory = new TwitterPostFactory(this.CreateTabinfo(), settingCommon);
             var status = this.CreateStatus();
-            status.User.Id = 20000L;
+            status.User.IdStr = "20000";
             var post = factory.CreateFromStatus(status, selfUserId: new("20000"), followerIds: EmptyIdSet, firstLoad: false);
 
             Assert.False(post.IsRead); // 未読
@@ -456,11 +454,9 @@ namespace OpenTween.Models
             };
             status.QuotedStatus = new()
             {
-                Id = 1234567890L,
                 IdStr = "1234567890",
                 User = new()
                 {
-                    Id = 1111,
                     IdStr = "1111",
                     ScreenName = "foo",
                 },
@@ -485,11 +481,9 @@ namespace OpenTween.Models
             status.FullText = "hoge";
             status.QuotedStatus = new()
             {
-                Id = 1234567890L,
                 IdStr = "1234567890",
                 User = new TwitterUser
                 {
-                    Id = 1111,
                     IdStr = "1111",
                     ScreenName = "foo",
                 },
@@ -714,7 +708,7 @@ namespace OpenTween.Models
         [Fact]
         public void ParseDateTimeFromSnowflakeId_LowerTest()
         {
-            var statusId = 1659990873340346368L;
+            var statusId = new TwitterStatusId("1659990873340346368");
             var createdAtStr = "Sat May 20 18:34:00 +0000 2023";
             var expected = new DateTimeUtc(2023, 5, 20, 18, 34, 0, 0);
             Assert.Equal(expected, TwitterPostFactory.ParseDateTimeFromSnowflakeId(statusId, createdAtStr));
@@ -723,7 +717,7 @@ namespace OpenTween.Models
         [Fact]
         public void ParseDateTimeFromSnowflakeId_UpperTest()
         {
-            var statusId = 1672312060766748673L;
+            var statusId = new TwitterStatusId("1672312060766748673");
             var createdAtStr = "Fri Jun 23 18:33:59 +0000 2023";
             var expected = new DateTimeUtc(2023, 6, 23, 18, 33, 59, 999);
             Assert.Equal(expected, TwitterPostFactory.ParseDateTimeFromSnowflakeId(statusId, createdAtStr));
@@ -733,9 +727,19 @@ namespace OpenTween.Models
         public void ParseDateTimeFromSnowflakeId_FallbackTest()
         {
             // Snowflake 導入以前の status_id に対しては created_at の文字列からパースした日時を採用する
-            var statusId = 20L;
+            var statusId = new TwitterStatusId("20");
             var createdAtStr = "Tue Mar 21 20:50:14 +0000 2006";
             var expected = new DateTimeUtc(2006, 3, 21, 20, 50, 14, 0);
+            Assert.Equal(expected, TwitterPostFactory.ParseDateTimeFromSnowflakeId(statusId, createdAtStr));
+        }
+
+        [Fact]
+        public void ParseDateTimeFromSnowflakeId_FallbackNotNumericTest()
+        {
+            // id_str が long 型に変換できない形式だった場合は created_at からパースした日時を採用する
+            var statusId = new TwitterStatusId("abcdef");
+            var createdAtStr = "Mon Jan 01 00:00:00 +0000 2024";
+            var expected = new DateTimeUtc(2024, 1, 1, 0, 0, 0, 0);
             Assert.Equal(expected, TwitterPostFactory.ParseDateTimeFromSnowflakeId(statusId, createdAtStr));
         }
 

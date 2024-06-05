@@ -139,7 +139,7 @@ namespace OpenTween.Api.GraphQL
                 FullText = GetText(tweetLegacyElm, "full_text"),
                 InReplyToScreenName = GetTextOrNull(tweetLegacyElm, "in_reply_to_screen_name"),
                 InReplyToStatusIdStr = GetTextOrNull(tweetLegacyElm, "in_reply_to_status_id_str"),
-                InReplyToUserId = GetTextOrNull(tweetLegacyElm, "in_reply_to_user_id_str") is string userId ? long.Parse(userId) : null,
+                InReplyToUserIdStr = GetTextOrNull(tweetLegacyElm, "in_reply_to_user_id_str"),
                 Favorited = GetTextOrNull(tweetLegacyElm, "favorited") is string favorited ? favorited == "true" : null,
                 Entities = new()
                 {
