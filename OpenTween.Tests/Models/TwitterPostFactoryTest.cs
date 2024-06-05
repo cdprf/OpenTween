@@ -714,7 +714,7 @@ namespace OpenTween.Models
         [Fact]
         public void ParseDateTimeFromSnowflakeId_LowerTest()
         {
-            var statusId = 1659990873340346368L;
+            var statusId = new TwitterStatusId("1659990873340346368");
             var createdAtStr = "Sat May 20 18:34:00 +0000 2023";
             var expected = new DateTimeUtc(2023, 5, 20, 18, 34, 0, 0);
             Assert.Equal(expected, TwitterPostFactory.ParseDateTimeFromSnowflakeId(statusId, createdAtStr));
@@ -723,7 +723,7 @@ namespace OpenTween.Models
         [Fact]
         public void ParseDateTimeFromSnowflakeId_UpperTest()
         {
-            var statusId = 1672312060766748673L;
+            var statusId = new TwitterStatusId("1672312060766748673");
             var createdAtStr = "Fri Jun 23 18:33:59 +0000 2023";
             var expected = new DateTimeUtc(2023, 6, 23, 18, 33, 59, 999);
             Assert.Equal(expected, TwitterPostFactory.ParseDateTimeFromSnowflakeId(statusId, createdAtStr));
@@ -733,9 +733,19 @@ namespace OpenTween.Models
         public void ParseDateTimeFromSnowflakeId_FallbackTest()
         {
             // Snowflake 導入以前の status_id に対しては created_at の文字列からパースした日時を採用する
-            var statusId = 20L;
+            var statusId = new TwitterStatusId("20");
             var createdAtStr = "Tue Mar 21 20:50:14 +0000 2006";
             var expected = new DateTimeUtc(2006, 3, 21, 20, 50, 14, 0);
+            Assert.Equal(expected, TwitterPostFactory.ParseDateTimeFromSnowflakeId(statusId, createdAtStr));
+        }
+
+        [Fact]
+        public void ParseDateTimeFromSnowflakeId_FallbackNotNumericTest()
+        {
+            // id_str が long 型に変換できない形式だった場合は created_at からパースした日時を採用する
+            var statusId = new TwitterStatusId("abcdef");
+            var createdAtStr = "Mon Jan 01 00:00:00 +0000 2024";
+            var expected = new DateTimeUtc(2024, 1, 1, 0, 0, 0, 0);
             Assert.Equal(expected, TwitterPostFactory.ParseDateTimeFromSnowflakeId(statusId, createdAtStr));
         }
 

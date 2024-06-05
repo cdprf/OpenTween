@@ -64,16 +64,19 @@ namespace OpenTween.Models
             bool favTweet = false
         )
         {
+            var statusId = new TwitterStatusId(status.IdStr);
             var statusUser = status.User ?? TwitterUser.CreateUnknownUser();
             var statusUserId = new TwitterUserId(statusUser.IdStr);
 
             // リツイートでない場合は null
             var retweetedStatus = (TwitterStatus?)null;
+            var retweetedStatusId = (TwitterStatusId?)null;
             var retweeterUser = (TwitterUser?)null;
             if (status.RetweetedStatus != null)
             {
                 // リツイート元のツイート
                 retweetedStatus = status.RetweetedStatus;
+                retweetedStatusId = new(retweetedStatus.IdStr);
                 // リツイートを行ったユーザー
                 retweeterUser = statusUser;
             }
@@ -144,9 +147,9 @@ namespace OpenTween.Models
             if (!isMe && followerIds.Count > 0)
                 isOwl = !followerIds.Contains(originalStatusUserId);
 
-            var createdAtForSorting = ParseDateTimeFromSnowflakeId(status.Id, status.CreatedAt);
+            var createdAtForSorting = ParseDateTimeFromSnowflakeId(statusId, status.CreatedAt);
             var createdAt = retweetedStatus != null
-                ? ParseDateTimeFromSnowflakeId(retweetedStatus.Id, retweetedStatus.CreatedAt)
+                ? ParseDateTimeFromSnowflakeId(retweetedStatusId!, retweetedStatus.CreatedAt)
                 : createdAtForSorting;
 
             if (status.IsPromoted)
@@ -160,7 +163,7 @@ namespace OpenTween.Models
             return new()
             {
                 // status から生成
-                StatusId = new TwitterStatusId(status.IdStr),
+                StatusId = statusId,
                 CreatedAtForSorting = createdAtForSorting,
                 IsMe = isMe,
                 IsPromoted = status.IsPromoted,
@@ -557,14 +560,19 @@ namespace OpenTween.Models
 
         public static readonly DateTimeUtc TwitterEpoch = DateTimeUtc.FromUnixTimeMilliseconds(1288834974657L);
 
-        public static DateTimeUtc ParseDateTimeFromSnowflakeId(long statusId, string createdAtStr)
+        public static DateTimeUtc ParseDateTimeFromSnowflakeId(TwitterStatusId statusId, string createdAtStr)
         {
+            var createdAtFromStr = MyCommon.DateTimeParse(createdAtStr);
+
+            // long 型に変換できなかった場合は created_at の値をそのまま使う
+            if (!long.TryParse(statusId.Id, out var numericId))
+                return createdAtFromStr;
+
             // status_id からミリ秒単位の日時を算出する
-            var timestampInMs = TwitterEpoch + TimeSpan.FromMilliseconds(statusId >> 22);
+            var timestampInMs = TwitterEpoch + TimeSpan.FromMilliseconds(numericId >> 22);
 
             // 通常の方法で得た秒精度の日時と比較して 1 秒未満の差であれば timestampInMs の値を採用する
             // （Snowflake 導入以前の ID や仕様変更によりこの計算式が使えなくなった場合の対策）
-            var createdAtFromStr = MyCommon.DateTimeParse(createdAtStr);
             var correct = (timestampInMs - createdAtFromStr).Duration() < TimeSpan.FromSeconds(1);
 
             return correct ? timestampInMs : createdAtFromStr;
