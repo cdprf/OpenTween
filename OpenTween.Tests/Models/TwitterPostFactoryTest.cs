@@ -45,7 +45,6 @@ namespace OpenTween.Models
 
             return new()
             {
-                Id = statusId,
                 IdStr = statusId.ToString(),
                 CreatedAt = "Sat Jan 01 00:00:00 +0000 2022",
                 FullText = "hoge",
@@ -456,7 +455,6 @@ namespace OpenTween.Models
             };
             status.QuotedStatus = new()
             {
-                Id = 1234567890L,
                 IdStr = "1234567890",
                 User = new()
                 {
@@ -485,7 +483,6 @@ namespace OpenTween.Models
             status.FullText = "hoge";
             status.QuotedStatus = new()
             {
-                Id = 1234567890L,
                 IdStr = "1234567890",
                 User = new TwitterUser
                 {
