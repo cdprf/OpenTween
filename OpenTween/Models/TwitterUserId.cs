@@ -21,6 +21,8 @@
 
 #nullable enable
 
+using System;
+
 namespace OpenTween.Models
 {
     public class TwitterUserId : PersonId
@@ -30,9 +32,6 @@ namespace OpenTween.Models
         public override string Id { get; }
 
         public TwitterUserId(string id)
-            => this.Id = id;
-
-        public TwitterUserId(long id)
-            => this.Id = id.ToString();
+            => this.Id = id ?? throw new ArgumentNullException(nameof(id));
     }
 }
