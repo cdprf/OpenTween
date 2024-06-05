@@ -592,7 +592,7 @@ namespace OpenTween
                 new TwitterEntityMention
                 {
                     Indices = new[] { 5, 16 },
-                    Id = 6253282L,
+                    IdStr = "6253282",
                     Name = "Twitter API",
                     ScreenName = "twitterapi",
                 },
