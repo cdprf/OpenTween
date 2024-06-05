@@ -367,17 +367,11 @@ namespace OpenTween.Api.DataModel
         [DataMember(Name = "created_at")]
         public string CreatedAt { get; set; }
 
-        [DataMember(Name = "id")]
-        public long Id { get; set; }
-
         [DataMember(Name = "id_str")]
         public string IdStr { get; set; }
 
         [DataMember(Name = "text")]
         public string Text { get; set; }
-
-        [DataMember(Name = "sender_id")]
-        public long SenderId { get; set; }
 
         [DataMember(Name = "sender_id_str")]
         public string SenderIdStr { get; set; }
@@ -387,9 +381,6 @@ namespace OpenTween.Api.DataModel
 
         [DataMember(Name = "sender", IsRequired = false)]
         public TwitterUser? Sender { get; set; }
-
-        [DataMember(Name = "recipient_id")]
-        public long RecipientId { get; set; }
 
         [DataMember(Name = "recipient_id_str")]
         public string RecipientIdStr { get; set; }
