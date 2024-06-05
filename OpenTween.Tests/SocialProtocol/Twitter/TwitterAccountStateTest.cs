@@ -34,7 +34,6 @@ namespace OpenTween.SocialProtocol.Twitter
 
             var twitterUser = new TwitterUser
             {
-                Id = 514241801L,
                 IdStr = "514241801",
                 ScreenName = "OpenTween",
                 StatusesCount = 31,

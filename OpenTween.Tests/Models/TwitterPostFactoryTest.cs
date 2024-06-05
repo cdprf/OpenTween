@@ -60,7 +60,6 @@ namespace OpenTween.Models
 
             return new()
             {
-                Id = userId,
                 IdStr = userId.ToString(),
                 ScreenName = "tetete",
                 Name = "ててて",
@@ -211,7 +210,7 @@ namespace OpenTween.Models
 
             var factory = new TwitterPostFactory(this.CreateTabinfo(), settingCommon);
             var status = this.CreateStatus();
-            status.User.Id = 20000L;
+            status.User.IdStr = "20000";
             var post = factory.CreateFromStatus(status, selfUserId: new("20000"), followerIds: EmptyIdSet, firstLoad: false);
 
             Assert.False(post.IsRead); // 未読
@@ -458,7 +457,6 @@ namespace OpenTween.Models
                 IdStr = "1234567890",
                 User = new()
                 {
-                    Id = 1111,
                     IdStr = "1111",
                     ScreenName = "foo",
                 },
@@ -486,7 +484,6 @@ namespace OpenTween.Models
                 IdStr = "1234567890",
                 User = new TwitterUser
                 {
-                    Id = 1111,
                     IdStr = "1111",
                     ScreenName = "foo",
                 },
