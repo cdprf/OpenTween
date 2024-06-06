@@ -48,8 +48,22 @@ namespace OpenTween.SocialProtocol.Misskey
             var noteUser = note.User;
             var noteUserId = new MisskeyUserId(noteUser.Id);
 
-            var renotedNote = note.Renote;
-            var renoterUser = renotedNote != null ? noteUser : null;
+            MisskeyNote? renotedNote = null;
+            MisskeyUserLite? renoterUser = null;
+            PostId[] quotedNoteIds = Array.Empty<PostId>();
+
+            if (note.Renote != null)
+            {
+                if (MyCommon.IsNullOrEmpty(note.Text))
+                {
+                    renotedNote = note.Renote;
+                    renoterUser = noteUser;
+                }
+                else
+                {
+                    quotedNoteIds = new PostId[] { new MisskeyNoteId(note.Renote.Id) };
+                }
+            }
 
             // リツイートであるか否かに関わらず常にオリジナルのツイート及びユーザーを指す
             var originalNote = renotedNote ?? note;
@@ -80,6 +94,7 @@ namespace OpenTween.SocialProtocol.Misskey
                 Text = textHtml,
                 TextFromApi = originalText,
                 AccessibleText = originalText,
+                QuoteStatusIds = quotedNoteIds,
                 PreloadedThumbnails = this.CreateThumbnailInfoList(originalNote.Files),
                 IsFav = reactionSent,
                 IsReply = renotedNote == null && originalNote.Mentions?.Any(x => x == accountState.UserId.Id) == true,
