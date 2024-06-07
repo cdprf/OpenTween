@@ -81,6 +81,20 @@ namespace OpenTween.SocialProtocol.Misskey
             var urlEntities = TweetExtractor.ExtractUrlEntities(originalText);
             var textHtml = TweetFormatter.AutoLinkHtml(originalText, urlEntities);
 
+            var textSuffix = "";
+            if (originalNote.Files.Length > 0)
+                textSuffix += " [画像]";
+            if (originalNote.Renote != null && !MyCommon.IsNullOrEmpty(originalNote.Text))
+                textSuffix += " [引用]";
+
+            if (!MyCommon.IsNullOrEmpty(textSuffix))
+            {
+                if (MyCommon.IsNullOrEmpty(originalText))
+                    originalText = textSuffix.TrimStart(' ');
+                else
+                    originalText += textSuffix;
+            }
+
             return new()
             {
                 // note から生成
