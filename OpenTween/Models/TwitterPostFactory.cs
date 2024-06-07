@@ -169,6 +169,7 @@ namespace OpenTween.Models
                 IsPromoted = status.IsPromoted,
 
                 // originalStatus から生成
+                PostUri = new(MyCommon.GetStatusUrl(screenName, new(originalStatus.IdStr))),
                 CreatedAt = createdAt,
                 Text = text,
                 TextFromApi = textFromApi,

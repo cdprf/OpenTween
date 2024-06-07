@@ -828,12 +828,6 @@ namespace OpenTween
 
         public const string TwitterUrl = "https://twitter.com/";
 
-        public static string GetStatusUrl(PostClass post)
-        {
-            var statusId = post.RetweetedId ?? post.StatusId;
-            return GetStatusUrl(post.ScreenName, statusId.ToTwitterStatusId());
-        }
-
         public static string GetStatusUrl(string screenName, TwitterStatusId statusId)
             => TwitterUrl + screenName + "/status/" + statusId.Id;
 

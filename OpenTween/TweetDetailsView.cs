@@ -1119,14 +1119,8 @@ namespace OpenTween
 
         private async void DateTimeLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (this.CurrentPost == null)
-                return;
-
-            if (this.CurrentPost.StatusId is not TwitterStatusId)
-                return;
-
-            var statusUrl = MyCommon.GetStatusUrl(this.CurrentPost);
-            await MyCommon.OpenInBrowserAsync(this, statusUrl);
+            if (this.CurrentPost?.PostUri is { } postUri)
+                await MyCommon.OpenInBrowserAsync(this, postUri);
         }
     }
 
