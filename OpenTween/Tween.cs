@@ -1573,6 +1573,7 @@ namespace OpenTween
 
             p.Report("Posting...");
 
+            var account = this.CurrentTabAccount;
             PostClass? post = null;
             var errMsg = "";
 
@@ -1588,7 +1589,7 @@ namespace OpenTween
                             .ConfigureAwait(false);
                     }
 
-                    post = await this.CurrentTabAccount.Client.CreatePost(postParamsWithMedia)
+                    post = await account.Client.CreatePost(postParamsWithMedia)
                         .ConfigureAwait(false);
                 });
 
@@ -1673,8 +1674,18 @@ namespace OpenTween
             // TLに反映
             if (post != null)
             {
-                this.statuses.AddPost(post);
-                this.statuses.DistributePosts();
+                if (account.UniqueKey == this.PrimaryAccount.UniqueKey)
+                {
+                    this.statuses.AddPost(post);
+                    this.statuses.DistributePosts();
+                }
+                else
+                {
+                    var secondaryAccountTab = this.statuses.GetTabsByType<HomeSpecifiedAccountTabModel>()
+                        .FirstOrDefault(x => x.SourceAccountId == account.UniqueKey) ?? null;
+
+                    secondaryAccountTab?.AddPostQueue(post);
+                }
                 this.RefreshTimeline();
             }
 
