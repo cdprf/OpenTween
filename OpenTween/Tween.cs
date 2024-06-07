@@ -3704,8 +3704,8 @@ namespace OpenTween
         {
             var tab = this.CurrentTab;
             var post = this.CurrentPost;
-            if (post != null && tab.TabType != MyCommon.TabUsageType.DirectMessage)
-                await MyCommon.OpenInBrowserAsync(this, MyCommon.GetStatusUrl(post));
+            if (post?.PostUri is { } postUri)
+                await MyCommon.OpenInBrowserAsync(this, postUri);
         }
 
         private async void VerUpMenuItem_Click(object sender, EventArgs e)
@@ -4621,7 +4621,10 @@ namespace OpenTween
 
             var copyUrls = new List<string>();
             foreach (var post in tab.SelectedPosts)
-                copyUrls.Add(MyCommon.GetStatusUrl(post));
+            {
+                if (post.PostUri is { } postUri)
+                    copyUrls.Add(postUri.ToString());
+            }
 
             if (copyUrls.Count == 0)
                 return;
@@ -6986,7 +6989,8 @@ namespace OpenTween
             {
                 if (MyCommon.IsKeyDown(Keys.Shift))
                 {
-                    await MyCommon.OpenInBrowserAsync(this, MyCommon.GetStatusUrl(currentPost.InReplyToUser, currentPost.InReplyToStatusId.ToTwitterStatusId()));
+                    if (currentPost.PostUri is { } postUri)
+                        await MyCommon.OpenInBrowserAsync(this, postUri);
                     return;
                 }
                 if (this.statuses.Posts.TryGetValue(currentPost.InReplyToStatusId, out var repPost))
@@ -8243,11 +8247,14 @@ namespace OpenTween
                     return;
                 }
 
+                if (post.PostUri is not { } postUri)
+                    return;
+
                 var selection = (this.StatusText.SelectionStart, this.StatusText.SelectionLength);
 
                 this.inReplyTo = null;
 
-                this.StatusText.Text += " " + MyCommon.GetStatusUrl(post);
+                this.StatusText.Text += " " + postUri;
 
                 (this.StatusText.SelectionStart, this.StatusText.SelectionLength) = selection;
                 this.StatusText.Focus();

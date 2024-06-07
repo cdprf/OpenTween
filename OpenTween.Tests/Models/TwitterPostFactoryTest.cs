@@ -75,6 +75,7 @@ namespace OpenTween.Models
             var post = factory.CreateFromStatus(status, selfUserId: new("20000"), followerIds: EmptyIdSet, firstLoad: false);
 
             Assert.Equal(new TwitterStatusId(status.IdStr), post.StatusId);
+            Assert.Equal(new($"https://twitter.com/tetete/status/{status.IdStr}"), post.PostUri);
             Assert.Equal(new DateTimeUtc(2022, 1, 1, 0, 0, 0), post.CreatedAt);
             Assert.Equal("hoge", post.Text);
             Assert.Equal("hoge", post.TextFromApi);
@@ -288,6 +289,7 @@ namespace OpenTween.Models
             var post = factory.CreateFromDirectMessageEvent(eventItem, users, apps, selfUserId: new(selfUser.IdStr), firstLoad: false);
 
             Assert.Equal(new TwitterDirectMessageId(eventItem.Id), post.StatusId);
+            Assert.Null(post.PostUri);
             Assert.Equal(new DateTimeUtc(2022, 1, 1, 0, 0, 0), post.CreatedAt);
             Assert.Equal("hoge", post.Text);
             Assert.Equal("hoge", post.TextFromApi);

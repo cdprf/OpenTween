@@ -67,6 +67,8 @@ namespace OpenTween.Models
 
         public PostId StatusId { get; init; } = null!;
 
+        public Uri? PostUri { get; init; }
+
         public string Text
         {
             get
