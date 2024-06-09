@@ -61,9 +61,9 @@ namespace OpenTween.SocialProtocol.Twitter
         public IApiConnection Connection
             => this.apiConnection;
 
-        public TwitterAccount(AccountKey uniqueKey)
+        public TwitterAccount(AccountKey accountKey)
         {
-            this.UniqueKey = uniqueKey;
+            this.UniqueKey = accountKey;
             this.Client = this.CreateClientInstance(APIAuthType.None);
         }
 

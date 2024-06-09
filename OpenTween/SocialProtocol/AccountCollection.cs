@@ -32,19 +32,19 @@ namespace OpenTween.SocialProtocol
     public sealed class AccountCollection : IDisposable
     {
         private Dictionary<AccountKey, ISocialAccount> accounts = new();
-        private AccountKey? primaryId;
+        private AccountKey? primaryAccountKey;
         private readonly ISocialAccount emptyAccount = new TwitterAccount(AccountKey.Empty);
 
         public bool IsDisposed { get; private set; }
 
         public ISocialAccount Primary
-            => this.primaryId != null ? this.accounts[this.primaryId.Value] : this.emptyAccount;
+            => this.primaryAccountKey != null ? this.accounts[this.primaryAccountKey.Value] : this.emptyAccount;
 
         public ISocialAccount[] Items
             => this.accounts.Values.ToArray();
 
         public ISocialAccount[] SecondaryAccounts
-            => this.accounts.Values.Where(x => x.UniqueKey != this.primaryId).ToArray();
+            => this.accounts.Values.Where(x => x.UniqueKey != this.primaryAccountKey).ToArray();
 
         public void LoadFromSettings(SettingCommon settingCommon)
         {
@@ -68,7 +68,7 @@ namespace OpenTween.SocialProtocol
             }
 
             this.accounts = newAccounts;
-            this.primaryId = settingCommon.SelectedAccountKey is { } guid ? new(guid) : null;
+            this.primaryAccountKey = settingCommon.SelectedAccountKey is { } guid ? new(guid) : null;
 
             var removedAccounts = oldAccounts
                 .Where(x => !newAccounts.ContainsKey(x.Key))
@@ -96,13 +96,13 @@ namespace OpenTween.SocialProtocol
 
         public ISocialAccount GetAccountForTab(TabModel tab)
         {
-            if (tab.SourceAccountId is { } accountId)
+            if (tab.SourceAccountKey is { } accountKey)
             {
-                if (this.accounts.TryGetValue(accountId, out var account))
+                if (this.accounts.TryGetValue(accountKey, out var account))
                     return account;
 
                 // タブ追加後に設定画面からアカウントの情報を削除した場合
-                return new InvalidAccount(accountId);
+                return new InvalidAccount(accountKey);
             }
 
             return this.Primary;

@@ -50,8 +50,8 @@ namespace OpenTween.SocialProtocol
 
         public bool IsDisposed { get; private set; }
 
-        public InvalidAccount(AccountKey uniqueKey)
-            => this.UniqueKey = uniqueKey;
+        public InvalidAccount(AccountKey accountKey)
+            => this.UniqueKey = accountKey;
 
         public void Initialize(UserAccount accountSettings, SettingCommon settingCommon)
         {

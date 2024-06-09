@@ -41,11 +41,11 @@ namespace OpenTween.SocialProtocol
 
         public ISocialAccount Create(UserAccount accountSettings, SettingCommon settingCommon)
         {
-            var accountId = new AccountKey(accountSettings.UniqueKey);
+            var accountKey = new AccountKey(accountSettings.UniqueKey);
 
             var account = this.factories.TryGetValue(accountSettings.AccountType, out var createAccount)
-                ? createAccount(accountId)
-                : new InvalidAccount(accountId);
+                ? createAccount(accountKey)
+                : new InvalidAccount(accountKey);
 
             account.Initialize(accountSettings, settingCommon);
 
