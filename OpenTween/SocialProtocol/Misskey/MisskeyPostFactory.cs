@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenTween.Api.DataModel;
 using OpenTween.Api.Misskey;
 using OpenTween.Models;
 using OpenTween.Setting;
@@ -81,6 +82,10 @@ namespace OpenTween.SocialProtocol.Misskey
             var urlEntities = TweetExtractor.ExtractUrlEntities(originalText);
             var textHtml = TweetFormatter.AutoLinkHtml(originalText, urlEntities);
 
+            var quotedNoteIdsInText = this.ExtractPostIdFromUrls(urlEntities).ToArray();
+            if (quotedNoteIdsInText.Length > 0)
+                quotedNoteIds = Enumerable.Concat(quotedNoteIdsInText, quotedNoteIds).ToArray();
+
             var textSuffix = "";
             if (originalNote.Files.Length > 0)
                 textSuffix += " [画像]";
@@ -132,6 +137,16 @@ namespace OpenTween.SocialProtocol.Misskey
 
                 IsRead = this.DetermineUnreadState(isMe, firstLoad),
             };
+        }
+
+        private IEnumerable<PostId> ExtractPostIdFromUrls(IEnumerable<TwitterEntityUrl> urls)
+        {
+            foreach (var url in urls)
+            {
+                var match = OpenTween.Twitter.StatusUrlRegex.Match(url.ExpandedUrl);
+                if (match.Success)
+                    yield return new TwitterStatusId(match.Groups["StatusId"].Value);
+            }
         }
 
         public static Uri CreateLocalPostUri(Uri serverUri, MisskeyNoteId noteId)

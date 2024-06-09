@@ -20,6 +20,7 @@
 // Boston, MA 02110-1301, USA.
 
 using OpenTween.Api.Misskey;
+using OpenTween.Models;
 using Xunit;
 
 namespace OpenTween.SocialProtocol.Misskey
@@ -222,6 +223,29 @@ namespace OpenTween.SocialProtocol.Misskey
             Assert.Null(post.RetweetedBy);
             Assert.Null(post.RetweetedByUserId);
             Assert.Equal(new[] { new MisskeyNoteId("aaaaa") }, post.QuoteStatusIds);
+        }
+
+        [Fact]
+        public void CreateFromNote_TextContainsTwitterUrlTest()
+        {
+            var note = new MisskeyNote
+            {
+                Id = "aaaaa",
+                CreatedAt = "2023-12-31T00:00:00.000Z",
+                Text = "hoge https://twitter.com/hoge/status/12345",
+                User = new()
+                {
+                    Id = "abcdef",
+                    Username = "foo",
+                },
+                Visibility = "public",
+            };
+            var factory = new MisskeyPostFactory(new());
+            var accountState = new MisskeyAccountState(new("https://example.com/"), new("aaaa"), "hoge");
+
+            var post = factory.CreateFromNote(note, accountState, firstLoad: false);
+            Assert.Equal(new MisskeyNoteId("aaaaa"), post.StatusId);
+            Assert.Equal(new[] { new TwitterStatusId("12345") }, post.QuoteStatusIds);
         }
     }
 }
