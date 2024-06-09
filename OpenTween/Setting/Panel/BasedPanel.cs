@@ -60,9 +60,13 @@ namespace OpenTween.Setting.Panel
                     _ => "Twitter / unknown",
                 };
                 var accountName = $"@{this.AccountSettings.Username}";
-                var suffix = this.IsPrimary ? Properties.Resources.AccountListBoxItem_Primary : "";
+                var suffix = "";
+                if (this.IsPrimary)
+                    suffix += " " + Properties.Resources.AccountListBoxItem_Primary;
+                if (this.AccountSettings.Disabled)
+                    suffix += " " + Properties.Resources.AccountListBoxItem_Disabled;
 
-                return $"[{authTypeText}] {accountName} {suffix}";
+                return $"[{authTypeText}] {accountName}{suffix}";
             }
         }
 
@@ -177,9 +181,41 @@ namespace OpenTween.Setting.Panel
                     this.AccountsList[oldPrimaryIndex] with { IsPrimary = false };
             }
 
+            // Disabled になっていたら強制的に解除する
+            this.AccountsList[index].AccountSettings.Disabled = false;
+
             this.AccountsList[index] =
                 this.AccountsList[index] with { IsPrimary = true };
         }
+
+        private void ToggleAccountDisabledAt(int index)
+        {
+            var listItem = this.AccountsList[index];
+
+            // Primary だった場合は無効にしない
+            if (listItem.IsPrimary)
+                return;
+
+            var accountSettings = listItem.AccountSettings;
+            accountSettings.Disabled = !accountSettings.Disabled;
+
+            this.AccountsList.ResetItem(index);
+        }
+
+        private void UpdateToggleDisabledButton()
+        {
+            var selectedIndex = this.AccountsListBox.SelectedIndex;
+            if (selectedIndex == -1)
+                return;
+
+            var selectedItem = this.AccountsList[selectedIndex];
+            this.ToggleDisabledButton.Text = selectedItem.AccountSettings.Disabled
+                ? Properties.Resources.EnableButtonCaption
+                : Properties.Resources.DisableButtonCaption;
+        }
+
+        private void AccountsListBox_SelectedIndexChanged(object sender, EventArgs e)
+            => this.UpdateToggleDisabledButton();
 
         private void AddAccountButton_Click(object sender, EventArgs e)
         {
@@ -227,6 +263,16 @@ namespace OpenTween.Setting.Panel
 
             using (ControlTransaction.Update(this.AccountsListBox))
                 this.MakeAccountPrimaryAt(selectedIndex);
+        }
+
+        private void ToggleDisabledButton_Click(object sender, EventArgs e)
+        {
+            var selectedIndex = this.AccountsListBox.SelectedIndex;
+            if (selectedIndex == -1)
+                return;
+
+            using (ControlTransaction.Update(this.AccountsListBox))
+                this.ToggleAccountDisabledAt(selectedIndex);
         }
     }
 }

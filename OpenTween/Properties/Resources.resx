@@ -5,6 +5,7 @@
 	<resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
 	<assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
 
+	<data name="AccountListBoxItem_Disabled"><value>(無効)</value></data>
 	<data name="AccountListBoxItem_Primary"><value>(メイン)</value></data>
 	<data name="AccountTypeErrorText"><value>この機能は現在のアカウントでは使用できません</value></data>
 	<data name="AddNewTab_ListView_AccessibleName"><value>発言一覧</value></data>

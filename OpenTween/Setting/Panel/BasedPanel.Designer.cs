@@ -36,6 +36,7 @@
             this.RemoveAccountButton = new System.Windows.Forms.Button();
             this.MakePrimaryButton = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.ToggleDisabledButton = new System.Windows.Forms.Button();
             this.contextMenuAddAccount = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -50,6 +51,7 @@
             resources.ApplyResources(this.AccountsListBox, "AccountsListBox");
             this.AccountsListBox.FormattingEnabled = true;
             this.AccountsListBox.Name = "AccountsListBox";
+            this.AccountsListBox.SelectedIndexChanged += new System.EventHandler(this.AccountsListBox_SelectedIndexChanged);
             // 
             // AddAccountButton
             // 
@@ -79,8 +81,16 @@
             this.panel1.Controls.Add(this.AddAccountButton);
             this.panel1.Controls.Add(this.RemoveAccountButton);
             this.panel1.Controls.Add(this.MakePrimaryButton);
+            this.panel1.Controls.Add(this.ToggleDisabledButton);
             resources.ApplyResources(this.panel1, "panel1");
             this.panel1.Name = "panel1";
+            // 
+            // ToggleDisabledButton
+            // 
+            resources.ApplyResources(this.ToggleDisabledButton, "ToggleDisabledButton");
+            this.ToggleDisabledButton.Name = "ToggleDisabledButton";
+            this.ToggleDisabledButton.UseVisualStyleBackColor = true;
+            this.ToggleDisabledButton.Click += new System.EventHandler(this.ToggleDisabledButton_Click);
             // 
             // contextMenuAddAccount
             // 
@@ -107,5 +117,6 @@
         internal System.Windows.Forms.Button MakePrimaryButton;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ContextMenuStrip contextMenuAddAccount;
+        private System.Windows.Forms.Button ToggleDisabledButton;
     }
 }

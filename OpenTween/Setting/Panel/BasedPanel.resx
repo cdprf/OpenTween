@@ -38,6 +38,10 @@
 	<data name="&gt;&gt;RemoveAccountButton.Parent"><value>panel1</value></data>
 	<data name="&gt;&gt;RemoveAccountButton.Type"><value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></data>
 	<data name="&gt;&gt;RemoveAccountButton.ZOrder"><value>3</value></data>
+	<data name="&gt;&gt;ToggleDisabledButton.Name"><value>ToggleDisabledButton</value></data>
+	<data name="&gt;&gt;ToggleDisabledButton.Parent"><value>panel1</value></data>
+	<data name="&gt;&gt;ToggleDisabledButton.Type"><value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></data>
+	<data name="&gt;&gt;ToggleDisabledButton.ZOrder"><value>5</value></data>
 	<data name="AccountListLabel.AutoSize" type="System.Boolean, mscorlib"><value>True</value></data>
 	<data name="AccountListLabel.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms"><value>NoControl</value></data>
 	<data name="AccountListLabel.Location" type="System.Drawing.Point, System.Drawing"><value>21, 20</value></data>
@@ -80,4 +84,11 @@
 	<data name="RemoveAccountButton.Size" type="System.Drawing.Size, System.Drawing"><value>100, 25</value></data>
 	<data name="RemoveAccountButton.TabIndex" type="System.Int32, mscorlib"><value>3</value></data>
 	<data name="RemoveAccountButton.Text"><value>削除</value></data>
+	<data name="ToggleDisabledButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms"><value>Top, Right</value></data>
+	<data name="ToggleDisabledButton.AutoSize" type="System.Boolean, mscorlib"><value>True</value></data>
+	<data name="ToggleDisabledButton.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms"><value>NoControl</value></data>
+	<data name="ToggleDisabledButton.Location" type="System.Drawing.Point, System.Drawing"><value>396, 135</value></data>
+	<data name="ToggleDisabledButton.Size" type="System.Drawing.Size, System.Drawing"><value>100, 25</value></data>
+	<data name="ToggleDisabledButton.TabIndex" type="System.Int32, mscorlib"><value>5</value></data>
+	<data name="ToggleDisabledButton.Text"><value>無効化</value></data>
 </root>
