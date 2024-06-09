@@ -35,7 +35,7 @@ namespace OpenTween.SocialProtocol.Twitter
         [InlineData("hoge https://twitter.com/twitterapi/status/22634515958", 276)]
         public void GetTextLengthRemain_Test(string text, int expected)
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             var formatter = new CreateTweetFormatter(twAccount);
 
             var postParams = new PostStatusParams(text);
@@ -45,7 +45,7 @@ namespace OpenTween.SocialProtocol.Twitter
         [Fact]
         public void CreateParams_SimpleTextTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             var formatter = new CreateTweetFormatter(twAccount);
 
             var postParams = new PostStatusParams(Text: "hoge");
@@ -56,7 +56,7 @@ namespace OpenTween.SocialProtocol.Twitter
         [Fact]
         public void CreateParams_RemoveAutoPopuratedMentions_SingleTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
 
             var formatter = new CreateTweetFormatter(twAccount);
             var inReplyToPost = new PostClass
@@ -79,7 +79,7 @@ namespace OpenTween.SocialProtocol.Twitter
         [Fact]
         public void CreateParams_RemoveAutoPopuratedMentions_MultipleTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
 
             var formatter = new CreateTweetFormatter(twAccount);
             var inReplyToPost = new PostClass
@@ -104,7 +104,7 @@ namespace OpenTween.SocialProtocol.Twitter
         [Fact]
         public void CreateParams_RemoveAutoPopuratedMentions_ExcludeTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
 
             var formatter = new CreateTweetFormatter(twAccount);
             var inReplyToPost = new PostClass
@@ -129,7 +129,7 @@ namespace OpenTween.SocialProtocol.Twitter
         [Fact]
         public void CreateParams_RemoveAttachmentUrl_Test()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             var formatter = new CreateTweetFormatter(twAccount);
 
             // 引用ツイートの URL を Text から除去する
@@ -144,7 +144,7 @@ namespace OpenTween.SocialProtocol.Twitter
         [Fact]
         public void CreateParams_RemoveAttachmentUrl_MultipleTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             var formatter = new CreateTweetFormatter(twAccount);
 
             // attachment_url は複数指定できないため末尾の URL のみ Text から除去する
@@ -159,7 +159,7 @@ namespace OpenTween.SocialProtocol.Twitter
         [Fact]
         public void CreateParams_RemoveAttachmentUrl_WithMediaTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             var formatter = new CreateTweetFormatter(twAccount);
 
             // 引用ツイートと画像添付は併用できないため attachment_url は使用しない（現在は許容されているかも？）

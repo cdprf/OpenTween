@@ -31,9 +31,9 @@ namespace OpenTween.SocialProtocol
 {
     public sealed class AccountCollection : IDisposable
     {
-        private Dictionary<Guid, ISocialAccount> accounts = new();
-        private Guid? primaryId;
-        private readonly ISocialAccount emptyAccount = new TwitterAccount(Guid.Empty);
+        private Dictionary<AccountKey, ISocialAccount> accounts = new();
+        private AccountKey? primaryId;
+        private readonly ISocialAccount emptyAccount = new TwitterAccount(AccountKey.Empty);
 
         public bool IsDisposed { get; private set; }
 
@@ -50,14 +50,14 @@ namespace OpenTween.SocialProtocol
         {
             var factory = new AccountFactory();
             var oldAccounts = this.accounts;
-            var newAccounts = new Dictionary<Guid, ISocialAccount>();
+            var newAccounts = new Dictionary<AccountKey, ISocialAccount>();
 
             foreach (var accountSettings in settingCommon.UserAccounts)
             {
                 if (accountSettings.Disabled)
                     continue;
 
-                var accountKey = accountSettings.UniqueKey;
+                var accountKey = new AccountKey(accountSettings.UniqueKey);
 
                 if (oldAccounts.TryGetValue(accountKey, out var account))
                     account.Initialize(accountSettings, settingCommon);
@@ -68,7 +68,7 @@ namespace OpenTween.SocialProtocol
             }
 
             this.accounts = newAccounts;
-            this.primaryId = settingCommon.SelectedAccountKey;
+            this.primaryId = settingCommon.SelectedAccountKey is { } guid ? new(guid) : null;
 
             var removedAccounts = oldAccounts
                 .Where(x => !newAccounts.ContainsKey(x.Key))

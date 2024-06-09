@@ -35,9 +35,9 @@ namespace OpenTween.Models
         public override bool IsPermanentTabType
             => false;
 
-        public override Guid? SourceAccountId { get; }
+        public override AccountKey? SourceAccountId { get; }
 
-        public HomeSpecifiedAccountTabModel(string tabName, Guid accountId)
+        public HomeSpecifiedAccountTabModel(string tabName, AccountKey accountId)
             : base(tabName)
         {
             this.SourceAccountId = accountId;

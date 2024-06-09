@@ -2390,7 +2390,7 @@ namespace OpenTween
         private async void SettingStripMenuItem_Click(object sender, EventArgs e)
         {
             // 設定画面表示前のユーザー情報
-            var previousAccountId = this.settings.Common.SelectedAccountKey;
+            var previousAccountId = this.settings.Common.SelectedAccountKey is { } guid ? new AccountKey(guid) : (AccountKey?)null;
             var previousSecondaryAccounts = this.accounts.SecondaryAccounts;
             var oldIconCol = this.Use2ColumnsMode;
 

@@ -19,7 +19,6 @@
 // the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
 // Boston, MA 02110-1301, USA.
 
-using System;
 using OpenTween.Models;
 using Xunit;
 
@@ -30,12 +29,12 @@ namespace OpenTween.SocialProtocol.Twitter
         [Fact]
         public void Initialize_Test()
         {
-            var accountKey = Guid.NewGuid();
+            var accountKey = AccountKey.New();
             using var account = new TwitterAccount(accountKey);
 
             var accountSettings = new UserAccount
             {
-                UniqueKey = accountKey,
+                UniqueKey = accountKey.Id,
                 TwitterAuthType = APIAuthType.OAuth1,
                 Token = "aaaaa",
                 TokenSecret = "aaaaa",
@@ -53,12 +52,12 @@ namespace OpenTween.SocialProtocol.Twitter
         [Fact]
         public void Initialize_ReconfigureTest()
         {
-            var accountKey = Guid.NewGuid();
+            var accountKey = AccountKey.New();
             using var account = new TwitterAccount(accountKey);
 
             var accountSettings1 = new UserAccount
             {
-                UniqueKey = accountKey,
+                UniqueKey = accountKey.Id,
                 TwitterAuthType = APIAuthType.OAuth1,
                 Token = "aaaaa",
                 TokenSecret = "aaaaa",
@@ -71,7 +70,7 @@ namespace OpenTween.SocialProtocol.Twitter
 
             var accountSettings2 = new UserAccount
             {
-                UniqueKey = accountKey,
+                UniqueKey = accountKey.Id,
                 TwitterAuthType = APIAuthType.OAuth1,
                 Token = "bbbbb",
                 TokenSecret = "bbbbb",
@@ -86,19 +85,19 @@ namespace OpenTween.SocialProtocol.Twitter
         [Fact]
         public void AccountType_Test()
         {
-            using var account = new TwitterAccount(Guid.NewGuid());
+            using var account = new TwitterAccount(AccountKey.New());
             Assert.Equal("Twitter", account.AccountType);
         }
 
         [Fact]
         public void Client_V1_Test()
         {
-            var accountKey = Guid.NewGuid();
+            var accountKey = AccountKey.New();
             using var account = new TwitterAccount(accountKey);
 
             var accountSettings = new UserAccount
             {
-                UniqueKey = accountKey,
+                UniqueKey = accountKey.Id,
                 TwitterAuthType = APIAuthType.OAuth1,
                 Token = "aaaaa",
                 TokenSecret = "aaaaa",
@@ -114,12 +113,12 @@ namespace OpenTween.SocialProtocol.Twitter
         [Fact]
         public void Client_Graphql_Test()
         {
-            var accountKey = Guid.NewGuid();
+            var accountKey = AccountKey.New();
             using var account = new TwitterAccount(accountKey);
 
             var accountSettings = new UserAccount
             {
-                UniqueKey = accountKey,
+                UniqueKey = accountKey.Id,
                 TwitterAuthType = APIAuthType.TwitterComCookie,
                 TwitterComCookie = "auth_token=foo; ct0=bar",
                 UserId = "11111",

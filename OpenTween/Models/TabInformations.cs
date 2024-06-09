@@ -36,6 +36,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTween.Setting;
+using OpenTween.SocialProtocol;
 
 namespace OpenTween.Models
 {
@@ -866,14 +867,14 @@ namespace OpenTween.Models
             }
         }
 
-        public void RefreshOwl(Guid accountId, ISet<PersonId> follower, bool isPrimary)
+        public void RefreshOwl(AccountKey accountId, ISet<PersonId> follower, bool isPrimary)
         {
             lock (this.lockObj)
             {
                 static bool DetermineOwl(PostClass post, ISet<PersonId> followers)
                     => !post.IsMe && followers.Count > 0 && !followers.Contains(post.UserId);
 
-                static bool SourceAccountIdMatched(TabModel tab, Guid accountId, bool isPrimary)
+                static bool SourceAccountIdMatched(TabModel tab, AccountKey accountId, bool isPrimary)
                     => tab.SourceAccountId == accountId || (isPrimary && tab.SourceAccountId == null);
 
                 if (isPrimary)

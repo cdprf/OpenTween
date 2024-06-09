@@ -19,7 +19,6 @@
 // the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
 // Boston, MA 02110-1301, USA.
 
-using System;
 using System.Threading.Tasks;
 using OpenTween.Connection;
 using Xunit;
@@ -31,7 +30,7 @@ namespace OpenTween.SocialProtocol
         [Fact]
         public async Task Connection_Test()
         {
-            using var account = new InvalidAccount(Guid.NewGuid());
+            using var account = new InvalidAccount(AccountKey.New());
             var requeset = new GetRequest { RequestUri = new("https://example.com/aaa") };
 
             await Assert.ThrowsAsync<WebApiException>(
@@ -42,7 +41,7 @@ namespace OpenTween.SocialProtocol
         [Fact]
         public async Task Client_Test()
         {
-            using var account = new InvalidAccount(Guid.NewGuid());
+            using var account = new InvalidAccount(AccountKey.New());
 
             await Assert.ThrowsAsync<WebApiException>(
                 () => account.Client.VerifyCredentials()

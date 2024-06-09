@@ -29,6 +29,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using Moq;
+using OpenTween.SocialProtocol;
 using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 
@@ -50,7 +51,7 @@ namespace OpenTween
         [Fact]
         public void SelectedMediaServiceIndex_Test()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
 
@@ -67,7 +68,7 @@ namespace OpenTween
         [Fact]
         public void SelectMediaService_TwitterTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -84,7 +85,7 @@ namespace OpenTween
         [Fact]
         public void SelectMediaService_ImgurTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Imgur");
@@ -99,7 +100,7 @@ namespace OpenTween
         [Fact]
         public void AddMediaItem_FilePath_SingleTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -123,7 +124,7 @@ namespace OpenTween
         [Fact]
         public void AddMediaItem_MemoryImageTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -149,7 +150,7 @@ namespace OpenTween
         [Fact]
         public void AddMediaItem_FilePath_MultipleTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -173,7 +174,7 @@ namespace OpenTween
         [Fact]
         public void ClearMediaItems_Test()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -192,7 +193,7 @@ namespace OpenTween
         [Fact]
         public void DetachMediaItems_Test()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -213,7 +214,7 @@ namespace OpenTween
         [Fact]
         public void SelectedMediaItemChange_Test()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -249,7 +250,7 @@ namespace OpenTween
         [Fact]
         public void SelectedMediaItemChange_DisposeTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -271,7 +272,7 @@ namespace OpenTween
         [Fact]
         public void SetSelectedMediaAltText_Test()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -294,7 +295,7 @@ namespace OpenTween
         [Fact]
         public void Validate_PassTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -308,7 +309,7 @@ namespace OpenTween
         [Fact]
         public void Validate_EmptyErrorTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -323,7 +324,7 @@ namespace OpenTween
         [Fact]
         public void Validate_ServiceNotSelectedErrorTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
 
@@ -339,7 +340,7 @@ namespace OpenTween
         [Fact]
         public void Validate_ExtensionErrorTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
@@ -360,7 +361,7 @@ namespace OpenTween
         [Fact]
         public void Validate_FileSizeErrorTest()
         {
-            using var twAccount = new TwitterAccount(Guid.NewGuid());
+            using var twAccount = new TwitterAccount(AccountKey.New());
             using var mediaSelector = new MediaSelector();
             mediaSelector.InitializeServices(twAccount);
             mediaSelector.SelectMediaService("Twitter");
