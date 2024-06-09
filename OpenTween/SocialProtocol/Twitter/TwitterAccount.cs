@@ -89,6 +89,9 @@ namespace OpenTween.SocialProtocol.Twitter
             this.twLegacy.RestrictFavCheck = settingCommon.RestrictFavCheck;
         }
 
+        public bool CanUsePostId(PostId postId)
+            => postId is TwitterStatusId or TwitterDirectMessageId;
+
         public void Dispose()
         {
             if (this.IsDisposed)
