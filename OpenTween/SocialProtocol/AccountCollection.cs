@@ -54,6 +54,9 @@ namespace OpenTween.SocialProtocol
 
             foreach (var accountSettings in settingCommon.UserAccounts)
             {
+                if (accountSettings.Disabled)
+                    continue;
+
                 var accountKey = accountSettings.UniqueKey;
 
                 if (oldAccounts.TryGetValue(accountKey, out var account))
