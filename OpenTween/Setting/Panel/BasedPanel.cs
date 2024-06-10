@@ -170,6 +170,20 @@ namespace OpenTween.Setting.Panel
 
         private void MakeAccountPrimaryAt(int index)
         {
+            var selectedListItem = this.AccountsList[index];
+            if (selectedListItem.AccountSettings.AccountType != "Twitter")
+            {
+                // 現時点での制約として Twitter アカウント以外はメインに設定できない
+                MessageBox.Show(
+                    this,
+                    Properties.Resources.AccountListBox_MakePrimaryError,
+                    ApplicationSettings.ApplicationName,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
             var oldPrimaryIndex = this.AccountsList.FindIndex(x => x.IsPrimary);
             if (oldPrimaryIndex != -1)
             {
@@ -181,10 +195,10 @@ namespace OpenTween.Setting.Panel
             }
 
             // Disabled になっていたら強制的に解除する
-            this.AccountsList[index].AccountSettings.Disabled = false;
+            selectedListItem.AccountSettings.Disabled = false;
 
             this.AccountsList[index] =
-                this.AccountsList[index] with { IsPrimary = true };
+                selectedListItem with { IsPrimary = true };
         }
 
         private void ToggleAccountDisabledAt(int index)
