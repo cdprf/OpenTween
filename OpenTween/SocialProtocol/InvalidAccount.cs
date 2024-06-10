@@ -57,6 +57,9 @@ namespace OpenTween.SocialProtocol
         {
         }
 
+        public bool CanUsePostId(PostId postId)
+            => false;
+
         public void Dispose()
             => this.IsDisposed = true;
 

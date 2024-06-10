@@ -8984,9 +8984,13 @@ namespace OpenTween
             var post = this.statuses[statusId];
             if (post == null)
             {
+                var account = this.GetAccountForPostId(statusId);
+                if (account == null)
+                    return;
+
                 try
                 {
-                    post = await this.CurrentTabAccount.Client.GetPostById(statusId, firstLoad: false);
+                    post = await account.Client.GetPostById(statusId, firstLoad: false);
                 }
                 catch (WebApiException ex)
                 {
@@ -8996,6 +9000,12 @@ namespace OpenTween
             }
 
             await this.OpenRelatedTab(post);
+        }
+
+        public ISocialAccount? GetAccountForPostId(PostId postId)
+        {
+            var preferedAccountKey = this.CurrentTab.SourceAccountKey;
+            return this.accounts.GetAccountForPostId(postId, preferedAccountKey);
         }
 
         /// <summary>
@@ -9013,7 +9023,11 @@ namespace OpenTween
 
             var tabName = this.statuses.MakeTabName("Related Tweets");
 
-            tabRelated = new RelatedPostsTabModel(tabName, this.CurrentTabAccount.UniqueKey, post)
+            var account = this.GetAccountForPostId(post.StatusId);
+            if (account == null)
+                return;
+
+            tabRelated = new RelatedPostsTabModel(tabName, account.UniqueKey, post)
             {
                 UnreadManage = false,
                 Notify = false,

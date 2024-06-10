@@ -46,5 +46,7 @@ namespace OpenTween.SocialProtocol
         public bool IsDisposed { get; }
 
         public void Initialize(UserAccount accountSettings, SettingCommon settingCommon);
+
+        public bool CanUsePostId(PostId postId);
     }
 }

@@ -365,9 +365,13 @@ namespace OpenTween
             var post = TabInformations.GetInstance()[statusId];
             if (post == null)
             {
+                var account = this.Owner.GetAccountForPostId(statusId);
+                if (account == null)
+                    return FormatQuoteTweetHtml(statusId, "This post is unavailable.", isReply);
+
                 try
                 {
-                    post = await this.Owner.CurrentTabAccount.Client.GetPostById(statusId, firstLoad: false)
+                    post = await account.Client.GetPostById(statusId, firstLoad: false)
                         .ConfigureAwait(false);
                 }
                 catch (WebApiException ex)
@@ -375,7 +379,7 @@ namespace OpenTween
                     return FormatQuoteTweetHtml(statusId, WebUtility.HtmlEncode($"Err:{ex.Message}(GetStatus)"), isReply);
                 }
 
-                if (this.Owner.CurrentTabAccount.AccountState.BlockedUserIds.Contains(post.UserId))
+                if (account.AccountState.BlockedUserIds.Contains(post.UserId))
                     return FormatQuoteTweetHtml(statusId, "This Tweet is unavailable.", isReply);
 
                 if (!TabInformations.GetInstance().AddQuoteTweet(post))
