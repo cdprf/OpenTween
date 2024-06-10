@@ -25,6 +25,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+using OpenTween.SocialProtocol;
 using Xunit;
 using Xunit.Extensions;
 
@@ -1199,7 +1200,7 @@ namespace OpenTween.Models
         [Fact]
         public void RefreshOwl_HomeTabTest()
         {
-            var accountId = Guid.NewGuid();
+            var accountKey = AccountKey.New();
             var post = new PostClass
             {
                 StatusId = new TwitterStatusId("100"),
@@ -1212,7 +1213,7 @@ namespace OpenTween.Models
             this.tabinfo.SubmitUpdate();
 
             var followerIds = new HashSet<PersonId> { new TwitterUserId("123") };
-            this.tabinfo.RefreshOwl(accountId, followerIds, isPrimary: true);
+            this.tabinfo.RefreshOwl(accountKey, followerIds, isPrimary: true);
 
             Assert.False(post.IsOwl);
         }
@@ -1220,7 +1221,7 @@ namespace OpenTween.Models
         [Fact]
         public void RefreshOwl_InnerStoregeTabTest()
         {
-            var accountId = Guid.NewGuid();
+            var accountKey = AccountKey.New();
             var tab = new PublicSearchTabModel("search");
             this.tabinfo.AddTab(tab);
 
@@ -1236,7 +1237,7 @@ namespace OpenTween.Models
             this.tabinfo.SubmitUpdate();
 
             var followerIds = new HashSet<PersonId> { new TwitterUserId("123") };
-            this.tabinfo.RefreshOwl(accountId, followerIds, isPrimary: true);
+            this.tabinfo.RefreshOwl(accountKey, followerIds, isPrimary: true);
 
             Assert.False(post.IsOwl);
         }
@@ -1244,7 +1245,7 @@ namespace OpenTween.Models
         [Fact]
         public void RefreshOwl_UnfollowedTest()
         {
-            var accountId = Guid.NewGuid();
+            var accountKey = AccountKey.New();
             var post = new PostClass
             {
                 StatusId = new TwitterStatusId("100"),
@@ -1257,7 +1258,7 @@ namespace OpenTween.Models
             this.tabinfo.SubmitUpdate();
 
             var followerIds = new HashSet<PersonId> { new TwitterUserId("456") };
-            this.tabinfo.RefreshOwl(accountId, followerIds, isPrimary: true);
+            this.tabinfo.RefreshOwl(accountKey, followerIds, isPrimary: true);
 
             Assert.True(post.IsOwl);
         }
@@ -1265,8 +1266,8 @@ namespace OpenTween.Models
         [Fact]
         public void RefreshOwl_SecondaryAccountTabTest()
         {
-            var accountId = Guid.NewGuid();
-            var tab = new HomeSpecifiedAccountTabModel("secondary", accountId);
+            var accountKey = AccountKey.New();
+            var tab = new HomeSpecifiedAccountTabModel("secondary", accountKey);
             this.tabinfo.AddTab(tab);
 
             var post = new PostClass
@@ -1281,7 +1282,7 @@ namespace OpenTween.Models
             this.tabinfo.SubmitUpdate();
 
             var followerIds = new HashSet<PersonId> { new TwitterUserId("123") };
-            this.tabinfo.RefreshOwl(accountId, followerIds, isPrimary: false);
+            this.tabinfo.RefreshOwl(accountKey, followerIds, isPrimary: false);
 
             Assert.True(post.IsOwl);
         }
@@ -1289,8 +1290,8 @@ namespace OpenTween.Models
         [Fact]
         public void RefreshOwl_SecondaryAccountTab_AccountNotMatchedTest()
         {
-            var accountId = Guid.NewGuid();
-            var tab = new HomeSpecifiedAccountTabModel("secondary", accountId);
+            var accountKey = AccountKey.New();
+            var tab = new HomeSpecifiedAccountTabModel("secondary", accountKey);
             this.tabinfo.AddTab(tab);
 
             var post = new PostClass
@@ -1304,9 +1305,9 @@ namespace OpenTween.Models
             this.tabinfo.DistributePosts();
             this.tabinfo.SubmitUpdate();
 
-            var otherAccountId = Guid.NewGuid(); // 他アカウントの followerIds なので IsOwl は更新されない
+            var otherAccountKey = AccountKey.New(); // 他アカウントの followerIds なので IsOwl は更新されない
             var followerIds = new HashSet<PersonId> { new TwitterUserId("123") };
-            this.tabinfo.RefreshOwl(otherAccountId, followerIds, isPrimary: false);
+            this.tabinfo.RefreshOwl(otherAccountKey, followerIds, isPrimary: false);
 
             Assert.True(post.IsOwl);
         }

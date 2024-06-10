@@ -193,10 +193,10 @@ namespace OpenTween.SocialProtocol
                 SelectedAccountKey = new("00000000-0000-4000-8000-000000000000"),
             });
 
-            var tabWithoutAccountId = new PublicSearchTabModel("hoge");
+            var tabWithoutAccountKey = new PublicSearchTabModel("hoge");
 
-            // SourceAccountId が null のタブに対しては Primary のアカウントを返す
-            var actual = accounts.GetAccountForTab(tabWithoutAccountId);
+            // SourceAccountKey が null のタブに対しては Primary のアカウントを返す
+            var actual = accounts.GetAccountForTab(tabWithoutAccountKey);
             Assert.IsType<TwitterAccount>(actual);
             Assert.Equal(new("00000000-0000-4000-8000-000000000000"), actual.UniqueKey);
         }
@@ -215,10 +215,10 @@ namespace OpenTween.SocialProtocol
                 SelectedAccountKey = new("00000000-0000-4000-8000-000000000000"),
             });
 
-            var tabWithAccountId = new RelatedPostsTabModel("hoge", new("00000000-0000-4000-8000-111111111111"), new());
+            var tabWithAccountKey = new RelatedPostsTabModel("hoge", new("00000000-0000-4000-8000-111111111111"), new());
 
-            // SourceAccountId が設定されているタブに対しては対応するアカウントを返す
-            var actual = accounts.GetAccountForTab(tabWithAccountId);
+            // SourceAccountKey が設定されているタブに対しては対応するアカウントを返す
+            var actual = accounts.GetAccountForTab(tabWithAccountKey);
             Assert.IsType<TwitterAccount>(actual);
             Assert.Equal(new("00000000-0000-4000-8000-111111111111"), actual.UniqueKey);
         }
@@ -236,10 +236,10 @@ namespace OpenTween.SocialProtocol
                 SelectedAccountKey = new("00000000-0000-4000-8000-000000000000"),
             });
 
-            var tabWithAccountId = new RelatedPostsTabModel("hoge", new("00000000-0000-4000-8000-999999999999"), new());
+            var tabWithAccountKey = new RelatedPostsTabModel("hoge", new("00000000-0000-4000-8000-999999999999"), new());
 
-            // SourceAccountId に存在しない ID が設定されていた場合は InvalidAccount を返す
-            var actual = accounts.GetAccountForTab(tabWithAccountId);
+            // 存在しない AccountKey が設定されていた場合は InvalidAccount を返す
+            var actual = accounts.GetAccountForTab(tabWithAccountKey);
             Assert.IsType<InvalidAccount>(actual);
             Assert.Equal(new("00000000-0000-4000-8000-999999999999"), actual.UniqueKey);
         }

@@ -31,7 +31,7 @@ namespace OpenTween.SocialProtocol
     {
         public string AccountType { get; }
 
-        public Guid UniqueKey { get; }
+        public AccountKey UniqueKey { get; }
 
         public PersonId UserId { get; }
 

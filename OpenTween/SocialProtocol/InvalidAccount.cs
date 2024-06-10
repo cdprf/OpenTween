@@ -21,7 +21,6 @@
 
 #nullable enable
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using OpenTween.Api;
@@ -35,7 +34,7 @@ namespace OpenTween.SocialProtocol
         public string AccountType
             => "InvalidAccount";
 
-        public Guid UniqueKey { get; }
+        public AccountKey UniqueKey { get; }
 
         public PersonId UserId
             => this.AccountState.UserId;
@@ -51,8 +50,8 @@ namespace OpenTween.SocialProtocol
 
         public bool IsDisposed { get; private set; }
 
-        public InvalidAccount(Guid uniqueKey)
-            => this.UniqueKey = uniqueKey;
+        public InvalidAccount(AccountKey accountKey)
+            => this.UniqueKey = accountKey;
 
         public void Initialize(UserAccount accountSettings, SettingCommon settingCommon)
         {

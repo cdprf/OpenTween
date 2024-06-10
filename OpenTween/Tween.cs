@@ -1682,7 +1682,7 @@ namespace OpenTween
                 else
                 {
                     var secondaryAccountTab = this.statuses.GetTabsByType<HomeSpecifiedAccountTabModel>()
-                        .FirstOrDefault(x => x.SourceAccountId == account.UniqueKey) ?? null;
+                        .FirstOrDefault(x => x.SourceAccountKey == account.UniqueKey) ?? null;
 
                     secondaryAccountTab?.AddPostQueue(post);
                 }
@@ -2390,7 +2390,7 @@ namespace OpenTween
         private async void SettingStripMenuItem_Click(object sender, EventArgs e)
         {
             // 設定画面表示前のユーザー情報
-            var previousAccountId = this.settings.Common.SelectedAccountKey;
+            var previousAccountKey = this.settings.Common.SelectedAccountKey is { } guid ? new AccountKey(guid) : (AccountKey?)null;
             var previousSecondaryAccounts = this.accounts.SecondaryAccounts;
             var oldIconCol = this.Use2ColumnsMode;
 
@@ -2583,7 +2583,7 @@ namespace OpenTween
             this.TopMost = this.settings.Common.AlwaysTop;
             this.SaveConfigsAll(false);
 
-            if (this.PrimaryAccount.UniqueKey != previousAccountId)
+            if (this.PrimaryAccount.UniqueKey != previousAccountKey)
             {
                 this.SubscribePrimaryAccountRatelimit();
                 await this.RefreshConfigurationAsync();
@@ -2602,7 +2602,7 @@ namespace OpenTween
             {
                 var isPrimary = account.UniqueKey == this.accounts.Primary.UniqueKey;
                 var tabExists = this.statuses.GetTabsByType<HomeSpecifiedAccountTabModel>()
-                    .Any(x => x.SourceAccountId == account.UniqueKey);
+                    .Any(x => x.SourceAccountKey == account.UniqueKey);
                 if (tabExists)
                     continue;
 
@@ -2620,7 +2620,7 @@ namespace OpenTween
 
             foreach (var tab in secondaryAccountTabs)
             {
-                var isAccountExists = secondaryAccounts.Any(x => x.UniqueKey == tab.SourceAccountId);
+                var isAccountExists = secondaryAccounts.Any(x => x.UniqueKey == tab.SourceAccountKey);
                 if (!isAccountExists)
                     this.RemoveSpecifiedTab(tab.TabName, confirm: false);
             }

@@ -21,7 +21,6 @@
 
 #nullable enable
 
-using System;
 using System.Diagnostics;
 using OpenTween.Connection;
 using OpenTween.Models;
@@ -36,7 +35,7 @@ namespace OpenTween.SocialProtocol.Twitter
         public string AccountType
             => "Twitter";
 
-        public Guid UniqueKey { get; }
+        public AccountKey UniqueKey { get; }
 
         public ISocialProtocolClient Client { get; private set; }
 
@@ -62,15 +61,15 @@ namespace OpenTween.SocialProtocol.Twitter
         public IApiConnection Connection
             => this.apiConnection;
 
-        public TwitterAccount(Guid uniqueKey)
+        public TwitterAccount(AccountKey accountKey)
         {
-            this.UniqueKey = uniqueKey;
+            this.UniqueKey = accountKey;
             this.Client = this.CreateClientInstance(APIAuthType.None);
         }
 
         public void Initialize(UserAccount accountSettings, SettingCommon settingCommon)
         {
-            Debug.Assert(accountSettings.UniqueKey == this.UniqueKey, "UniqueKey must be same as current value.");
+            Debug.Assert(accountSettings.UniqueKey == this.UniqueKey.Id, "UniqueKey must be same as current value.");
 
             var credential = accountSettings.GetTwitterCredential();
             var userId = new TwitterUserId(accountSettings.UserId);

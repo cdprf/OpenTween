@@ -40,14 +40,14 @@ namespace OpenTween.Models
 
         public override bool IsPermanentTabType => false;
 
-        public override Guid? SourceAccountId { get; }
+        public override AccountKey? SourceAccountKey { get; }
 
         public PostClass TargetPost { get; }
 
-        public RelatedPostsTabModel(string tabName, Guid accountId, PostClass targetPost)
+        public RelatedPostsTabModel(string tabName, AccountKey accountKey, PostClass targetPost)
             : base(tabName)
         {
-            this.SourceAccountId = accountId;
+            this.SourceAccountKey = accountKey;
             this.TargetPost = targetPost;
         }
 

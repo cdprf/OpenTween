@@ -35,12 +35,12 @@ namespace OpenTween.Models
         public override bool IsPermanentTabType
             => false;
 
-        public override Guid? SourceAccountId { get; }
+        public override AccountKey? SourceAccountKey { get; }
 
-        public HomeSpecifiedAccountTabModel(string tabName, Guid accountId)
+        public HomeSpecifiedAccountTabModel(string tabName, AccountKey accountKey)
             : base(tabName)
         {
-            this.SourceAccountId = accountId;
+            this.SourceAccountKey = accountKey;
         }
 
         public override async Task RefreshAsync(ISocialAccount account, bool backward, IProgress<string> progress)

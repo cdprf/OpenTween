@@ -22,34 +22,24 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
-using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.SocialProtocol
 {
-    public class AccountFactory
+    /// <summary>
+    /// マルチアカウント機能でアカウントを区別するために使用するキー
+    /// </summary>
+    public record struct AccountKey(
+        Guid Id
+    )
     {
-        private readonly Dictionary<string, Func<AccountKey, ISocialAccount>> factories;
-
-        public AccountFactory()
+        public AccountKey(string idStr)
+            : this(new Guid(idStr))
         {
-            this.factories = new()
-            {
-                ["Twitter"] = x => new TwitterAccount(x),
-            };
         }
 
-        public ISocialAccount Create(UserAccount accountSettings, SettingCommon settingCommon)
-        {
-            var accountKey = new AccountKey(accountSettings.UniqueKey);
+        public static AccountKey Empty { get; } = new(Guid.Empty);
 
-            var account = this.factories.TryGetValue(accountSettings.AccountType, out var createAccount)
-                ? createAccount(accountKey)
-                : new InvalidAccount(accountKey);
-
-            account.Initialize(accountSettings, settingCommon);
-
-            return account;
-        }
+        public static AccountKey New()
+            => new(Guid.NewGuid());
     }
 }
