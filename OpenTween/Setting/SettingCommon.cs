@@ -406,6 +406,9 @@ namespace OpenTween
             set => this.TokenSecret = this.Decrypt(value);
         }
 
+        [XmlArrayItem(ElementName = "Scope")]
+        public string[] Scopes { get; set; } = Array.Empty<string>();
+
         public TwitterAppToken GetTwitterAppToken()
         {
             return new()

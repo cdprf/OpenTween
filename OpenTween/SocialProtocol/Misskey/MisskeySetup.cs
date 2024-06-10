@@ -32,6 +32,13 @@ namespace OpenTween.SocialProtocol.Misskey
 {
     public class MisskeySetup : NotifyPropertyChangedBase
     {
+        public static readonly string[] AuthorizeScopes = new[]
+        {
+            "read:account",
+            "write:notes",
+            "write:reactions",
+        };
+
         public string ServerHostname
         {
             get => this.serverHostname;
@@ -67,12 +74,7 @@ namespace OpenTween.SocialProtocol.Misskey
             var query = MyCommon.BuildQueryString(new KeyValuePair<string, string>[]
             {
                 new("name", ApplicationSettings.ApplicationName),
-                new("permission", string.Join(",", new[]
-                {
-                    "read:account",
-                    "write:notes",
-                    "write:reactions",
-                })),
+                new("permission", string.Join(",", AuthorizeScopes)),
             });
             var authorizeUri = new Uri(this.serverBaseUri, $"{path}?{query}");
 
@@ -124,6 +126,7 @@ namespace OpenTween.SocialProtocol.Misskey
                 UserId = tokenResponse.User.Id,
                 Username = tokenResponse.User.Username,
                 TokenSecret = tokenResponse.Token,
+                Scopes = AuthorizeScopes,
             };
         }
     }
