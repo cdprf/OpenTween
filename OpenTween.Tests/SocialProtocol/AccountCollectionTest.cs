@@ -161,6 +161,26 @@ namespace OpenTween.SocialProtocol
         }
 
         [Fact]
+        public void SecondaryAccounts_DisabledTest()
+        {
+            var disabledAccountSetting = this.CreateAccountSetting("00000000-0000-4000-8000-111111111111");
+            disabledAccountSetting.Disabled = true;
+
+            using var accounts = new AccountCollection();
+            accounts.LoadFromSettings(new()
+            {
+                UserAccounts = new()
+                {
+                    this.CreateAccountSetting("00000000-0000-4000-8000-000000000000"),
+                    disabledAccountSetting,
+                },
+                SelectedAccountKey = new("00000000-0000-4000-8000-000000000000"),
+            });
+
+            Assert.Empty(accounts.SecondaryAccounts);
+        }
+
+        [Fact]
         public void GetAccountForTab_DefaultTest()
         {
             using var accounts = new AccountCollection();

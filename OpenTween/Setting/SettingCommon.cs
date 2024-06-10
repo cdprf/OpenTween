@@ -352,6 +352,9 @@ namespace OpenTween
     {
         public Guid UniqueKey { get; set; } = Guid.NewGuid();
 
+        [DefaultValue(false)]
+        public bool Disabled { get; set; }
+
         [DefaultValue("Twitter")]
         public string AccountType { get; set; } = "Twitter";
 

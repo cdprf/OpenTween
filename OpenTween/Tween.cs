@@ -2593,6 +2593,7 @@ namespace OpenTween
             var newSecondaryAccounts = currentSecondaryAccounts
                 .Where(x => !previousSecondaryAccounts.Any(y => y.UniqueKey == x.UniqueKey));
             this.AddSecondaryAccountTabs(newSecondaryAccounts);
+            this.RemoveMissingAccountTabs();
         }
 
         private void AddSecondaryAccountTabs(IEnumerable<ISocialAccount> accounts)
@@ -2609,6 +2610,19 @@ namespace OpenTween
                 var homeTab = new HomeSpecifiedAccountTabModel(tabName, account.UniqueKey);
                 this.statuses.AddTab(homeTab);
                 this.AddNewTab(homeTab, startup: false);
+            }
+        }
+
+        private void RemoveMissingAccountTabs()
+        {
+            var secondaryAccounts = this.accounts.SecondaryAccounts;
+            var secondaryAccountTabs = this.statuses.GetTabsByType<HomeSpecifiedAccountTabModel>();
+
+            foreach (var tab in secondaryAccountTabs)
+            {
+                var isAccountExists = secondaryAccounts.Any(x => x.UniqueKey == tab.SourceAccountId);
+                if (!isAccountExists)
+                    this.RemoveSpecifiedTab(tab.TabName, confirm: false);
             }
         }
 
