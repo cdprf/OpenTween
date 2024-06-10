@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using OpenTween.SocialProtocol.Misskey;
 using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.SocialProtocol
@@ -33,10 +34,12 @@ namespace OpenTween.SocialProtocol
     public class AccountSetupDispatcher
     {
         public record AccountSetupItem(
-            Guid Id,
             string Caption,
             Func<IAccountSetup> CreateInstance
-        );
+        )
+        {
+            public Guid Id { get; } = Guid.NewGuid();
+        }
 
         private readonly List<AccountSetupItem> setupList;
 
@@ -44,8 +47,9 @@ namespace OpenTween.SocialProtocol
         {
             this.setupList = new()
             {
-                new(Guid.NewGuid(), "Twitter (OAuth)", () => new TwitterOAuthSetupDialog()),
-                new(Guid.NewGuid(), "Twitter (Cookie)", () => new TwitterCookieSetupDialog()),
+                new("Twitter (OAuth)", () => new TwitterOAuthSetupDialog()),
+                new("Twitter (Cookie)", () => new TwitterCookieSetupDialog()),
+                new("Misskey", () => new MisskeySetupDialog()),
             };
         }
 

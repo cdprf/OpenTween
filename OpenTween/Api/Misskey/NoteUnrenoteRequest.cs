@@ -22,36 +22,42 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
+using OpenTween.Connection;
 using OpenTween.SocialProtocol.Misskey;
-using OpenTween.SocialProtocol.Twitter;
 
-namespace OpenTween.SocialProtocol
+namespace OpenTween.Api.Misskey
 {
-    public class AccountFactory
+    public class NoteUnrenoteRequest
     {
-        private readonly Dictionary<string, Func<AccountKey, ISocialAccount>> factories;
+        public required MisskeyNoteId NoteId { get; set; }
 
-        public AccountFactory()
+        public async Task Send(IApiConnection apiConnection)
         {
-            this.factories = new()
+            var request = new PostJsonRequest
             {
-                ["Twitter"] = x => new TwitterAccount(x),
-                ["Misskey"] = x => new MisskeyAccount(x),
+                RequestUri = new("notes/unrenote", UriKind.Relative),
+                JsonString = this.CreateRequestJson(),
             };
+
+            using var response = await apiConnection.SendAsync(request)
+                .ConfigureAwait(false);
         }
 
-        public ISocialAccount Create(UserAccount accountSettings, SettingCommon settingCommon)
+        [DataContract]
+        private record RequestBody(
+            [property: DataMember(Name = "noteId")]
+            string NoteId
+        );
+
+        private string CreateRequestJson()
         {
-            var accountKey = new AccountKey(accountSettings.UniqueKey);
+            var body = new RequestBody(
+                NoteId: this.NoteId.Id
+            );
 
-            var account = this.factories.TryGetValue(accountSettings.AccountType, out var createAccount)
-                ? createAccount(accountKey)
-                : new InvalidAccount(accountKey);
-
-            account.Initialize(accountSettings, settingCommon);
-
-            return account;
+            return JsonUtils.SerializeJsonByDataContract(body);
         }
     }
 }

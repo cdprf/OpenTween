@@ -22,36 +22,39 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
-using OpenTween.SocialProtocol.Misskey;
-using OpenTween.SocialProtocol.Twitter;
+using System.Threading.Tasks;
+using OpenTween.Connection;
 
-namespace OpenTween.SocialProtocol
+namespace OpenTween.Api.Misskey
 {
-    public class AccountFactory
+    public class MiauthCheckRequest
     {
-        private readonly Dictionary<string, Func<AccountKey, ISocialAccount>> factories;
+        public required string SessionNonce { get; set; }
 
-        public AccountFactory()
+        public async Task<MiauthTokenResponse?> Send(IApiConnection apiConnection)
         {
-            this.factories = new()
+            var request = new PostRequest
             {
-                ["Twitter"] = x => new TwitterAccount(x),
-                ["Misskey"] = x => new MisskeyAccount(x),
+                RequestUri = this.CreateRequestUri(),
             };
+
+            using var response = await apiConnection.SendAsync(request)
+                .ConfigureAwait(false);
+
+            try
+            {
+                return await response.ReadAsJson<MiauthTokenResponse>()
+                    .ConfigureAwait(false);
+            }
+            catch (WebApiException ex)
+                when (ex.ResponseText == """{"ok":false}""")
+            {
+                // 指定した SessionNonce での認可が完了していない状態
+                return null;
+            }
         }
 
-        public ISocialAccount Create(UserAccount accountSettings, SettingCommon settingCommon)
-        {
-            var accountKey = new AccountKey(accountSettings.UniqueKey);
-
-            var account = this.factories.TryGetValue(accountSettings.AccountType, out var createAccount)
-                ? createAccount(accountKey)
-                : new InvalidAccount(accountKey);
-
-            account.Initialize(accountSettings, settingCommon);
-
-            return account;
-        }
+        private Uri CreateRequestUri()
+            => new($"miauth/{Uri.EscapeDataString(this.SessionNonce)}/check", UriKind.Relative);
     }
 }

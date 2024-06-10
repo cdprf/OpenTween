@@ -19,39 +19,40 @@
 // the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
 // Boston, MA 02110-1301, USA.
 
-#nullable enable
-
 using System;
-using System.Collections.Generic;
-using OpenTween.SocialProtocol.Misskey;
-using OpenTween.SocialProtocol.Twitter;
+using System.Threading.Tasks;
+using Moq;
+using OpenTween.Connection;
+using Xunit;
 
-namespace OpenTween.SocialProtocol
+namespace OpenTween.Api.Misskey
 {
-    public class AccountFactory
+    public class MiauthCheckRequestTest
     {
-        private readonly Dictionary<string, Func<AccountKey, ISocialAccount>> factories;
-
-        public AccountFactory()
+        [Fact]
+        public async Task Send_Test()
         {
-            this.factories = new()
+            var response = TestUtils.CreateApiResponse(new MiauthTokenResponse());
+
+            var mock = new Mock<IApiConnection>();
+            mock.Setup(x =>
+                    x.SendAsync(It.IsAny<IHttpRequest>())
+                )
+                .Callback<IHttpRequest>(x =>
+                {
+                    var request = Assert.IsType<PostRequest>(x);
+                    Assert.Equal(new("miauth/abc123/check", UriKind.Relative), request.RequestUri);
+                    Assert.Null(request.Query);
+                })
+                .ReturnsAsync(response);
+
+            var request = new MiauthCheckRequest
             {
-                ["Twitter"] = x => new TwitterAccount(x),
-                ["Misskey"] = x => new MisskeyAccount(x),
+                SessionNonce = "abc123",
             };
-        }
+            await request.Send(mock.Object);
 
-        public ISocialAccount Create(UserAccount accountSettings, SettingCommon settingCommon)
-        {
-            var accountKey = new AccountKey(accountSettings.UniqueKey);
-
-            var account = this.factories.TryGetValue(accountSettings.AccountType, out var createAccount)
-                ? createAccount(accountKey)
-                : new InvalidAccount(accountKey);
-
-            account.Initialize(accountSettings, settingCommon);
-
-            return account;
+            mock.VerifyAll();
         }
     }
 }

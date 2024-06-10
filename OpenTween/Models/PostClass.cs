@@ -35,6 +35,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenTween.Thumbnail;
 
 namespace OpenTween.Models
 {
@@ -112,6 +113,8 @@ namespace OpenTween.Models
         public PersonId? InReplyToUserId { get; init; }
 
         public List<MediaInfo> Media { get; init; } = new();
+
+        public ThumbnailInfo[] PreloadedThumbnails { get; init; } = Array.Empty<ThumbnailInfo>();
 
         public PostId[] QuoteStatusIds { get; init; } = Array.Empty<PostId>();
 

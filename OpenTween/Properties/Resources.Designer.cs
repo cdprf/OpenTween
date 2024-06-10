@@ -61,6 +61,15 @@ namespace OpenTween.Properties {
         }
         
         /// <summary>
+        ///   メインに設定できるのはTwitterアカウントのみです に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string AccountListBox_MakePrimaryError {
+            get {
+                return ResourceManager.GetString("AccountListBox_MakePrimaryError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   (無効) に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string AccountListBoxItem_Disabled {

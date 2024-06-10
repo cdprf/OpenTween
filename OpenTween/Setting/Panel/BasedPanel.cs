@@ -53,20 +53,19 @@ namespace OpenTween.Setting.Panel
 
             private string ComposeDisplayText()
             {
-                var authTypeText = this.AccountSettings.TwitterAuthType switch
-                {
-                    APIAuthType.OAuth1 => "Twitter / OAuth",
-                    APIAuthType.TwitterComCookie => "Twitter / Cookie",
-                    _ => "Twitter / unknown",
-                };
+                var accountTypeText = this.AccountSettings.AccountType;
+
                 var accountName = $"@{this.AccountSettings.Username}";
+                if (!MyCommon.IsNullOrEmpty(this.AccountSettings.ServerHostname))
+                    accountName += $"@{this.AccountSettings.ServerHostname}";
+
                 var suffix = "";
                 if (this.IsPrimary)
                     suffix += " " + Properties.Resources.AccountListBoxItem_Primary;
                 if (this.AccountSettings.Disabled)
                     suffix += " " + Properties.Resources.AccountListBoxItem_Disabled;
 
-                return $"[{authTypeText}] {accountName}{suffix}";
+                return $"[{accountTypeText}] {accountName}{suffix}";
             }
         }
 
@@ -171,6 +170,20 @@ namespace OpenTween.Setting.Panel
 
         private void MakeAccountPrimaryAt(int index)
         {
+            var selectedListItem = this.AccountsList[index];
+            if (selectedListItem.AccountSettings.AccountType != "Twitter")
+            {
+                // 現時点での制約として Twitter アカウント以外はメインに設定できない
+                MessageBox.Show(
+                    this,
+                    Properties.Resources.AccountListBox_MakePrimaryError,
+                    ApplicationSettings.ApplicationName,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
             var oldPrimaryIndex = this.AccountsList.FindIndex(x => x.IsPrimary);
             if (oldPrimaryIndex != -1)
             {
@@ -182,10 +195,10 @@ namespace OpenTween.Setting.Panel
             }
 
             // Disabled になっていたら強制的に解除する
-            this.AccountsList[index].AccountSettings.Disabled = false;
+            selectedListItem.AccountSettings.Disabled = false;
 
             this.AccountsList[index] =
-                this.AccountsList[index] with { IsPrimary = true };
+                selectedListItem with { IsPrimary = true };
         }
 
         private void ToggleAccountDisabledAt(int index)
