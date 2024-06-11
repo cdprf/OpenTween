@@ -39,6 +39,9 @@ namespace OpenTween.Api.Misskey
 
             var mock = new Mock<IApiConnection>();
             mock.Setup(x =>
+                    x.ThrowIfUnauthorizedScope("write:drive")
+                );
+            mock.Setup(x =>
                     x.SendAsync(It.IsAny<IHttpRequest>())
                 )
                 .Callback<IHttpRequest>(x =>

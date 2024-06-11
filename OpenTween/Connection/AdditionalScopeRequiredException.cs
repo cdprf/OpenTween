@@ -1,5 +1,5 @@
 ﻿// OpenTween - Client of Twitter
-// Copyright (c) 2023 kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
+// Copyright (c) 2024 kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
 // All rights reserved.
 //
 // This file is part of OpenTween.
@@ -21,15 +21,13 @@
 
 #nullable enable
 
-using System;
-using System.Threading.Tasks;
-
 namespace OpenTween.Connection
 {
-    public interface IApiConnection : IDisposable
+    public class AdditionalScopeRequiredException : WebApiException
     {
-        void ThrowIfUnauthorizedScope(string scope);
-
-        Task<ApiResponse> SendAsync(IHttpRequest request);
+        public AdditionalScopeRequiredException()
+            : base(Properties.Resources.AdditionalScopeRequired_Message)
+        {
+        }
     }
 }

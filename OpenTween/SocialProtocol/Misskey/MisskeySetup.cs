@@ -108,7 +108,7 @@ namespace OpenTween.SocialProtocol.Misskey
                 throw new InvalidOperationException($"{nameof(this.serverBaseUri)} is null");
 
             var apiBaseUri = new Uri(this.serverBaseUri, "/api/");
-            var apiConnection = new MisskeyApiConnection(apiBaseUri, accessToken: "");
+            var apiConnection = new MisskeyApiConnection(apiBaseUri, accessToken: "", new());
             var request = new MiauthCheckRequest
             {
                 SessionNonce = this.sessionNonce.ToString(),

@@ -36,6 +36,8 @@ namespace OpenTween.Api.Misskey
 
         public async Task<MisskeyDriveFile> Send(IApiConnection apiConnection)
         {
+            apiConnection.ThrowIfUnauthorizedScope("write:drive");
+
             var request = new PostMultipartRequest
             {
                 RequestUri = new("drive/files/create", UriKind.Relative),
