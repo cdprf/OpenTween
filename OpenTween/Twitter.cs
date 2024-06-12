@@ -537,8 +537,11 @@ namespace OpenTween
         }
 
         internal PostClass[] CreatePostsFromJson(TwitterStatus[] statuses, bool firstLoad)
+            => this.CreatePostsFromJson(statuses, firstLoad, favTweet: false);
+
+        internal PostClass[] CreatePostsFromJson(TwitterStatus[] statuses, bool firstLoad, bool favTweet)
         {
-            var posts = statuses.Select(x => this.CreatePostsFromStatusData(x, firstLoad)).ToArray();
+            var posts = statuses.Select(x => this.CreatePostsFromStatusData(x, firstLoad, favTweet)).ToArray();
 
             TwitterPostFactory.AdjustSortKeyForPromotedPost(posts);
 
