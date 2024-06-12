@@ -97,6 +97,15 @@ namespace OpenTween.Properties {
         }
         
         /// <summary>
+        ///   この機能を使用するためにはアカウントの再設定が必要です に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string AdditionalScopeRequired_Message {
+            get {
+                return ResourceManager.GetString("AdditionalScopeRequired_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   発言一覧 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string AddNewTab_ListView_AccessibleName {
