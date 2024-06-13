@@ -9004,8 +9004,8 @@ namespace OpenTween
 
         public ISocialAccount? GetAccountForPostId(PostId postId)
         {
-            var preferedAccountKey = this.CurrentTab.SourceAccountKey;
-            return this.accounts.GetAccountForPostId(postId, preferedAccountKey);
+            var preferredAccountKey = this.CurrentTab.SourceAccountKey;
+            return this.accounts.GetAccountForPostId(postId, preferredAccountKey);
         }
 
         /// <summary>
