@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using OpenTween.Api.DataModel;
 using OpenTween.Models;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {

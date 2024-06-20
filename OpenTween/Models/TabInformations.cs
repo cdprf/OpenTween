@@ -37,6 +37,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTween.Setting;
 using OpenTween.SocialProtocol;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Models
 {

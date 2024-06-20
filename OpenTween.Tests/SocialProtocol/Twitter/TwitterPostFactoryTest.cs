@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using OpenTween.Api.DataModel;
+using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 
 namespace OpenTween.Models

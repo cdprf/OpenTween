@@ -30,6 +30,7 @@ using System;
 using System.Net;
 using OpenTween.Api.DataModel;
 using OpenTween.Models;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {

@@ -24,7 +24,7 @@
 using System;
 using System.Threading.Tasks;
 using OpenTween.Connection;
-using OpenTween.Models;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Api.GraphQL
 {

@@ -20,6 +20,7 @@
 // Boston, MA 02110-1301, USA.
 
 using OpenTween.Api.GraphQL;
+using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 
 namespace OpenTween.Models

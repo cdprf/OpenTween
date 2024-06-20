@@ -28,6 +28,7 @@ using OpenTween.Api.DataModel;
 using OpenTween.Api.Misskey;
 using OpenTween.Models;
 using OpenTween.Setting;
+using OpenTween.SocialProtocol.Twitter;
 using OpenTween.Thumbnail;
 
 namespace OpenTween.SocialProtocol.Misskey
