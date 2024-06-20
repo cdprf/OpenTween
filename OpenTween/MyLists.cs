@@ -38,12 +38,13 @@ using System.Windows.Forms;
 using OpenTween.Api;
 using OpenTween.Api.DataModel;
 using OpenTween.Connection;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {
     public partial class MyLists : OTBaseForm
     {
-        private readonly Twitter twitter = null!;
+        private readonly TwitterLegacy twitter = null!;
         private readonly string contextScreenName = null!;
 
         /// <summary>自分が所有しているリスト</summary>
@@ -55,7 +56,7 @@ namespace OpenTween
         public MyLists()
             => this.InitializeComponent();
 
-        public MyLists(string screenName, Twitter twitter)
+        public MyLists(string screenName, TwitterLegacy twitter)
         {
             this.InitializeComponent();
 

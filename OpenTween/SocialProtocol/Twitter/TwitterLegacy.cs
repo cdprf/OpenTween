@@ -29,31 +29,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using OpenTween.Api;
 using OpenTween.Api.DataModel;
 using OpenTween.Api.GraphQL;
-using OpenTween.Api.TwitterV2;
 using OpenTween.Connection;
 using OpenTween.Models;
 using OpenTween.Setting;
-using OpenTween.SocialProtocol.Twitter;
 
-namespace OpenTween
+namespace OpenTween.SocialProtocol.Twitter
 {
-    public class Twitter : IDisposable
+    public class TwitterLegacy : IDisposable
     {
         #region Regexp from twitter-text-js
 
@@ -181,7 +169,7 @@ namespace OpenTween
 
         private string? previousStatusId = null;
 
-        public Twitter(TwitterApi api)
+        public TwitterLegacy(TwitterApi api)
         {
             this.postFactory = new(TabInformations.GetInstance(), SettingManager.Instance.Common);
             this.urlExpander = new(ShortUrl.Instance);
@@ -210,7 +198,7 @@ namespace OpenTween
         {
             this.CheckAccountState();
 
-            if (Twitter.DMSendTextRegex.IsMatch(param.Text))
+            if (DMSendTextRegex.IsMatch(param.Text))
             {
                 var mediaId = param.MediaIds?.FirstOrDefault();
 
@@ -317,7 +305,7 @@ namespace OpenTween
                     .ConfigureAwait(false);
             }
 
-            succeeded:
+        succeeded:
             return mediaId;
         }
 
@@ -325,7 +313,7 @@ namespace OpenTween
         {
             this.CheckAccountState();
 
-            var mc = Twitter.DMSendTextRegex.Match(postStr);
+            var mc = DMSendTextRegex.Match(postStr);
 
             var body = mc.Groups["body"].Value;
             var recipientName = mc.Groups["id"].Value;
@@ -824,7 +812,7 @@ namespace OpenTween
 
         public int GetTextLengthRemain(string postText)
         {
-            var matchDm = Twitter.DMSendTextRegex.Match(postText);
+            var matchDm = DMSendTextRegex.Match(postText);
             if (matchDm.Success)
                 return this.GetTextLengthRemainDM(matchDm.Groups["body"].Value);
 

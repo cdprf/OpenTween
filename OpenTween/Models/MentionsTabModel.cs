@@ -30,6 +30,7 @@
 using System;
 using System.Threading.Tasks;
 using OpenTween.SocialProtocol;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Models
 {
@@ -53,7 +54,7 @@ namespace OpenTween.Models
             progress.Report(string.Format(Properties.Resources.GetTimelineWorker_RunWorkerCompletedText4, backward ? -1 : 1));
 
             var firstLoad = !this.IsFirstLoadCompleted;
-            var count = Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Reply, backward, firstLoad);
+            var count = TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Reply, backward, firstLoad);
             var cursor = backward ? this.CursorBottom : this.CursorTop;
 
             var response = await account.Client.GetMentionsTimeline(count, cursor, firstLoad)

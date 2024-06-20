@@ -278,7 +278,7 @@ namespace OpenTween
 
             this.ClearUserPicture();
 
-            var imageSize = Twitter.DecideProfileImageSize(this.UserPicture.Width);
+            var imageSize = TwitterLegacy.DecideProfileImageSize(this.UserPicture.Width);
             if (!force)
             {
                 var cachedImage = this.IconCache.TryGetLargerOrSameSizeFromCache(normalImageUrl, imageSize);
@@ -298,7 +298,7 @@ namespace OpenTween
             await this.UserPicture.SetImageFromTask(
                 async () =>
                 {
-                    var imageUrl = Twitter.CreateProfileImageUrl(normalImageUrl, imageSize);
+                    var imageUrl = TwitterLegacy.CreateProfileImageUrl(normalImageUrl, imageSize);
                     var image = await this.IconCache.DownloadImageAsync(imageUrl, force)
                         .ConfigureAwait(false);
 
@@ -470,7 +470,7 @@ namespace OpenTween
 
         private string? GetUserId()
         {
-            var m = Twitter.StatusUrlRegex.Match(this.postBrowserStatusText);
+            var m = TwitterLegacy.StatusUrlRegex.Match(this.postBrowserStatusText);
             if (m.Success && this.Owner.IsTwitterId(m.Result("${ScreenName}")))
                 return m.Result("${ScreenName}");
             else
@@ -751,7 +751,7 @@ namespace OpenTween
             if (MyCommon.IsNullOrEmpty(imageNormalUrl))
                 return;
 
-            var imageOriginalUrl = Twitter.CreateProfileImageUrl(imageNormalUrl, "original");
+            var imageOriginalUrl = TwitterLegacy.CreateProfileImageUrl(imageNormalUrl, "original");
             await MyCommon.OpenInBrowserAsync(this, imageOriginalUrl);
         }
 

@@ -48,10 +48,10 @@ namespace OpenTween
         private CancellationTokenSource? cancellationTokenSource = null;
 
         private readonly TweenMain mainForm;
-        private readonly Twitter twitter;
+        private readonly TwitterLegacy twitter;
         private readonly DetailsHtmlBuilder detailsHtmlBuilder;
 
-        public UserInfoDialog(TweenMain mainForm, Twitter twitter, DetailsHtmlBuilder detailsHtmlBuilder)
+        public UserInfoDialog(TweenMain mainForm, TwitterLegacy twitter, DetailsHtmlBuilder detailsHtmlBuilder)
         {
             this.mainForm = mainForm;
             this.twitter = twitter;
@@ -207,8 +207,8 @@ namespace OpenTween
 
             await this.UserPicture.SetImageFromTask(async () =>
             {
-                var sizeName = Twitter.DecideProfileImageSize(this.UserPicture.Width);
-                var uri = Twitter.CreateProfileImageUrl(imageUri, sizeName);
+                var sizeName = TwitterLegacy.DecideProfileImageSize(this.UserPicture.Width);
+                var uri = TwitterLegacy.CreateProfileImageUrl(imageUri, sizeName);
 
                 using var imageStream = await Networking.Http.GetStreamAsync(uri)
                     .ConfigureAwait(false);
@@ -468,7 +468,7 @@ namespace OpenTween
         private async void UserPicture_Click(object sender, EventArgs e)
         {
             var imageUrl = this.displayUser.ProfileImageUrlHttps;
-            imageUrl = Twitter.CreateProfileImageUrl(imageUrl, "original");
+            imageUrl = TwitterLegacy.CreateProfileImageUrl(imageUrl, "original");
 
             await MyCommon.OpenInBrowserAsync(this, imageUrl);
         }

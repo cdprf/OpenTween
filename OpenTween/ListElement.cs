@@ -48,7 +48,7 @@ namespace OpenTween
         public string Username = "";
         public string Nickname = "";
 
-        protected Twitter tw = null!;
+        protected TwitterLegacy tw = null!;
 
         private List<UserInfo> members = new();
 
@@ -59,7 +59,7 @@ namespace OpenTween
         {
         }
 
-        public ListElement(TwitterList listElementData, Twitter tw)
+        public ListElement(TwitterList listElementData, TwitterLegacy tw)
         {
             this.Description = listElementData.Description;
             this.Id = listElementData.Id;

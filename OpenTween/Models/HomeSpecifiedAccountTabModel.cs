@@ -24,6 +24,7 @@
 using System;
 using System.Threading.Tasks;
 using OpenTween.SocialProtocol;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Models
 {
@@ -48,7 +49,7 @@ namespace OpenTween.Models
             progress.Report("Home refreshing...");
 
             var firstLoad = !this.IsFirstLoadCompleted;
-            var count = Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, backward, firstLoad);
+            var count = TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, backward, firstLoad);
             var cursor = backward ? this.CursorBottom : this.CursorTop;
 
             var response = await account.Client.GetHomeTimeline(count, cursor, firstLoad)

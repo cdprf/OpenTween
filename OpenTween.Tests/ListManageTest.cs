@@ -19,12 +19,8 @@
 // the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
 // Boston, MA 02110-1301, USA.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTween.Api;
+using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 
 namespace OpenTween
@@ -35,7 +31,7 @@ namespace OpenTween
         public void Initialize_Test()
         {
             using var twitterApi = new TwitterApi();
-            using var twitter = new Twitter(twitterApi);
+            using var twitter = new TwitterLegacy(twitterApi);
             using var dialog = new ListManage(twitter);
         }
     }

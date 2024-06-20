@@ -3322,7 +3322,7 @@ namespace OpenTween
                 // 参照: https://support.twitter.com/articles/14020
 
                 if (Regex.IsMatch(statusText, @"^[+\-\[\]\s\\.,*/(){}^~|='&%$#""<>?]*(d|dm|m)([+\-\[\]\s\\.,*/(){}^~|='&%$#""<>?]+|$)", RegexOptions.IgnoreCase)
-                    && !Twitter.DMSendTextRegex.IsMatch(statusText))
+                    && !TwitterLegacy.DMSendTextRegex.IsMatch(statusText))
                 {
                     // U+200B (ZERO WIDTH SPACE) を先頭に加えて回避
                     statusText = '\u200b' + statusText;
@@ -5536,7 +5536,7 @@ namespace OpenTween
             if (ret != DialogResult.OK)
                 return;
 
-            var match = Twitter.StatusUrlRegex.Match(inputText);
+            var match = TwitterLegacy.StatusUrlRegex.Match(inputText);
             if (!match.Success)
             {
                 ShowFormatErrorDialog(this);
@@ -6850,7 +6850,7 @@ namespace OpenTween
         {
             MatchCollection m;
             // ハッシュタグの保存
-            m = Regex.Matches(statusText, Twitter.Hashtag, RegexOptions.IgnoreCase);
+            m = Regex.Matches(statusText, TwitterLegacy.Hashtag, RegexOptions.IgnoreCase);
             var hstr = "";
             foreach (Match hm in m)
             {
@@ -9220,7 +9220,7 @@ namespace OpenTween
         }
 
         private async void TwitterApiStatusToolStripMenuItem_Click(object sender, EventArgs e)
-            => await MyCommon.OpenInBrowserAsync(this, Twitter.ServiceAvailabilityStatusUrl);
+            => await MyCommon.OpenInBrowserAsync(this, TwitterLegacy.ServiceAvailabilityStatusUrl);
 
         private void PostButton_KeyDown(object sender, KeyEventArgs e)
         {

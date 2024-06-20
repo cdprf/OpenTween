@@ -34,6 +34,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Setting.Panel
 {
@@ -95,7 +96,7 @@ namespace OpenTween.Setting.Panel
                 return;
             }
 
-            if (!Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.Timeline, cnt))
+            if (!TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.Timeline, cnt))
             {
                 MessageBox.Show(Properties.Resources.TextCountApi_Validating1);
                 e.Cancel = true;
@@ -117,7 +118,7 @@ namespace OpenTween.Setting.Panel
                 return;
             }
 
-            if (!Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.Reply, cnt))
+            if (!TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.Reply, cnt))
             {
                 MessageBox.Show(Properties.Resources.TextCountApi_Validating1);
                 e.Cancel = true;
@@ -139,7 +140,7 @@ namespace OpenTween.Setting.Panel
                 return;
             }
 
-            if (cnt != 0 && !Twitter.VerifyMoreApiResultCount(cnt))
+            if (cnt != 0 && !TwitterLegacy.VerifyMoreApiResultCount(cnt))
             {
                 MessageBox.Show(Properties.Resources.TextCountApi_Validating1);
                 e.Cancel = true;
@@ -177,7 +178,7 @@ namespace OpenTween.Setting.Panel
                 return;
             }
 
-            if (cnt != 0 && !Twitter.VerifyFirstApiResultCount(cnt))
+            if (cnt != 0 && !TwitterLegacy.VerifyFirstApiResultCount(cnt))
             {
                 MessageBox.Show(Properties.Resources.TextCountApi_Validating1);
                 e.Cancel = true;
@@ -199,7 +200,7 @@ namespace OpenTween.Setting.Panel
                 return;
             }
 
-            if (cnt != 0 && !Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.PublicSearch, cnt))
+            if (cnt != 0 && !TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.PublicSearch, cnt))
             {
                 MessageBox.Show(Properties.Resources.TextSearchCountApi_Validating1);
                 e.Cancel = true;
@@ -221,7 +222,7 @@ namespace OpenTween.Setting.Panel
                 return;
             }
 
-            if (cnt != 0 && !Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.Favorites, cnt))
+            if (cnt != 0 && !TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.Favorites, cnt))
             {
                 MessageBox.Show(Properties.Resources.TextCountApi_Validating1);
                 e.Cancel = true;
@@ -243,7 +244,7 @@ namespace OpenTween.Setting.Panel
                 return;
             }
 
-            if (cnt != 0 && !Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.UserTimeline, cnt))
+            if (cnt != 0 && !TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.UserTimeline, cnt))
             {
                 MessageBox.Show(Properties.Resources.TextCountApi_Validating1);
                 e.Cancel = true;
@@ -265,7 +266,7 @@ namespace OpenTween.Setting.Panel
                 return;
             }
 
-            if (cnt != 0 && !Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.List, cnt))
+            if (cnt != 0 && !TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.List, cnt))
             {
                 MessageBox.Show(Properties.Resources.TextCountApi_Validating1);
                 e.Cancel = true;

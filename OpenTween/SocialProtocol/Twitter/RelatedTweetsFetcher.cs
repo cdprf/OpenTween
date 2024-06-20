@@ -110,8 +110,8 @@ namespace OpenTween.SocialProtocol.Twitter
 
             // MRTとかに対応のためツイート内にあるツイートを指すURLを取り込む
             var text = targetPost.Text;
-            var ma = OpenTween.Twitter.StatusUrlRegex.Matches(text).Cast<Match>()
-                .Concat(OpenTween.Twitter.ThirdPartyStatusUrlRegex.Matches(text).Cast<Match>());
+            var ma = TwitterLegacy.StatusUrlRegex.Matches(text).Cast<Match>()
+                .Concat(TwitterLegacy.ThirdPartyStatusUrlRegex.Matches(text).Cast<Match>());
             foreach (var match in ma)
             {
                 var statusId = new TwitterStatusId(match.Groups["StatusId"].Value);

@@ -29,6 +29,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using OpenTween.Api.DataModel;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {
@@ -47,7 +48,7 @@ namespace OpenTween
         /// </summary>
         public static IEnumerable<TwitterEntityUrl> ExtractUrlEntities(string text)
         {
-            var urlMatches = Regex.Matches(text, Twitter.RgUrl, RegexOptions.IgnoreCase).Cast<Match>();
+            var urlMatches = Regex.Matches(text, TwitterLegacy.RgUrl, RegexOptions.IgnoreCase).Cast<Match>();
             foreach (var m in urlMatches)
             {
                 var before = m.Groups["before"].Value;
@@ -59,15 +60,15 @@ namespace OpenTween
                 var validUrl = false;
                 if (protocol.Length == 0)
                 {
-                    if (Regex.IsMatch(before, Twitter.UrlInvalidWithoutProtocolPrecedingChars))
+                    if (Regex.IsMatch(before, TwitterLegacy.UrlInvalidWithoutProtocolPrecedingChars))
                         continue;
 
                     var last_url_invalid_match = false;
-                    var domainMatches = Regex.Matches(domain, Twitter.UrlValidAsciiDomain, RegexOptions.IgnoreCase).Cast<Match>();
+                    var domainMatches = Regex.Matches(domain, TwitterLegacy.UrlValidAsciiDomain, RegexOptions.IgnoreCase).Cast<Match>();
                     foreach (var mm in domainMatches)
                     {
                         var lasturl = mm.Value;
-                        last_url_invalid_match = Regex.IsMatch(lasturl, Twitter.UrlInvalidShortDomain, RegexOptions.IgnoreCase);
+                        last_url_invalid_match = Regex.IsMatch(lasturl, TwitterLegacy.UrlInvalidShortDomain, RegexOptions.IgnoreCase);
                         if (!last_url_invalid_match)
                         {
                             validUrl = true;
@@ -140,7 +141,7 @@ namespace OpenTween
         /// </summary>
         public static IEnumerable<TwitterEntityHashtag> ExtractHashtagEntities(string text)
         {
-            var matches = Regex.Matches(text, Twitter.Hashtag);
+            var matches = Regex.Matches(text, TwitterLegacy.Hashtag);
             foreach (var match in matches.Cast<Match>())
             {
                 var groupHashtagSharp = match.Groups[2];

@@ -401,7 +401,7 @@ namespace OpenTween.SocialProtocol.Twitter
                 {
                     if (quotedStatus != null)
                     {
-                        var matchStatusUrl = OpenTween.Twitter.StatusUrlRegex.Match(entity.ExpandedUrl);
+                        var matchStatusUrl = TwitterLegacy.StatusUrlRegex.Match(entity.ExpandedUrl);
                         if (matchStatusUrl.Success && matchStatusUrl.Groups["StatusId"].Value == quotedStatus.IdStr)
                         {
                             var quotedText = CreateAccessibleText(quotedStatus.FullText, quotedStatus.MergedEntities, quotedStatus: null, quotedStatusLink: null);
@@ -552,7 +552,7 @@ namespace OpenTween.SocialProtocol.Twitter
         {
             foreach (var url in urls)
             {
-                var match = OpenTween.Twitter.StatusUrlRegex.Match(url);
+                var match = TwitterLegacy.StatusUrlRegex.Match(url);
                 if (match.Success)
                     yield return new(match.Groups["StatusId"].Value);
             }
