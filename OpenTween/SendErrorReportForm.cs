@@ -35,6 +35,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTween.Api.DataModel;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {
@@ -133,7 +134,7 @@ namespace OpenTween
 
         private string encodedReportForDM = "";
 
-        private readonly Twitter? tw;
+        private readonly TwitterLegacy? tw;
         private readonly string originalReportText;
 
         public ErrorReport(string reportText)
@@ -141,7 +142,7 @@ namespace OpenTween
         {
         }
 
-        public ErrorReport(Twitter? tw, string reportText)
+        public ErrorReport(TwitterLegacy? tw, string reportText)
         {
             this.tw = tw;
             this.originalReportText = reportText;

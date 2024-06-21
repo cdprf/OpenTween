@@ -28,6 +28,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTween.Api;
 using OpenTween.Api.DataModel;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.MediaUploadServices
 {
@@ -72,7 +73,7 @@ namespace OpenTween.MediaUploadServices
 
         private TwitterConfiguration twitterConfig;
 
-        public Mobypicture(Twitter twitter, TwitterConfiguration twitterConfig)
+        public Mobypicture(TwitterLegacy twitter, TwitterConfiguration twitterConfig)
             : this(new MobypictureApi(twitter.Api), twitterConfig)
         {
         }

@@ -28,6 +28,7 @@ using OpenTween.Api.DataModel;
 using OpenTween.Api.Misskey;
 using OpenTween.Models;
 using OpenTween.Setting;
+using OpenTween.SocialProtocol.Twitter;
 using OpenTween.Thumbnail;
 
 namespace OpenTween.SocialProtocol.Misskey
@@ -143,7 +144,7 @@ namespace OpenTween.SocialProtocol.Misskey
         {
             foreach (var url in urls)
             {
-                var match = OpenTween.Twitter.StatusUrlRegex.Match(url.ExpandedUrl);
+                var match = TwitterLegacy.StatusUrlRegex.Match(url.ExpandedUrl);
                 if (match.Success)
                     yield return new TwitterStatusId(match.Groups["StatusId"].Value);
             }

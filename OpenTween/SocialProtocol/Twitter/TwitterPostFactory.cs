@@ -23,14 +23,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using OpenTween.Api.DataModel;
-using OpenTween.Setting;
+using OpenTween.Models;
 
-namespace OpenTween.Models
+namespace OpenTween.SocialProtocol.Twitter
 {
     public class TwitterPostFactory
     {
@@ -402,7 +401,7 @@ namespace OpenTween.Models
                 {
                     if (quotedStatus != null)
                     {
-                        var matchStatusUrl = Twitter.StatusUrlRegex.Match(entity.ExpandedUrl);
+                        var matchStatusUrl = TwitterLegacy.StatusUrlRegex.Match(entity.ExpandedUrl);
                         if (matchStatusUrl.Success && matchStatusUrl.Groups["StatusId"].Value == quotedStatus.IdStr)
                         {
                             var quotedText = CreateAccessibleText(quotedStatus.FullText, quotedStatus.MergedEntities, quotedStatus: null, quotedStatusLink: null);
@@ -553,7 +552,7 @@ namespace OpenTween.Models
         {
             foreach (var url in urls)
             {
-                var match = Twitter.StatusUrlRegex.Match(url);
+                var match = TwitterLegacy.StatusUrlRegex.Match(url);
                 if (match.Success)
                     yield return new(match.Groups["StatusId"].Value);
             }

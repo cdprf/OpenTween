@@ -29,7 +29,6 @@ using System.Threading.Tasks;
 using System.Xml.XPath;
 using OpenTween.Api.DataModel;
 using OpenTween.Connection;
-using OpenTween.Models;
 using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Api.GraphQL

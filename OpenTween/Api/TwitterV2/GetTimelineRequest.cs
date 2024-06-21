@@ -28,7 +28,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTween.Api.DataModel;
 using OpenTween.Connection;
-using OpenTween.Models;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Api.TwitterV2
 {

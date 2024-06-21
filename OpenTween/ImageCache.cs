@@ -32,6 +32,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using OpenTween.Connection;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {
@@ -145,7 +146,7 @@ namespace OpenTween
 
             foreach (var candidateSize in sizes.Skip(minimumIndex))
             {
-                var imageUrl = Twitter.CreateProfileImageUrl(normalUrl, candidateSize);
+                var imageUrl = TwitterLegacy.CreateProfileImageUrl(normalUrl, candidateSize);
                 var image = this.TryGetFromCache(imageUrl);
                 if (image != null)
                     return image;

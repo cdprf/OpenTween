@@ -21,17 +21,14 @@
 
 using System;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using OpenTween.Api;
-using OpenTween.Models;
 using OpenTween.Setting;
 using Xunit;
-using Xunit.Extensions;
 
-namespace OpenTween
+namespace OpenTween.SocialProtocol.Twitter
 {
-    public class TwitterTest
+    public class TwitterLegacyTest
     {
         [Theory]
         [InlineData("https://twitter.com/twitterapi/status/22634515958",
@@ -49,7 +46,7 @@ namespace OpenTween
             new[] { "22634515958" })]
         public void StatusUrlRegexTest(string url, string[] expected)
         {
-            var results = Twitter.StatusUrlRegex.Matches(url).Cast<Match>()
+            var results = TwitterLegacy.StatusUrlRegex.Matches(url).Cast<Match>()
                 .Select(x => x.Groups["StatusId"].Value).ToArray();
 
             Assert.Equal(expected, results);
@@ -70,7 +67,7 @@ namespace OpenTween
         [InlineData("https://mobile.x.com/twitterapi/status/22634515958", true)]
         [InlineData("https://x.com/messages/compose?recipient_id=514241801", false)] // DM は twitter.com のみ通る
         public void AttachmentUrlRegexTest(string url, bool isMatch)
-            => Assert.Equal(isMatch, Twitter.AttachmentUrlRegex.IsMatch(url));
+            => Assert.Equal(isMatch, TwitterLegacy.AttachmentUrlRegex.IsMatch(url));
 
         [Theory]
         [InlineData("http://favstar.fm/users/twitterapi/status/22634515958", new[] { "22634515958" })]
@@ -80,7 +77,7 @@ namespace OpenTween
         [InlineData("http://frtrt.net/solo_status.php?status=263483634307198977", new[] { "263483634307198977" })]
         public void ThirdPartyStatusUrlRegexTest(string url, string[] expected)
         {
-            var results = Twitter.ThirdPartyStatusUrlRegex.Matches(url).Cast<Match>()
+            var results = TwitterLegacy.ThirdPartyStatusUrlRegex.Matches(url).Cast<Match>()
                 .Select(x => x.Groups["StatusId"].Value).ToArray();
 
             Assert.Equal(expected, results);
@@ -113,14 +110,14 @@ namespace OpenTween
             Assert.Equal(20, usertl);
 
             // Timeline,Reply
-            Assert.Equal(timeline, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, false, false));
-            Assert.Equal(reply, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Reply, false, false));
+            Assert.Equal(timeline, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, false, false));
+            Assert.Equal(reply, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Reply, false, false));
 
             // その他はTimelineと同値になる
-            Assert.Equal(timeline, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, false, false));
-            Assert.Equal(timeline, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.List, false, false));
-            Assert.Equal(timeline, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, false, false));
-            Assert.Equal(timeline, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, false, false));
+            Assert.Equal(timeline, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, false, false));
+            Assert.Equal(timeline, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.List, false, false));
+            Assert.Equal(timeline, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, false, false));
+            Assert.Equal(timeline, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, false, false));
 
             SettingManagerTest.Common = oldInstance;
         }
@@ -143,58 +140,58 @@ namespace OpenTween
             SettingManager.Instance.Common.UseAdditionalCount = true;
 
             // Timeline
-            Assert.Equal(timeline, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, false, false));
-            Assert.Equal(100, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, true, false)); // 100 件が上限
-            Assert.Equal(startup, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, false, true));
+            Assert.Equal(timeline, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, false, false));
+            Assert.Equal(100, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, true, false)); // 100 件が上限
+            Assert.Equal(startup, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, false, true));
 
             // Reply
-            Assert.Equal(reply, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Reply, false, false));
-            Assert.Equal(more, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Reply, true, false));
-            Assert.Equal(reply, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Reply, false, true));  // Replyの値が使われる
+            Assert.Equal(reply, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Reply, false, false));
+            Assert.Equal(more, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Reply, true, false));
+            Assert.Equal(reply, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Reply, false, true));  // Replyの値が使われる
 
             // Favorites
-            Assert.Equal(favorite, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, false, false));
-            Assert.Equal(favorite, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, true, false));
-            Assert.Equal(favorite, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, false, true));
+            Assert.Equal(favorite, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, false, false));
+            Assert.Equal(favorite, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, true, false));
+            Assert.Equal(favorite, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, false, true));
 
             SettingManager.Instance.Common.FavoritesCountApi = 0;
 
-            Assert.Equal(timeline, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, false, false));
-            Assert.Equal(more, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, true, false));
-            Assert.Equal(startup, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, false, true));
+            Assert.Equal(timeline, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, false, false));
+            Assert.Equal(more, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, true, false));
+            Assert.Equal(startup, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Favorites, false, true));
 
             // List
-            Assert.Equal(list, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.List, false, false));
-            Assert.Equal(list, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.List, true, false));
-            Assert.Equal(list, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.List, false, true));
+            Assert.Equal(list, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.List, false, false));
+            Assert.Equal(list, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.List, true, false));
+            Assert.Equal(list, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.List, false, true));
 
             SettingManager.Instance.Common.ListCountApi = 0;
 
-            Assert.Equal(timeline, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.List, false, false));
-            Assert.Equal(more, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.List, true, false));
-            Assert.Equal(startup, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.List, false, true));
+            Assert.Equal(timeline, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.List, false, false));
+            Assert.Equal(more, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.List, true, false));
+            Assert.Equal(startup, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.List, false, true));
 
             // PublicSearch
-            Assert.Equal(search, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, false, false));
-            Assert.Equal(search, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, true, false));
-            Assert.Equal(search, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, false, true));
+            Assert.Equal(search, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, false, false));
+            Assert.Equal(search, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, true, false));
+            Assert.Equal(search, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, false, true));
 
             SettingManager.Instance.Common.SearchCountApi = 0;
 
-            Assert.Equal(timeline, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, false, false));
-            Assert.Equal(search, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, true, false));  // MoreCountApiの値がPublicSearchの最大値に制限される
-            Assert.Equal(startup, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, false, true));
+            Assert.Equal(timeline, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, false, false));
+            Assert.Equal(search, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, true, false));  // MoreCountApiの値がPublicSearchの最大値に制限される
+            Assert.Equal(startup, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.PublicSearch, false, true));
 
             // UserTimeline
-            Assert.Equal(usertl, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, false, false));
-            Assert.Equal(usertl, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, true, false));
-            Assert.Equal(usertl, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, false, true));
+            Assert.Equal(usertl, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, false, false));
+            Assert.Equal(usertl, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, true, false));
+            Assert.Equal(usertl, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, false, true));
 
             SettingManager.Instance.Common.UserTimelineCountApi = 0;
 
-            Assert.Equal(timeline, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, false, false));
-            Assert.Equal(more, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, true, false));
-            Assert.Equal(startup, Twitter.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, false, true));
+            Assert.Equal(timeline, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, false, false));
+            Assert.Equal(more, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, true, false));
+            Assert.Equal(startup, TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.UserTimeline, false, true));
 
             SettingManagerTest.Common = oldInstance;
         }
@@ -203,7 +200,7 @@ namespace OpenTween
         public void GetTextLengthRemain_Test()
         {
             using var twitterApi = new TwitterApi();
-            using var twitter = new Twitter(twitterApi);
+            using var twitter = new TwitterLegacy(twitterApi);
 
             Assert.Equal(280, twitter.GetTextLengthRemain(""));
             Assert.Equal(272, twitter.GetTextLengthRemain("hogehoge"));
@@ -213,7 +210,7 @@ namespace OpenTween
         public void GetTextLengthRemain_DirectMessageTest()
         {
             using var twitterApi = new TwitterApi();
-            using var twitter = new Twitter(twitterApi);
+            using var twitter = new TwitterLegacy(twitterApi);
 
             // 2015年8月から DM の文字数上限が 10,000 文字に変更された
             // https://twittercommunity.com/t/41348
@@ -234,7 +231,7 @@ namespace OpenTween
         public void GetTextLengthRemain_UrlTest()
         {
             using var twitterApi = new TwitterApi();
-            using var twitter = new Twitter(twitterApi);
+            using var twitter = new TwitterLegacy(twitterApi);
 
             // t.co に短縮される分の文字数を考慮
             twitter.TextConfiguration.TransformedURLLength = 20;
@@ -251,7 +248,7 @@ namespace OpenTween
         public void GetTextLengthRemain_UrlWithoutSchemeTest()
         {
             using var twitterApi = new TwitterApi();
-            using var twitter = new Twitter(twitterApi);
+            using var twitter = new TwitterLegacy(twitterApi);
 
             // t.co に短縮される分の文字数を考慮
             twitter.TextConfiguration.TransformedURLLength = 20;
@@ -269,7 +266,7 @@ namespace OpenTween
         public void GetTextLengthRemain_SurrogatePairTest()
         {
             using var twitterApi = new TwitterApi();
-            using var twitter = new Twitter(twitterApi);
+            using var twitter = new TwitterLegacy(twitterApi);
 
             Assert.Equal(278, twitter.GetTextLengthRemain("🍣"));
             Assert.Equal(267, twitter.GetTextLengthRemain("🔥🐔🔥 焼き鳥"));
@@ -279,7 +276,7 @@ namespace OpenTween
         public void GetTextLengthRemain_EmojiTest()
         {
             using var twitterApi = new TwitterApi();
-            using var twitter = new Twitter(twitterApi);
+            using var twitter = new TwitterLegacy(twitterApi);
 
             // 絵文字の文字数カウントの仕様変更に対するテストケース
             // https://twittercommunity.com/t/114607
@@ -299,7 +296,7 @@ namespace OpenTween
         public void GetTextLengthRemain_BrokenSurrogateTest()
         {
             using var twitterApi = new TwitterApi();
-            using var twitter = new Twitter(twitterApi);
+            using var twitter = new TwitterLegacy(twitterApi);
 
             // 投稿欄に IME から絵文字を入力すると HighSurrogate のみ入力された状態で TextChanged イベントが呼ばれることがある
             Assert.Equal(278, twitter.GetTextLengthRemain("\ud83d"));
@@ -313,11 +310,11 @@ namespace OpenTween
         [InlineData("https://pbs.twimg.com/profile_images/00000/foo_normal.jpg", "original", "https://pbs.twimg.com/profile_images/00000/foo.jpg")]
         [InlineData("https://pbs.twimg.com/profile_images/00000/foo_normal_bar_normal.jpg", "original", "https://pbs.twimg.com/profile_images/00000/foo_normal_bar.jpg")]
         public void CreateProfileImageUrl_Test(string normalUrl, string size, string expected)
-            => Assert.Equal(expected, Twitter.CreateProfileImageUrl(normalUrl, size));
+            => Assert.Equal(expected, TwitterLegacy.CreateProfileImageUrl(normalUrl, size));
 
         [Fact]
         public void CreateProfileImageUrl_InvalidSizeTest()
-            => Assert.Throws<ArgumentException>(() => Twitter.CreateProfileImageUrl("https://pbs.twimg.com/profile_images/00000/foo_normal.jpg", "INVALID"));
+            => Assert.Throws<ArgumentException>(() => TwitterLegacy.CreateProfileImageUrl("https://pbs.twimg.com/profile_images/00000/foo_normal.jpg", "INVALID"));
 
         [Theory]
         [InlineData(24, "mini")]
@@ -327,6 +324,6 @@ namespace OpenTween
         [InlineData(73, "bigger")]
         [InlineData(74, "original")]
         public void DecideProfileImageSize_Test(int sizePx, string expected)
-            => Assert.Equal(expected, Twitter.DecideProfileImageSize(sizePx));
+            => Assert.Equal(expected, TwitterLegacy.DecideProfileImageSize(sizePx));
     }
 }

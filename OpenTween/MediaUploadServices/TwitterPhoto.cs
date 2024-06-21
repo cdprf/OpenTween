@@ -44,10 +44,10 @@ namespace OpenTween.MediaUploadServices
     {
         private readonly string[] pictureExt = { ".jpg", ".jpeg", ".gif", ".png" };
 
-        private readonly Twitter tw;
+        private readonly TwitterLegacy tw;
         private TwitterConfiguration twitterConfig;
 
-        public TwitterPhoto(Twitter twitter, TwitterConfiguration twitterConfig)
+        public TwitterPhoto(TwitterLegacy twitter, TwitterConfiguration twitterConfig)
         {
             this.tw = twitter;
             this.twitterConfig = twitterConfig;
@@ -92,7 +92,7 @@ namespace OpenTween.MediaUploadServices
 
             TwitterMediaId[] mediaIds;
 
-            if (Twitter.DMSendTextRegex.IsMatch(postParams.Text))
+            if (TwitterLegacy.DMSendTextRegex.IsMatch(postParams.Text))
                 mediaIds = new[] { await this.UploadMediaForDM(mediaItems).ConfigureAwait(false) };
             else
                 mediaIds = await this.UploadMediaForTweet(mediaItems).ConfigureAwait(false);

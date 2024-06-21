@@ -1,5 +1,5 @@
 ﻿// OpenTween - Client of Twitter
-// Copyright (c) 2024 kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
+// Copyright (c) 2023 kim_upsilon (@kim_upsilon) <https://upsilo.net/~upsilon/>
 // All rights reserved.
 //
 // This file is part of OpenTween.
@@ -22,16 +22,17 @@
 #nullable enable
 
 using System;
+using OpenTween.Models;
 
-namespace OpenTween.Models
+namespace OpenTween.SocialProtocol.Twitter
 {
-    public class TwitterUserId : PersonId
+    public class TwitterDirectMessageId : PostId
     {
-        public override string IdType => "twitter_user";
+        public override string IdType => "twitter_dm";
 
         public override string Id { get; }
 
-        public TwitterUserId(string id)
+        public TwitterDirectMessageId(string id)
             => this.Id = id ?? throw new ArgumentNullException(nameof(id));
     }
 }

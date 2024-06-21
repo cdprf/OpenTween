@@ -29,7 +29,7 @@ namespace OpenTween.SocialProtocol.Twitter
 {
     public class TwitterAccount : ISocialAccount
     {
-        private readonly OpenTween.Twitter twLegacy = new(new());
+        private readonly TwitterLegacy twLegacy = new(new());
         private TwitterApiConnection apiConnection = new();
 
         public string AccountType
@@ -46,7 +46,7 @@ namespace OpenTween.SocialProtocol.Twitter
         ISocialAccountState ISocialAccount.AccountState
             => this.AccountState;
 
-        public OpenTween.Twitter Legacy
+        public TwitterLegacy Legacy
             => this.twLegacy;
 
         public PersonId UserId

@@ -21,18 +21,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using Moq;
 using OpenTween.Api.DataModel;
 using OpenTween.Connection;
-using OpenTween.Models;
 using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 

@@ -20,13 +20,8 @@
 // Boston, MA 02110-1301, USA.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using OpenTween.SocialProtocol.Twitter;
 using Xunit;
-using Xunit.Extensions;
 
 namespace OpenTween.Models
 {

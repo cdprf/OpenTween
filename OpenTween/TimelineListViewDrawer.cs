@@ -33,6 +33,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTween.Models;
 using OpenTween.OpenTweenCustomControl;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {
@@ -165,7 +166,7 @@ namespace OpenTween
             if (MyCommon.IsNullOrEmpty(normalImageUrl))
                 return;
 
-            var sizeName = Twitter.DecideProfileImageSize(scaledIconSize.Width);
+            var sizeName = TwitterLegacy.DecideProfileImageSize(scaledIconSize.Width);
             var cachedImage = this.iconCache.TryGetLargerOrSameSizeFromCache(normalImageUrl, sizeName);
 
             if (cachedImage != null)
@@ -209,7 +210,7 @@ namespace OpenTween
         {
             try
             {
-                var imageUrl = Twitter.CreateProfileImageUrl(normalImageUrl, sizeName);
+                var imageUrl = TwitterLegacy.CreateProfileImageUrl(normalImageUrl, sizeName);
                 await this.iconCache.DownloadImageAsync(imageUrl);
 
                 return true;

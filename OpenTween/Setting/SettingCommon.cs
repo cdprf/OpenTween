@@ -32,6 +32,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using OpenTween.Connection;
+using OpenTween.SocialProtocol.Twitter;
 using OpenTween.Thumbnail;
 
 namespace OpenTween
@@ -298,28 +299,28 @@ namespace OpenTween
             if (this.ListsPeriod < 0)
                 this.ListsPeriod = 15;
 
-            if (!Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.Timeline, this.CountApi))
+            if (!TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.Timeline, this.CountApi))
                 this.CountApi = 60;
 
-            if (!Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.Reply, this.CountApiReply))
+            if (!TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.Reply, this.CountApiReply))
                 this.CountApiReply = 40;
 
-            if (this.MoreCountApi != 0 && !Twitter.VerifyMoreApiResultCount(this.MoreCountApi))
+            if (this.MoreCountApi != 0 && !TwitterLegacy.VerifyMoreApiResultCount(this.MoreCountApi))
                 this.MoreCountApi = 200;
 
-            if (this.FirstCountApi != 0 && !Twitter.VerifyFirstApiResultCount(this.FirstCountApi))
+            if (this.FirstCountApi != 0 && !TwitterLegacy.VerifyFirstApiResultCount(this.FirstCountApi))
                 this.FirstCountApi = 100;
 
-            if (this.FavoritesCountApi != 0 && !Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.Favorites, this.FavoritesCountApi))
+            if (this.FavoritesCountApi != 0 && !TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.Favorites, this.FavoritesCountApi))
                 this.FavoritesCountApi = 40;
 
-            if (this.ListCountApi != 0 && !Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.List, this.ListCountApi))
+            if (this.ListCountApi != 0 && !TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.List, this.ListCountApi))
                 this.ListCountApi = 100;
 
-            if (this.SearchCountApi != 0 && !Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.PublicSearch, this.SearchCountApi))
+            if (this.SearchCountApi != 0 && !TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.PublicSearch, this.SearchCountApi))
                 this.SearchCountApi = 100;
 
-            if (this.UserTimelineCountApi != 0 && !Twitter.VerifyApiResultCount(MyCommon.WORKERTYPE.UserTimeline, this.UserTimelineCountApi))
+            if (this.UserTimelineCountApi != 0 && !TwitterLegacy.VerifyApiResultCount(MyCommon.WORKERTYPE.UserTimeline, this.UserTimelineCountApi))
                 this.UserTimelineCountApi = 20;
 
             // 廃止サービスが選択されていた場合ux.nuへ読み替え

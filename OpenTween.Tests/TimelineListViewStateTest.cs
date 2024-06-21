@@ -24,6 +24,7 @@ using System.Linq;
 using System.Windows.Forms;
 using OpenTween.Models;
 using OpenTween.OpenTweenCustomControl;
+using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 
 namespace OpenTween

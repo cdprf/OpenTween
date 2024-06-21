@@ -72,7 +72,7 @@ namespace OpenTween.Models
             progress.Report(string.Format(Properties.Resources.GetTimelineWorker_RunWorkerCompletedText5, backward ? -1 : 1));
 
             var firstLoad = !this.IsFirstLoadCompleted;
-            var count = Twitter.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, backward, firstLoad);
+            var count = TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.Timeline, backward, firstLoad);
             var cursor = backward ? this.CursorBottom : this.CursorTop;
 
             var response = await account.Client.GetHomeTimeline(count, cursor, firstLoad)

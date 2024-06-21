@@ -22,16 +22,26 @@
 #nullable enable
 
 using System;
+using OpenTween.Models;
 
-namespace OpenTween.Models
+namespace OpenTween.SocialProtocol.Twitter
 {
-    public class TwitterDirectMessageId : PostId
+    public class TwitterStatusId : PostId
     {
-        public override string IdType => "twitter_dm";
+        public override string IdType => "twitter_status";
 
         public override string Id { get; }
 
-        public TwitterDirectMessageId(string id)
+        public TwitterStatusId(string id)
             => this.Id = id ?? throw new ArgumentNullException(nameof(id));
+
+        public TwitterStatusId(long id)
+            => this.Id = id.ToString();
+    }
+
+    public static class TwitterStatusIdExtension
+    {
+        public static TwitterStatusId ToTwitterStatusId(this PostId postId)
+            => postId is TwitterStatusId statusId ? statusId : throw new InvalidOperationException("Cannot convert to twitter status_id.");
     }
 }

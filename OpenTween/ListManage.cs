@@ -37,14 +37,15 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTween.Connection;
 using OpenTween.Models;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {
     public partial class ListManage : OTBaseForm
     {
-        private readonly Twitter tw;
+        private readonly TwitterLegacy tw;
 
-        public ListManage(Twitter tw)
+        public ListManage(TwitterLegacy tw)
         {
             this.InitializeComponent();
 
@@ -349,8 +350,8 @@ namespace OpenTween
 
             await this.UserIcon.SetImageFromTask(async () =>
             {
-                var sizeName = Twitter.DecideProfileImageSize(this.UserIcon.Width);
-                var uri = Twitter.CreateProfileImageUrl(imageUri.AbsoluteUri, sizeName);
+                var sizeName = TwitterLegacy.DecideProfileImageSize(this.UserIcon.Width);
+                var uri = TwitterLegacy.CreateProfileImageUrl(imageUri.AbsoluteUri, sizeName);
 
                 using var imageStream = await Networking.Http.GetStreamAsync(uri);
                 var image = await MemoryImage.CopyFromStreamAsync(imageStream);
@@ -421,7 +422,7 @@ namespace OpenTween
         {
             public bool IsCreated { get; private set; } = false;
 
-            public NewListElement(Twitter tw)
+            public NewListElement(TwitterLegacy tw)
                 => this.tw = tw;
 
             public override async Task Refresh()

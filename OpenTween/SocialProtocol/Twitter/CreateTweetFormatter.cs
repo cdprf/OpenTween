@@ -134,7 +134,7 @@ namespace OpenTween.SocialProtocol.Twitter
                 return createParams;
 
             var tweetText = createParams.Text;
-            var match = OpenTween.Twitter.AttachmentUrlRegex.Match(tweetText);
+            var match = TwitterLegacy.AttachmentUrlRegex.Match(tweetText);
             if (!match.Success)
                 return createParams;
 

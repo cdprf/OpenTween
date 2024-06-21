@@ -22,7 +22,6 @@
 using System.Threading.Tasks;
 using Moq;
 using OpenTween.Connection;
-using OpenTween.Models;
 using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 

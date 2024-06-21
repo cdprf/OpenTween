@@ -30,6 +30,7 @@
 using System;
 using System.Threading.Tasks;
 using OpenTween.SocialProtocol;
+using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.Models
 {
@@ -59,7 +60,7 @@ namespace OpenTween.Models
             progress.Report("List refreshing...");
 
             var firstLoad = !this.IsFirstLoadCompleted;
-            var count = Twitter.GetApiResultCount(MyCommon.WORKERTYPE.List, backward, firstLoad);
+            var count = TwitterLegacy.GetApiResultCount(MyCommon.WORKERTYPE.List, backward, firstLoad);
             var cursor = backward ? this.CursorBottom : this.CursorTop;
 
             var response = await account.Client.GetListTimeline(this.ListInfo.Id, count, cursor, firstLoad)

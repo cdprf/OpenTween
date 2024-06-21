@@ -20,7 +20,7 @@
 // Boston, MA 02110-1301, USA.
 
 using OpenTween.Api.Misskey;
-using OpenTween.Models;
+using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 
 namespace OpenTween.SocialProtocol.Misskey

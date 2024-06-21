@@ -22,6 +22,7 @@
 using System;
 using OpenTween.Models;
 using OpenTween.OpenTweenCustomControl;
+using OpenTween.SocialProtocol.Twitter;
 using Xunit;
 
 namespace OpenTween
