@@ -28,13 +28,11 @@
 #nullable enable
 
 using System;
-using System.Linq;
 using System.Windows.Forms;
 using OpenTween.Connection;
 using OpenTween.Models;
 using OpenTween.Setting;
 using OpenTween.SocialProtocol;
-using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
 {
