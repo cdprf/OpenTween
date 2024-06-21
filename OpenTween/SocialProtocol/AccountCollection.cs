@@ -25,7 +25,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenTween.Models;
-using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.SocialProtocol
 {
@@ -33,7 +32,7 @@ namespace OpenTween.SocialProtocol
     {
         private Dictionary<AccountKey, ISocialAccount> accounts = new();
         private AccountKey? primaryAccountKey;
-        private readonly ISocialAccount emptyAccount = new TwitterAccount(AccountKey.Empty);
+        private readonly ISocialAccount emptyAccount = new InvalidAccount(AccountKey.Empty);
 
         public bool IsDisposed { get; private set; }
 

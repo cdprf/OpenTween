@@ -26,7 +26,6 @@ using System.Threading.Tasks;
 using OpenTween.Api;
 using OpenTween.Connection;
 using OpenTween.Models;
-using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween.SocialProtocol
 {
@@ -63,6 +62,15 @@ namespace OpenTween.SocialProtocol
 
         public void Dispose()
             => this.IsDisposed = true;
+
+        private class InvalidPersonId : PersonId
+        {
+            public override string IdType
+                => "invalid";
+
+            public override string Id
+                => "0";
+        }
 
         private class InvalidAccountConnection : IApiConnection
         {
@@ -135,7 +143,7 @@ namespace OpenTween.SocialProtocol
         private class InvalidAccountState : ISocialAccountState
         {
             public PersonId UserId
-                => new TwitterUserId("0");
+                => new InvalidPersonId();
 
             public string UserName
                 => "(Unknown account)";

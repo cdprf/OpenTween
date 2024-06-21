@@ -92,7 +92,7 @@ namespace OpenTween.SocialProtocol
 
             // 欠けている ID は削除される
             Assert.Empty(accounts.Items);
-            Assert.Equal(APIAuthType.None, ((TwitterAccount)accounts.Primary).AuthType);
+            Assert.IsType<InvalidAccount>(accounts.Primary);
             Assert.True(accountItem1.IsDisposed);
         }
 
