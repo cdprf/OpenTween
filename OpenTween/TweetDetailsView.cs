@@ -268,9 +268,9 @@ namespace OpenTween
                 .ToArray();
         }
 
-        private async Task SetUserPictureAsync(string normalImageUrl, bool force = false)
+        private async Task SetUserPictureAsync(IResponsiveImageUri? responsiveImageUri, bool force = false)
         {
-            if (MyCommon.IsNullOrEmpty(normalImageUrl))
+            if (responsiveImageUri == null)
                 return;
 
             if (this.IconCache == null)
@@ -278,10 +278,10 @@ namespace OpenTween
 
             this.ClearUserPicture();
 
-            var imageSize = TwitterLegacy.DecideProfileImageSize(this.UserPicture.Width);
+            var sizePx = this.UserPicture.Width;
             if (!force)
             {
-                var cachedImage = this.IconCache.TryGetLargerOrSameSizeFromCache(normalImageUrl, imageSize);
+                var cachedImage = this.IconCache.TryGetLargerOrSameSizeFromCache(responsiveImageUri, minSizePx: sizePx);
                 if (cachedImage != null)
                 {
                     // 既にキャッシュされていればそれを表示して終了
@@ -290,7 +290,7 @@ namespace OpenTween
                 }
 
                 // 小さいサイズの画像がキャッシュにある場合は高解像度の画像が取得できるまでの間表示する
-                var fallbackImage = this.IconCache.TryGetLargerOrSameSizeFromCache(normalImageUrl, "mini");
+                var fallbackImage = this.IconCache.TryGetLargerOrSameSizeFromCache(responsiveImageUri, minSizePx: 0);
                 if (fallbackImage != null)
                     this.UserPicture.Image = fallbackImage.Clone();
             }
@@ -298,8 +298,8 @@ namespace OpenTween
             await this.UserPicture.SetImageFromTask(
                 async () =>
                 {
-                    var imageUrl = TwitterLegacy.CreateProfileImageUrl(normalImageUrl, imageSize);
-                    var image = await this.IconCache.DownloadImageAsync(imageUrl, force)
+                    var imageUri = responsiveImageUri.GetImageUri(sizePx);
+                    var image = await this.IconCache.DownloadImageAsync(imageUri, force)
                         .ConfigureAwait(false);
 
                     return image.Clone();
@@ -600,34 +600,15 @@ namespace OpenTween
             // 発言詳細のアイコン右クリック時のメニュー制御
             if (this.CurrentPost != null)
             {
-                var name = this.CurrentPost.ImageUrl;
-                if (!MyCommon.IsNullOrEmpty(name))
+                var imageUri = this.CurrentPost.ImageUrl;
+                if (imageUri != null)
                 {
-                    var idx = name.LastIndexOf('/');
-                    if (idx != -1)
-                    {
-                        name = Path.GetFileName(name.Substring(idx));
-                        if (name.Contains("_normal.") || name.EndsWith("_normal", StringComparison.Ordinal))
-                        {
-                            name = name.Replace("_normal", "");
-                            this.IconNameToolStripMenuItem.Text = name;
-                            this.IconNameToolStripMenuItem.Enabled = true;
-                        }
-                        else
-                        {
-                            this.IconNameToolStripMenuItem.Enabled = false;
-                            this.IconNameToolStripMenuItem.Text = Properties.Resources.ContextMenuStrip3_OpeningText1;
-                        }
-                    }
-                    else
-                    {
-                        this.IconNameToolStripMenuItem.Enabled = false;
-                        this.IconNameToolStripMenuItem.Text = Properties.Resources.ContextMenuStrip3_OpeningText1;
-                    }
+                    this.IconNameToolStripMenuItem.Text = imageUri.GetFilename();
+                    this.IconNameToolStripMenuItem.Enabled = true;
 
                     this.ReloadIconToolStripMenuItem.Enabled = true;
 
-                    if (this.IconCache.TryGetFromCache(this.CurrentPost.ImageUrl) != null)
+                    if (this.IconCache.TryGetLargerOrSameSizeFromCache(imageUri, minSizePx: 0) != null)
                     {
                         this.SaveIconPictureToolStripMenuItem.Enabled = true;
                     }
@@ -747,34 +728,33 @@ namespace OpenTween
 
         private async void IconNameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var imageNormalUrl = this.CurrentPost?.ImageUrl;
-            if (MyCommon.IsNullOrEmpty(imageNormalUrl))
+            var imageUri = this.CurrentPost?.ImageUrl;
+            if (imageUri == null)
                 return;
 
-            var imageOriginalUrl = TwitterLegacy.CreateProfileImageUrl(imageNormalUrl, "original");
-            await MyCommon.OpenInBrowserAsync(this, imageOriginalUrl);
+            await MyCommon.OpenInBrowserAsync(this, imageUri.GetOriginalImageUri());
         }
 
         private async void ReloadIconToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var imageUrl = this.CurrentPost?.ImageUrl;
-            if (MyCommon.IsNullOrEmpty(imageUrl))
+            var imageUri = this.CurrentPost?.ImageUrl;
+            if (imageUri == null)
                 return;
 
-            await this.SetUserPictureAsync(imageUrl, force: true);
+            await this.SetUserPictureAsync(imageUri, force: true);
         }
 
         private void SaveIconPictureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var imageUrl = this.CurrentPost?.ImageUrl;
-            if (MyCommon.IsNullOrEmpty(imageUrl))
+            var imageUri = this.CurrentPost?.ImageUrl;
+            if (imageUri == null)
                 return;
 
-            var memoryImage = this.IconCache.TryGetFromCache(imageUrl);
+            var memoryImage = this.IconCache.TryGetFromCache(imageUri.GetOriginalImageUri());
             if (memoryImage == null)
                 return;
 
-            this.Owner.SaveFileDialog1.FileName = imageUrl.Substring(imageUrl.LastIndexOf('/') + 1);
+            this.Owner.SaveFileDialog1.FileName = imageUri.GetFilename();
 
             if (this.Owner.SaveFileDialog1.ShowDialog() == DialogResult.OK)
             {

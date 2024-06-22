@@ -22,16 +22,13 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using OpenTween.Connection;
+using OpenTween.Models;
 using OpenTween.SocialProtocol.Twitter;
 
 namespace OpenTween
@@ -85,11 +82,12 @@ namespace OpenTween
         /// <param name="address">取得先の URL</param>
         /// <param name="force">キャッシュを使用せずに取得する場合は true</param>
         /// <returns>非同期に画像を取得するタスク</returns>
-        public Task<MemoryImage> DownloadImageAsync(string address, bool force = false)
+        public Task<MemoryImage> DownloadImageAsync(Uri address, bool force = false)
         {
             var cancelToken = this.cancelTokenSource.Token;
+            var addressStr = address.AbsoluteUri;
 
-            this.InnerDictionary.TryGetValue(address, out var cachedImageTask);
+            this.InnerDictionary.TryGetValue(addressStr, out var cachedImageTask);
 
             if (cachedImageTask != null && !force)
                 return cachedImageTask;
@@ -97,12 +95,12 @@ namespace OpenTween
             cancelToken.ThrowIfCancellationRequested();
 
             var imageTask = Task.Run(() => this.FetchImageAsync(address, cancelToken));
-            this.InnerDictionary[address] = imageTask;
+            this.InnerDictionary[addressStr] = imageTask;
 
             return imageTask;
         }
 
-        private async Task<MemoryImage> FetchImageAsync(string uri, CancellationToken cancelToken)
+        private async Task<MemoryImage> FetchImageAsync(Uri uri, CancellationToken cancelToken)
         {
             try
             {
@@ -130,24 +128,24 @@ namespace OpenTween
             return MemoryImage.CopyFromImage(bitmap);
         }
 
-        public MemoryImage? TryGetFromCache(string address)
+        public MemoryImage? TryGetFromCache(Uri address)
         {
-            if (!this.InnerDictionary.TryGetValue(address, out var imageTask) ||
+            var addressStr = address.AbsoluteUri;
+
+            if (!this.InnerDictionary.TryGetValue(addressStr, out var imageTask) ||
                 imageTask.Status != TaskStatus.RanToCompletion)
                 return null;
 
             return imageTask.Result;
         }
 
-        public MemoryImage? TryGetLargerOrSameSizeFromCache(string normalUrl, string size)
+        public MemoryImage? TryGetLargerOrSameSizeFromCache(IResponsiveImageUri responseImageUri, int minSizePx)
         {
-            var sizes = new[] { "mini", "normal", "bigger", "original" };
-            var minimumIndex = sizes.FindIndex(x => x == size);
+            var imageUris = responseImageUri.GetImageUriLargerOrSameSize(minSizePx);
 
-            foreach (var candidateSize in sizes.Skip(minimumIndex))
+            foreach (var imageUri in imageUris)
             {
-                var imageUrl = TwitterLegacy.CreateProfileImageUrl(normalUrl, candidateSize);
-                var image = this.TryGetFromCache(imageUrl);
+                var image = this.TryGetFromCache(imageUri);
                 if (image != null)
                     return image;
             }

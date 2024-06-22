@@ -63,7 +63,7 @@ namespace OpenTween.SocialProtocol.Misskey
             Assert.Equal(new MisskeyUserId("ghijkl"), post.UserId);
             Assert.Equal("bar", post.ScreenName);
             Assert.Equal("bar", post.Nickname);
-            Assert.Equal("", post.ImageUrl);
+            Assert.Null(post.ImageUrl);
             Assert.Null(post.RetweetedId);
             Assert.Null(post.RetweetedBy);
             Assert.Null(post.RetweetedByUserId);

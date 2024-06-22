@@ -342,7 +342,7 @@ namespace OpenTween
             }
         }
 
-        private async Task LoadUserIconAsync(Uri imageUri, PersonId userId)
+        private async Task LoadUserIconAsync(IResponsiveImageUri imageUri, PersonId userId)
         {
             var oldImage = this.UserIcon.Image;
             this.UserIcon.Image = null;
@@ -350,8 +350,7 @@ namespace OpenTween
 
             await this.UserIcon.SetImageFromTask(async () =>
             {
-                var sizeName = TwitterLegacy.DecideProfileImageSize(this.UserIcon.Width);
-                var uri = TwitterLegacy.CreateProfileImageUrl(imageUri.AbsoluteUri, sizeName);
+                var uri = imageUri.GetImageUri(this.UserIcon.Width);
 
                 using var imageStream = await Networking.Http.GetStreamAsync(uri);
                 var image = await MemoryImage.CopyFromStreamAsync(imageStream);

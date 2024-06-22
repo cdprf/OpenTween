@@ -85,8 +85,10 @@ namespace OpenTween.Api.DataModel
         [DataMember(Name = "profile_banner_url")]
         public string ProfileBannerUrl { get; set; }
 
+        // ProfileImageUrlHttps が null になる場合があるらしい
+        // 参照: https://sourceforge.jp/ticket/browse.php?group_id=6526&tid=33871
         [DataMember(Name = "profile_image_url_https")]
-        public string ProfileImageUrlHttps { get; set; }
+        public string? ProfileImageUrlHttps { get; set; }
 
         [DataMember(Name = "protected")]
         public bool Protected { get; set; }
@@ -120,7 +122,7 @@ namespace OpenTween.Api.DataModel
                 IdStr = "0",
                 ScreenName = "?????",
                 Name = "Unknown User",
-                ProfileImageUrlHttps = "",
+                ProfileImageUrlHttps = null,
             };
         }
     }
