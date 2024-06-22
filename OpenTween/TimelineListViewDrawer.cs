@@ -159,15 +159,15 @@ namespace OpenTween
 
         private void DrawListViewItemProfileImage(Graphics g, PostClass post, Size scaledIconSize, Rectangle iconRect)
         {
-            if (scaledIconSize.Width <= 0)
+            var sizePx = scaledIconSize.Width;
+            if (sizePx <= 0)
                 return;
 
-            var normalImageUrl = post.ImageUrl;
-            if (MyCommon.IsNullOrEmpty(normalImageUrl))
+            var imageUri = post.ImageUrl;
+            if (imageUri == null)
                 return;
 
-            var sizeName = TwitterLegacy.DecideProfileImageSize(scaledIconSize.Width);
-            var cachedImage = this.iconCache.TryGetLargerOrSameSizeFromCache(normalImageUrl, sizeName);
+            var cachedImage = this.iconCache.TryGetLargerOrSameSizeFromCache(imageUri, minSizePx: sizePx);
 
             if (cachedImage != null)
             {
@@ -186,7 +186,7 @@ namespace OpenTween
                 // キャッシュにない画像の場合は読み込みが完了してから再描画する
                 async Task RefreshProfileImageLazy()
                 {
-                    var success = await this.LoadProfileImage(normalImageUrl, sizeName);
+                    var success = await this.LoadProfileImage(imageUri, sizePx);
                     if (!success)
                         return;
 
@@ -206,12 +206,11 @@ namespace OpenTween
             }
         }
 
-        private async Task<bool> LoadProfileImage(string normalImageUrl, string sizeName)
+        private async Task<bool> LoadProfileImage(IResponsiveImageUri responsiveImageUri, int sizePx)
         {
             try
             {
-                var imageUrl = TwitterLegacy.CreateProfileImageUrl(normalImageUrl, sizeName);
-                await this.iconCache.DownloadImageAsync(imageUrl);
+                await this.iconCache.DownloadImageAsync(responsiveImageUri.GetImageUri(sizePx));
 
                 return true;
             }

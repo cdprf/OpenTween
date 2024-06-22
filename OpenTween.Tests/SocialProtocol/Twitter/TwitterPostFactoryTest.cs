@@ -110,7 +110,7 @@ namespace OpenTween.Models
             Assert.Equal(new TwitterUserId(status.User.IdStr), post.UserId);
             Assert.Equal("tetete", post.ScreenName);
             Assert.Equal("ててて", post.Nickname);
-            Assert.Equal("https://example.com/profile.png", post.ImageUrl);
+            Assert.Equal(new TwitterProfileImageUri("https://example.com/profile.png"), post.ImageUrl);
             Assert.False(post.IsProtect);
             Assert.False(post.IsOwl);
             Assert.False(post.IsMe);
@@ -324,7 +324,7 @@ namespace OpenTween.Models
             Assert.Equal(new TwitterUserId(otherUser.IdStr), post.UserId);
             Assert.Equal("tetete", post.ScreenName);
             Assert.Equal("ててて", post.Nickname);
-            Assert.Equal("https://example.com/profile.png", post.ImageUrl);
+            Assert.Equal(new TwitterProfileImageUri("https://example.com/profile.png"), post.ImageUrl);
             Assert.False(post.IsProtect);
             Assert.True(post.IsOwl);
             Assert.False(post.IsMe);

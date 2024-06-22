@@ -29,12 +29,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using OpenTween.Thumbnail;
 
 namespace OpenTween.Models
@@ -53,7 +49,7 @@ namespace OpenTween.Models
         /// <summary>スクリーンリーダーでの読み上げを考慮したテキスト</summary>
         public string AccessibleText { get; init; } = "";
 
-        public string? ImageUrl { get; init; }
+        public IResponsiveImageUri? ImageUrl { get; init; }
 
         public string ScreenName { get; init; } = "";
 

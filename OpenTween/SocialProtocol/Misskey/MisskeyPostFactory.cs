@@ -127,7 +127,7 @@ namespace OpenTween.SocialProtocol.Misskey
                 UserId = originalNoteUserId,
                 ScreenName = originalNoteUserAcct,
                 Nickname = originalNoteUser.Name ?? originalNoteUser.Username,
-                ImageUrl = originalNoteUser.AvatarUrl ?? "",
+                ImageUrl = originalNoteUser.AvatarUrl is { } avatarUrl ? new MisskeyAvatarUri(avatarUrl) : null,
 
                 // renotedNote から生成
                 RetweetedId = renotedNote?.Id is { } renotedId ? new MisskeyNoteId(renotedId) : null,

@@ -972,8 +972,8 @@ namespace OpenTween
                             var bText = sb.ToString();
                             if (MyCommon.IsNullOrEmpty(bText)) return;
 
-                            var image = post.ImageUrl is { } imageUrl
-                                ? this.iconCache.TryGetFromCache(imageUrl)
+                            var image = post.ImageUrl is { } responsiveImageUri
+                                ? this.iconCache.TryGetLargerOrSameSizeFromCache(responsiveImageUri, minSizePx: 0)
                                 : null;
 
                             this.gh.Notify(nt, post.StatusId.Id, title.ToString(), bText, image?.Image);

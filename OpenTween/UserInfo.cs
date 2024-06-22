@@ -48,7 +48,7 @@ namespace OpenTween
             this.Location = WebUtility.HtmlDecode(user.Location);
             this.Description = WebUtility.HtmlDecode(user.Description);
             this.ImageUrl = user.ProfileImageUrlHttps is { } imageUrlStr
-                ? new Uri(imageUrlStr)
+                ? new TwitterProfileImageUri(imageUrlStr)
                 : null;
             this.Url = user.Url ?? "";
             this.Protect = user.Protected;
@@ -70,7 +70,7 @@ namespace OpenTween
         public string ScreenName = "";
         public string Location = "";
         public string Description = "";
-        public Uri? ImageUrl = null;
+        public IResponsiveImageUri? ImageUrl = null;
         public string Url = "";
         public bool Protect = false;
         public int FriendsCount = 0;

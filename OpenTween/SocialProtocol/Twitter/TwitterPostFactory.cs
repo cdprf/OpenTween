@@ -138,7 +138,7 @@ namespace OpenTween.SocialProtocol.Twitter
             var screenName = string.Intern(originalStatusUser.ScreenName);
             var nickname = string.Intern(originalStatusUser.Name);
             var imageUrl = originalStatusUser.ProfileImageUrlHttps is { } profileImageUrl
-                ? string.Intern(profileImageUrl)
+                ? new TwitterProfileImageUri(string.Intern(profileImageUrl))
                 : null;
 
             // Source整形
@@ -268,7 +268,7 @@ namespace OpenTween.SocialProtocol.Twitter
             var screenName = string.Intern(displayUser.ScreenName);
             var nickname = string.Intern(displayUser.Name);
             var imageUrl = displayUser.ProfileImageUrlHttps is { } imageUrlStr
-                ? string.Intern(imageUrlStr)
+                ? new TwitterProfileImageUri(string.Intern(imageUrlStr))
                 : null;
 
             var source = (string?)null;

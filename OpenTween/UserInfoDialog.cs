@@ -150,12 +150,16 @@ namespace OpenTween
                 this.ButtonBlockDestroy.Enabled = true;
             }
 
+            var imageUri = user.ProfileImageUrlHttps is { } imageUrlStr
+                ? new TwitterProfileImageUri(imageUrlStr)
+                : null;
+
             await Task.WhenAll(new[]
             {
                 this.SetDescriptionAsync(user.Description, user.Entities?.Description, cancellationToken),
                 this.SetRecentStatusAsync(user.Status, cancellationToken),
                 this.SetLinkLabelWebAsync(user.Url, user.Entities?.Url, cancellationToken),
-                this.SetUserImageAsync(user.ProfileImageUrlHttps, cancellationToken),
+                this.SetUserImageAsync(imageUri, cancellationToken),
                 this.LoadFriendshipAsync(user.ScreenName, cancellationToken),
             });
         }
@@ -194,7 +198,7 @@ namespace OpenTween
             }
         }
 
-        private async Task SetUserImageAsync(string? imageUri, CancellationToken cancellationToken)
+        private async Task SetUserImageAsync(IResponsiveImageUri? imageUri, CancellationToken cancellationToken)
         {
             var oldImage = this.UserPicture.Image;
             this.UserPicture.Image = null;
@@ -205,8 +209,7 @@ namespace OpenTween
 
             await this.UserPicture.SetImageFromTask(async () =>
             {
-                var sizeName = TwitterLegacy.DecideProfileImageSize(this.UserPicture.Width);
-                var uri = TwitterLegacy.CreateProfileImageUrl(imageUri, sizeName);
+                var uri = imageUri.GetImageUri(this.UserPicture.Width);
 
                 using var imageStream = await Networking.Http.GetStreamAsync(uri)
                     .ConfigureAwait(false);
@@ -465,13 +468,13 @@ namespace OpenTween
 
         private async void UserPicture_Click(object sender, EventArgs e)
         {
-            var imageUrl = this.displayUser.ProfileImageUrlHttps;
-            if (imageUrl == null)
+            var imageUrlStr = this.displayUser.ProfileImageUrlHttps;
+            if (imageUrlStr == null)
                 return;
 
-            imageUrl = TwitterLegacy.CreateProfileImageUrl(imageUrl, "original");
+            var imageUri = new TwitterProfileImageUri(imageUrlStr);
 
-            await MyCommon.OpenInBrowserAsync(this, imageUrl);
+            await MyCommon.OpenInBrowserAsync(this, imageUri.GetOriginalImageUri());
         }
 
         private bool isEditing = false;
