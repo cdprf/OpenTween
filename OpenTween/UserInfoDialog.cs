@@ -194,14 +194,12 @@ namespace OpenTween
             }
         }
 
-        private async Task SetUserImageAsync(string imageUri, CancellationToken cancellationToken)
+        private async Task SetUserImageAsync(string? imageUri, CancellationToken cancellationToken)
         {
             var oldImage = this.UserPicture.Image;
             this.UserPicture.Image = null;
             oldImage?.Dispose();
 
-            // ProfileImageUrlHttps が null になる場合があるらしい
-            // 参照: https://sourceforge.jp/ticket/browse.php?group_id=6526&tid=33871
             if (imageUri == null)
                 return;
 
@@ -468,6 +466,9 @@ namespace OpenTween
         private async void UserPicture_Click(object sender, EventArgs e)
         {
             var imageUrl = this.displayUser.ProfileImageUrlHttps;
+            if (imageUrl == null)
+                return;
+
             imageUrl = TwitterLegacy.CreateProfileImageUrl(imageUrl, "original");
 
             await MyCommon.OpenInBrowserAsync(this, imageUrl);

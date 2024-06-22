@@ -268,7 +268,7 @@ namespace OpenTween
                 .ToArray();
         }
 
-        private async Task SetUserPictureAsync(string normalImageUrl, bool force = false)
+        private async Task SetUserPictureAsync(string? normalImageUrl, bool force = false)
         {
             if (MyCommon.IsNullOrEmpty(normalImageUrl))
                 return;
@@ -627,7 +627,7 @@ namespace OpenTween
 
                     this.ReloadIconToolStripMenuItem.Enabled = true;
 
-                    if (this.IconCache.TryGetFromCache(this.CurrentPost.ImageUrl) != null)
+                    if (this.CurrentPost.ImageUrl is { } imageUrl && this.IconCache.TryGetFromCache(imageUrl) != null)
                     {
                         this.SaveIconPictureToolStripMenuItem.Enabled = true;
                     }

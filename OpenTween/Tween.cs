@@ -972,8 +972,11 @@ namespace OpenTween
                             var bText = sb.ToString();
                             if (MyCommon.IsNullOrEmpty(bText)) return;
 
-                            var image = this.iconCache.TryGetFromCache(post.ImageUrl);
-                            this.gh.Notify(nt, post.StatusId.Id, title.ToString(), bText, image?.Image, post.ImageUrl);
+                            var image = post.ImageUrl is { } imageUrl
+                                ? this.iconCache.TryGetFromCache(imageUrl)
+                                : null;
+
+                            this.gh.Notify(nt, post.StatusId.Id, title.ToString(), bText, image?.Image);
                         }
                     }
                     else

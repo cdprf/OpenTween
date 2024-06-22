@@ -47,14 +47,9 @@ namespace OpenTween
             this.ScreenName = user.ScreenName;
             this.Location = WebUtility.HtmlDecode(user.Location);
             this.Description = WebUtility.HtmlDecode(user.Description);
-            try
-            {
-                this.ImageUrl = new Uri(user.ProfileImageUrlHttps);
-            }
-            catch (Exception)
-            {
-                this.ImageUrl = null;
-            }
+            this.ImageUrl = user.ProfileImageUrlHttps is { } imageUrlStr
+                ? new Uri(imageUrlStr)
+                : null;
             this.Url = user.Url ?? "";
             this.Protect = user.Protected;
             this.FriendsCount = user.FriendsCount;

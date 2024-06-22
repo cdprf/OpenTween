@@ -137,7 +137,9 @@ namespace OpenTween.SocialProtocol.Twitter
             // 他の発言と重複しやすい (共通化できる) 文字列は string.Intern を通す
             var screenName = string.Intern(originalStatusUser.ScreenName);
             var nickname = string.Intern(originalStatusUser.Name);
-            var imageUrl = string.Intern(originalStatusUser.ProfileImageUrlHttps);
+            var imageUrl = originalStatusUser.ProfileImageUrlHttps is { } profileImageUrl
+                ? string.Intern(profileImageUrl)
+                : null;
 
             // Source整形
             var (sourceText, sourceUri) = ParseSource(originalStatus.Source);
@@ -265,7 +267,9 @@ namespace OpenTween.SocialProtocol.Twitter
             // 他の発言と重複しやすい (共通化できる) 文字列は string.Intern を通す
             var screenName = string.Intern(displayUser.ScreenName);
             var nickname = string.Intern(displayUser.Name);
-            var imageUrl = string.Intern(displayUser.ProfileImageUrlHttps);
+            var imageUrl = displayUser.ProfileImageUrlHttps is { } imageUrlStr
+                ? string.Intern(imageUrlStr)
+                : null;
 
             var source = (string?)null;
             var sourceUri = (Uri?)null;

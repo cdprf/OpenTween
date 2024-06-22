@@ -75,7 +75,7 @@ namespace OpenTween.Api.GraphQL
             {
                 IdStr = GetText(userElm, "rest_id"),
                 Name = GetText(userLegacyElm, "name"),
-                ProfileImageUrlHttps = GetText(userLegacyElm, "profile_image_url_https"),
+                ProfileImageUrlHttps = GetTextOrNull(userLegacyElm, "profile_image_url_https"),
                 ScreenName = GetText(userLegacyElm, "screen_name"),
                 Protected = GetTextOrNull(userLegacyElm, "protected") == "true",
                 Verified = GetTextOrNull(userLegacyElm, "verified") == "true",
